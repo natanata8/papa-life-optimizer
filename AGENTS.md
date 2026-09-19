@@ -61,7 +61,7 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 `HUMAN_REQUIRED` にするもの:
 
-- Frozen UX / Visual Authority の変更、凍結、または「完成」宣言
+- Freeze 済み Visual Authority の変更、差し替え、または新しい凍結宣言
 - プロダクト方針、MVP 範囲、収益化、価格の確定
 - Production deploy
 - `main` 直 push、force push、本番秘密情報の追加
@@ -72,11 +72,12 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 ## Frozen UX / Visual Authority
 
-- 承認済みの Frozen UX / Visual Authority は、まだ存在しない。
-- `docs/DESIGN_SYSTEM.md` と現行 TOP は草案であり、凍結済みではない。
-- 草案を「凍結した」とみなして大幅な見た目変更をしない。
-- 色、余白、型、コピーのトーンを変える必要があれば、理由を PR に書き、`HUMAN_REQUIRED` を残す。
-- 既存の骨格を壊すリデザインは禁止。バグ修正とアクセシビリティの最小修正のみ可。
+- Visual Authority は承認済み。正本は TOP / drink / sofa / sleep-in / game の既存画面である。
+- 朝寝坊 / 飲み会 / ソファ / ゲームは approved / frozen。TOP は Visual approved、canonical copy は復元前提。
+- システムは warm off-white、olive accent、日本語セリフ見出し、Sans 本文、白カード、少量の生活写真。
+- 銅アクセント、Noto Sans JP のみ、育児アプリのパステル、ゲーミフィケーション、SaaS ダッシュボードは正本ではない。
+- 現行 `src/` の見た目は仮実装。VA に寄せるのは可。Freeze 済み画面を新案で上書きするのは `HUMAN_REQUIRED`。
+- 色、型、写真、トーンを変える必要があれば、理由を PR に書き、`HUMAN_REQUIRED` を残す。
 
 ## Git
 

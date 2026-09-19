@@ -7,7 +7,7 @@ export function HomePage() {
       <header className="border-b border-border">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-4">
           <p className="text-sm font-medium tracking-wide">papa-life-optimizer</p>
-          <p className="text-xs text-muted">草案 / 未凍結</p>
+          <p className="text-xs text-muted">仮実装 / VA 正本あり</p>
         </div>
       </header>
 
@@ -43,7 +43,7 @@ export function HomePage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-1 px-6 py-5 text-xs leading-6 text-muted">
-          <p>Frozen UX / Visual Authority は未承認です。この画面は草案です。</p>
+          <p>この実装は Visual Authority の仮置きです。TOP の正本コピーは復元前提です。</p>
           <p>Production deploy は禁止。正本は GitHub latest main / docs / Issues / PRs です。</p>
         </div>
       </footer>

@@ -56,6 +56,6 @@ Production への deploy はしないでください。
 
 ## 運用
 
-- Frozen UX / Visual Authority は未承認です。TOP 骨格を勝手に作り直さないでください。
+- Visual Authority は承認済みです。朝寝坊 / 飲み会 / ソファ / ゲームは freeze、TOP は Visual approved（canonical copy は復元前提）です。現行実装の銅ドラフトを正本にしないでください。
 - `HUMAN_REQUIRED` 以外は止めずに進みます。
 - 完了時は changed files / tests / branch / commit / PR / blockers / HUMAN_REQUIRED を報告します。
