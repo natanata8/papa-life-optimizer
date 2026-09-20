@@ -13,26 +13,18 @@ export function HomePage() {
 
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-6 py-10">
         <section className="flex flex-col gap-4">
-          <p className="text-sm font-medium text-accent">自分時間を、家庭の手順にする</p>
           <h1 className="text-3xl font-semibold leading-tight tracking-tight">
-            家庭を止めずに、
-            <br />
-            自分の時間を取る
+            papa-life-optimizer
           </h1>
           <p className="max-w-xl text-base leading-7 text-muted">
-            育児中の父親が、家族の日常を崩さずに飲み、ゲーム、ゴロゴロ、朝寝坊を実行するためのWebサービスです。いまはTOPの骨格までです。
+            育児中の父親が、自分の時間も大切にしながら家庭をうまく回すためのWebサービス
           </p>
         </section>
 
         <section className="flex flex-col gap-4" aria-labelledby="mvp-scenarios">
-          <div className="flex flex-col gap-1">
-            <h2 id="mvp-scenarios" className="text-lg font-semibold">
-              初期MVPの4シナリオ
-            </h2>
-            <p className="text-sm leading-6 text-muted">
-              詳細フローはまだありません。選ぶ前に、家庭側で埋める穴だけ先に見ます。
-            </p>
-          </div>
+          <h2 id="mvp-scenarios" className="sr-only">
+            飲みに行きたい、ゲームしたい、ソファでゴロゴロしたい、休日は朝寝坊したい
+          </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {scenarios.map((scenario) => (
               <ScenarioCard key={scenario.id} scenario={scenario} />
@@ -43,7 +35,7 @@ export function HomePage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-1 px-6 py-5 text-xs leading-6 text-muted">
-          <p>この実装は Visual Authority の仮置きです。TOP の正本コピーは復元前提です。</p>
+          <p>この実装の見た目は仮置きです。Visual Authority の正本は docs/visual-authority/ です。</p>
           <p>Production deploy は禁止。正本は GitHub latest main / docs / Issues / PRs です。</p>
         </div>
       </footer>

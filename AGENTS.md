@@ -10,7 +10,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # papa-life-optimizer Agent Rules
 
-育児中の父親が、家庭を止めずに自分の時間を取るための Web サービス。
+育児中の父親が、自分の時間も大切にしながら家庭をうまく回すためのWebサービス。
 エージェントはコードを書く前に、必ずこのファイルと正本ドキュメントを読む。
 
 ## 作業前に必ず読む
@@ -28,6 +28,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - ユーザー仮説: `docs/USER_RESEARCH.md`
 - 市場・競合: `docs/MARKET_RESEARCH.md`
 - 収益仮説: `docs/MONETIZATION.md`
+- 見た目の正本: `docs/visual-authority/`
 - 起動手順: `README.md`
 
 読んでいない状態で実装や方針変更を始めない。
@@ -72,12 +73,12 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 ## Frozen UX / Visual Authority
 
-- Visual Authority は承認済み。正本は TOP / drink / sofa / sleep-in / game の既存画面である。
-- 朝寝坊 / 飲み会 / ソファ / ゲームは approved / frozen。TOP は Visual approved、canonical copy は復元前提。
+- 見た目の正本は `docs/visual-authority/`。Slack や現行 `src/` は正本ではない。
+- 朝寝坊 / 飲み会 / ソファ / ゲームは approved / frozen。TOP は Visual approved。copy は `docs/visual-authority/TOP/canonical-copy.md`。
 - システムは warm off-white、olive accent、日本語セリフ見出し、Sans 本文、白カード、少量の生活写真。
 - 銅アクセント、Noto Sans JP のみ、育児アプリのパステル、ゲーミフィケーション、SaaS ダッシュボードは正本ではない。
-- 現行 `src/` の見た目は仮実装。VA に寄せるのは可。Freeze 済み画面を新案で上書きするのは `HUMAN_REQUIRED`。
-- 色、型、写真、トーンを変える必要があれば、理由を PR に書き、`HUMAN_REQUIRED` を残す。
+- 画像未着。代替画像は作らない。仮 Visual を freeze 済み VA へ寄せる実装は、今は行わない。
+- Freeze 済み画面の改変と画像追加は `HUMAN_REQUIRED`。
 
 ## Git
 

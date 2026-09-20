@@ -1,6 +1,6 @@
 # papa-life-optimizer
 
-育児中の父親が、家庭を止めずに自分の時間を取るための Web サービス。
+育児中の父親が、自分の時間も大切にしながら家庭をうまく回すためのWebサービス
 
 初期 MVP の対象は次の 4 シナリオだけです。
 
@@ -50,12 +50,13 @@ Production への deploy はしないでください。
 関連資料:
 
 - [AGENTS.md](AGENTS.md)
+- [docs/visual-authority/README.md](docs/visual-authority/README.md)
 - [docs/USER_RESEARCH.md](docs/USER_RESEARCH.md)
 - [docs/MARKET_RESEARCH.md](docs/MARKET_RESEARCH.md)
 - [docs/MONETIZATION.md](docs/MONETIZATION.md)
 
 ## 運用
 
-- Visual Authority は承認済みです。朝寝坊 / 飲み会 / ソファ / ゲームは freeze、TOP は Visual approved（canonical copy は復元前提）です。現行実装の銅ドラフトを正本にしないでください。
+- 見た目の正本は [docs/visual-authority/](docs/visual-authority/README.md) です。朝寝坊 / 飲み会 / ソファ / ゲームは freeze、TOP は Visual approved です。画像未着なので代替画像は置かず、現行の仮 Visual はまだ寄せません。
 - `HUMAN_REQUIRED` 以外は止めずに進みます。
 - 完了時は changed files / tests / branch / commit / PR / blockers / HUMAN_REQUIRED を報告します。

@@ -10,7 +10,7 @@
 
 Slack は依頼と進捗の場所であり、仕様の正本ではない。
 矛盾時は latest `main` を優先する。
-ただし見た目の正本は、承認済み Visual Authority 画面である。実装や古い docs と食い違うときは VA を優先する。
+見た目の正本は GitHub の `docs/visual-authority/` である。実装や古い docs と食い違うときはそこを優先する。
 
 ## D-002 main 直 push 禁止、branch と PR で進める
 
@@ -55,7 +55,7 @@ Slack は依頼と進捗の場所であり、仕様の正本ではない。
 状態: 採用
 
 方針・凍結済み VA の変更・本番・一次調査の確定以外は、仮定を書いて進める。
-実装を承認済み VA に寄せる作業は `AUTO-CONTINUE`。
+仮 Visual を freeze 済み VA へ寄せる実装は、画像が `docs/visual-authority/` に入るまで行わない。
 
 ## D-008 エージェントは作業前に 5 文書を読む
 
@@ -97,10 +97,10 @@ Slack は依頼と進捗の場所であり、仕様の正本ではない。
 画面状態:
 
 - 朝寝坊 / 飲み会 / ソファ / ゲームは Visual Authority approved / frozen
-- TOP は Visual approved。canonical copy は復元前提
+- TOP は Visual approved。canonical copy は `docs/visual-authority/TOP/canonical-copy.md` に復元済み
 
-現行 `src/` の銅トークンと Sans のみ組版は仮実装。VA に合わせて捨ててよい。
-Freeze 済み画面の改変は `HUMAN_REQUIRED`。
+現行 `src/` の銅トークンと Sans のみ組版は仮実装。
+Freeze 済み画面の改変と、代替画像の作成は `HUMAN_REQUIRED`。
 
 ## D-012 将来拡張は FAMILY / PARTNER / SELF。MVP は広げない
 
@@ -118,3 +118,12 @@ Freeze 済み画面の改変は `HUMAN_REQUIRED`。
 
 将来候補: affiliate / SNS・メディア / B2B 福利厚生 / タイアップ。
 価格も実装も今はしない。候補を消して個人課金だけにもしない。
+
+## D-014 Visual Authority の GitHub 正本は docs/visual-authority/
+
+日付: 2026-09-20
+状態: 採用
+
+見た目の参照先は `docs/visual-authority/` に統一する。
+画像未着の間は manifest / README / canonical copy だけを置き、代替画像は作らない。
+現行 TOP の仮 Visual を freeze 済み VA へ寄せる実装は、今は行わない。画像追加後の別タスクとする。

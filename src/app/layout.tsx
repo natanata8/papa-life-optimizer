@@ -11,7 +11,7 @@ const notoSansJp = Noto_Sans_JP({
 export const metadata: Metadata = {
   title: "papa-life-optimizer",
   description:
-    "育児中の父親が、家庭を止めずに自分の時間を取るためのWebサービス",
+    "育児中の父親が、自分の時間も大切にしながら家庭をうまく回すためのWebサービス",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

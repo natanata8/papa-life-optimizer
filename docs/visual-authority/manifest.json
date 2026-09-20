@@ -1,0 +1,71 @@
+{
+  "sourceOfTruth": "docs/visual-authority/",
+  "updated": "2026-09-20",
+  "system": {
+    "background": "warm off-white",
+    "accent": "olive",
+    "headline": "japanese-serif",
+    "body": "sans-serif",
+    "card": "white",
+    "photography": "restrained-lifestyle",
+    "forbidden": [
+      "parenting-app-pastel",
+      "gamification",
+      "saas-dashboard",
+      "copper-accent",
+      "sans-only-typography"
+    ]
+  },
+  "screens": [
+    {
+      "id": "TOP",
+      "label": "TOP",
+      "status": "visual_approved",
+      "frozen": false,
+      "image": null,
+      "imageStatus": "HUMAN_REQUIRED",
+      "copyPath": "TOP/canonical-copy.md",
+      "copyStatus": "restored"
+    },
+    {
+      "id": "DRINK",
+      "label": "飲み会",
+      "status": "visual_authority_approved_frozen",
+      "frozen": true,
+      "image": null,
+      "imageStatus": "HUMAN_REQUIRED",
+      "copyPath": "DRINK/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "SOFA",
+      "label": "ソファ",
+      "status": "visual_authority_approved_frozen",
+      "frozen": true,
+      "image": null,
+      "imageStatus": "HUMAN_REQUIRED",
+      "copyPath": "SOFA/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "SLEEP_IN",
+      "label": "朝寝坊",
+      "status": "visual_authority_approved_frozen",
+      "frozen": true,
+      "image": null,
+      "imageStatus": "HUMAN_REQUIRED",
+      "copyPath": "SLEEP_IN/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "GAME",
+      "label": "ゲーム",
+      "status": "visual_authority_approved_frozen",
+      "frozen": true,
+      "image": null,
+      "imageStatus": "HUMAN_REQUIRED",
+      "copyPath": "GAME/canonical-copy.md",
+      "copyStatus": "title_only"
+    }
+  ]
+}

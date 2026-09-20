@@ -23,7 +23,11 @@ describe("HomePage", () => {
     const html = renderToStaticMarkup(createElement(HomePage));
 
     expect(html).toContain("papa-life-optimizer");
-    expect(html).toContain("家庭を止めずに");
+    expect(html).toContain(
+      "育児中の父親が、自分の時間も大切にしながら家庭をうまく回すためのWebサービス",
+    );
+    expect(html).not.toContain("家庭を止めずに");
+    expect(html).not.toContain("自分時間を、家庭の手順にする");
     for (const title of MVP_SCENARIO_TITLES) {
       expect(html).toContain(title);
     }
