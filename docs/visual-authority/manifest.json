@@ -1,0 +1,68 @@
+{
+  "role": "historical_reference_current_hypothesis",
+  "bindsImplementation": false,
+  "updated": "2026-09-20",
+  "system": {
+    "status": "hypothesis_changeable",
+    "background": "warm off-white",
+    "accent": "olive",
+    "headline": "japanese-serif",
+    "body": "sans-serif",
+    "card": "white",
+    "photography": "restrained-lifestyle"
+  },
+  "principles": [
+    "do-not-blame-fathers",
+    "do-not-treat-partners-as-enemies",
+    "do-not-treat-self-time-as-wrong",
+    "no-saas-dashboard",
+    "no-excessive-gamification"
+  ],
+  "screens": [
+    {
+      "id": "TOP",
+      "label": "TOP",
+      "status": "design_hypothesis",
+      "frozen": false,
+      "image": null,
+      "copyPath": "TOP/canonical-copy.md",
+      "copyStatus": "restored"
+    },
+    {
+      "id": "DRINK",
+      "label": "飲み会",
+      "status": "design_hypothesis",
+      "frozen": false,
+      "image": null,
+      "copyPath": "DRINK/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "SOFA",
+      "label": "ソファ",
+      "status": "design_hypothesis",
+      "frozen": false,
+      "image": null,
+      "copyPath": "SOFA/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "SLEEP_IN",
+      "label": "朝寝坊",
+      "status": "design_hypothesis",
+      "frozen": false,
+      "image": null,
+      "copyPath": "SLEEP_IN/canonical-copy.md",
+      "copyStatus": "title_only"
+    },
+    {
+      "id": "GAME",
+      "label": "ゲーム",
+      "status": "design_hypothesis",
+      "frozen": false,
+      "image": null,
+      "copyPath": "GAME/canonical-copy.md",
+      "copyStatus": "title_only"
+    }
+  ]
+}
