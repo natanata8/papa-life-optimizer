@@ -28,7 +28,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - ユーザー仮説: `docs/USER_RESEARCH.md`
 - 市場・競合: `docs/MARKET_RESEARCH.md`
 - 収益仮説: `docs/MONETIZATION.md`
-- 見た目の正本: `docs/visual-authority/`
+- 見た目の仮説: `docs/visual-authority/`（拘束しない）
 - 起動手順: `README.md`
 
 読んでいない状態で実装や方針変更を始めない。
@@ -49,7 +49,8 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 - `main` への直接 push は禁止。必ず branch を切り、PR で進める。
 - Production deploy は禁止。プレビューやローカル確認までに留める。
-- Frozen UX / Visual Authority を勝手に変更しない。変更が必要なら `HUMAN_REQUIRED` にする。
+- 既存 Visual はデザイン仮説であり、freeze 正本ではない。見た目の変更は原則を守れば `AUTO-CONTINUE`。
+- UX / ブランド原則（父親を責めない、パートナーを敵にしない、自分時間を悪にしない、SaaS ダッシュボード化しない、過度なゲーミフィケーションをしない）は維持する。緩めるときは `HUMAN_REQUIRED`。
 - `HUMAN_REQUIRED` 以外は `AUTO-CONTINUE`。判断できる実装・文書化・テスト・PR 作成は止めずに進める。
 - 技術構成は Next.js + TypeScript + Tailwind CSS。スタック変更は `HUMAN_REQUIRED`。
 - 初期 MVP の対象シナリオは次の 4 つのみ。勝手に増やさない。
@@ -62,7 +63,7 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 `HUMAN_REQUIRED` にするもの:
 
-- Freeze 済み Visual Authority の変更、差し替え、または新しい凍結宣言
+- UX / ブランド原則を緩めること
 - プロダクト方針、MVP 範囲、収益化、価格の確定
 - Production deploy
 - `main` 直 push、force push、本番秘密情報の追加
@@ -71,14 +72,12 @@ Slack は作業依頼と進捗の場所であり、仕様の正本ではない�
 
 それ以外は `AUTO-CONTINUE`。不明点は仮定を `docs/DECISIONS.md` か PR に書き、作業を止めない。仮定がプロダクト方針に触れる場合だけ `HUMAN_REQUIRED` として残す。
 
-## Frozen UX / Visual Authority
+## 見た目と原則
 
-- 見た目の正本は `docs/visual-authority/`。Slack や現行 `src/` は正本ではない。
-- 朝寝坊 / 飲み会 / ソファ / ゲームは approved / frozen。TOP は Visual approved。copy は `docs/visual-authority/TOP/canonical-copy.md`。
-- システムは warm off-white、olive accent、日本語セリフ見出し、Sans 本文、白カード、少量の生活写真。
-- 銅アクセント、Noto Sans JP のみ、育児アプリのパステル、ゲーミフィケーション、SaaS ダッシュボードは正本ではない。
-- 画像未着。代替画像は作らない。仮 Visual を freeze 済み VA へ寄せる実装は、今は行わない。
-- Freeze 済み画面の改変と画像追加は `HUMAN_REQUIRED`。
+- TOP / DRINK / SOFA / SLEEP_IN / GAME の既存 Visual は、現時点のデザイン仮説である。freeze 済み正本ではない。
+- warm off-white / olive / セリフ + Sans / 白カード / lifestyle photography も変更可能。
+- `docs/visual-authority/` は historical reference / current hypothesis。実装を拘束しない。
+- 維持する原則: 父親を責めない、パートナーを敵にしない、自分時間を悪にしない、SaaS ダッシュボード化しない、過度なゲーミフィケーションをしない。
 
 ## Git
 

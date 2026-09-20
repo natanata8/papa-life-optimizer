@@ -1,8 +1,13 @@
 # Visual Authority
 
-GitHub 上の見た目の正本。Slack や現行 `src/` の仮実装は正本ではない。
+historical reference / current hypothesis。
+実装を拘束する正本ではない。
 
-参照先は常にこのディレクトリである。
+TOP / DRINK / SOFA / SLEEP_IN / GAME の既存案と、
+warm off-white / olive / セリフ + Sans / 白カード / lifestyle photography は、
+現時点のデザイン仮説であり、変更可能である。
+
+拘束するのは `docs/DESIGN_SYSTEM.md` の UX / ブランド原則だけである。
 
 - マニフェスト: [`manifest.json`](manifest.json)
 - 画面: `TOP` / `DRINK` / `SOFA` / `SLEEP_IN` / `GAME`
@@ -11,27 +16,20 @@ GitHub 上の見た目の正本。Slack や現行 `src/` の仮実装は正本�
 
 | ID | 画面 | Visual | 画像 | コピー |
 | --- | --- | --- | --- | --- |
-| TOP | TOP | approved | 未着 `HUMAN_REQUIRED` | 復元済み（initial `main` の確定文のみ） |
-| DRINK | 飲み会 | approved / frozen | 未着 `HUMAN_REQUIRED` | タイトルのみ確定 |
-| SOFA | ソファ | approved / frozen | 未着 `HUMAN_REQUIRED` | タイトルのみ確定 |
-| SLEEP_IN | 朝寝坊 | approved / frozen | 未着 `HUMAN_REQUIRED` | タイトルのみ確定 |
-| GAME | ゲーム | approved / frozen | 未着 `HUMAN_REQUIRED` | タイトルのみ確定 |
+| TOP | TOP | デザイン仮説 | 未着 | initial `main` の一文を復元済み |
+| DRINK | 飲み会 | デザイン仮説 | 未着 | タイトルのみ |
+| SOFA | ソファ | デザイン仮説 | 未着 | タイトルのみ |
+| SLEEP_IN | 朝寝坊 | デザイン仮説 | 未着 | タイトルのみ |
+| GAME | ゲーム | デザイン仮説 | 未着 | タイトルのみ |
 
-画像がまだ取れない。代替画像は置かない。
-各画面ディレクトリに freeze 済み画面を追加する作業は `HUMAN_REQUIRED`。
+代替画像は正本化のために作らない。
 
-## 確定システム
+## 現時点の仮説
+
+変更可能。
 
 - warm off-white
 - olive accent
 - 日本語セリフ見出し + Sans 本文
 - 白カード
 - 少量の生活写真
-- 育児アプリのパステル / ゲーミフィケーション / SaaS ダッシュボードは禁止
-
-## やってはいけないこと
-
-- ここに無い画像を生成して正本にすること
-- 現行 TOP の銅ドラフトをこのディレクトリへ逆輸入すること
-- 画像未着のまま、仮 Visual を freeze 済み VA へ寄せる実装をすること
-- TOP に新しいキャッチコピーを足すこと

@@ -10,7 +10,7 @@
 
 Slack は依頼と進捗の場所であり、仕様の正本ではない。
 矛盾時は latest `main` を優先する。
-見た目の正本は GitHub の `docs/visual-authority/` である。実装や古い docs と食い違うときはそこを優先する。
+見た目の既存案は正本ではない。拘束するのは UX / ブランド原則である（D-015）。
 
 ## D-002 main 直 push 禁止、branch と PR で進める
 
@@ -54,8 +54,8 @@ Slack は依頼と進捗の場所であり、仕様の正本ではない。
 日付: 2026-09-19
 状態: 採用
 
-方針・凍結済み VA の変更・本番・一次調査の確定以外は、仮定を書いて進める。
-仮 Visual を freeze 済み VA へ寄せる実装は、画像が `docs/visual-authority/` に入るまで行わない。
+方針・原則の緩和・本番・一次調査の確定以外は、仮定を書いて進める。
+見た目の仮説変更は `AUTO-CONTINUE`。
 
 ## D-008 エージェントは作業前に 5 文書を読む
 
@@ -71,7 +71,7 @@ Slack は依頼と進捗の場所であり、仕様の正本ではない。
 状態: 採用（一部更新）
 
 シナリオ詳細、保存、認証、課金は入れない。
-詳細画面は freeze 済み Visual Authority に従って組む。現行骨格の見た目を伸ばさない。
+詳細画面の見た目は仮説でよい。原則だけ守る。
 
 ## D-010 調査と収益の docs は二次情報の草案とする
 
@@ -83,24 +83,9 @@ Slack は依頼と進捗の場所であり、仕様の正本ではない。
 ## D-011 Visual Authority は承認済み。銅ドラフトは正本ではない
 
 日付: 2026-09-19
-状態: 採用（D-006 を上書き）
+状態: 撤回（D-015 で上書き）
 
-確定システム:
-
-- warm off-white
-- olive accent
-- 日本語セリフ見出し + Sans 本文
-- 白カード
-- 少量の生活写真
-- 育児アプリのパステル / ゲーミフィケーション / SaaS ダッシュボードは禁止
-
-画面状態:
-
-- 朝寝坊 / 飲み会 / ソファ / ゲームは Visual Authority approved / frozen
-- TOP は Visual approved。canonical copy は `docs/visual-authority/TOP/canonical-copy.md` に復元済み
-
-現行 `src/` の銅トークンと Sans のみ組版は仮実装。
-Freeze 済み画面の改変と、代替画像の作成は `HUMAN_REQUIRED`。
+既存 Visual を freeze 正本にしてしまった。デザイン仮説に戻す。
 
 ## D-012 将来拡張は FAMILY / PARTNER / SELF。MVP は広げない
 
@@ -122,8 +107,25 @@ Freeze 済み画面の改変と、代替画像の作成は `HUMAN_REQUIRED`。
 ## D-014 Visual Authority の GitHub 正本は docs/visual-authority/
 
 日付: 2026-09-20
-状態: 採用
+状態: 撤回（D-015 で上書き）
 
-見た目の参照先は `docs/visual-authority/` に統一する。
-画像未着の間は manifest / README / canonical copy だけを置き、代替画像は作らない。
-現行 TOP の仮 Visual を freeze 済み VA へ寄せる実装は、今は行わない。画像追加後の別タスクとする。
+`docs/visual-authority/` を実装拘束の正本にしてしまった。historical reference / current hypothesis に戻す。
+
+## D-015 既存 Visual はデザイン仮説。原則だけ拘束する
+
+日付: 2026-09-20
+状態: 採用（D-011 / D-014 を上書き）
+
+TOP / DRINK / SOFA / SLEEP_IN / GAME の既存 Visual は freeze 済み正本ではない。
+warm off-white / olive / セリフ + Sans / 白カード / lifestyle photography も変更可能。
+`docs/visual-authority/` は残すが、実装を拘束しない。
+
+維持する原則:
+
+- 父親を責めない
+- パートナーを敵にしない
+- 自分時間を悪にしない
+- SaaS ダッシュボード化しない
+- 過度なゲーミフィケーションをしない
+
+原則を緩めることだけ `HUMAN_REQUIRED`。見た目の仮説変更は `AUTO-CONTINUE`。

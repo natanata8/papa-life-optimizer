@@ -7,7 +7,7 @@ export function HomePage() {
       <header className="border-b border-border">
         <div className="mx-auto flex w-full max-w-2xl items-center justify-between px-6 py-4">
           <p className="text-sm font-medium tracking-wide">papa-life-optimizer</p>
-          <p className="text-xs text-muted">仮実装 / VA 正本あり</p>
+          <p className="text-xs text-muted">仮実装 / デザイン仮説</p>
         </div>
       </header>
 
@@ -35,7 +35,7 @@ export function HomePage() {
 
       <footer className="border-t border-border">
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-1 px-6 py-5 text-xs leading-6 text-muted">
-          <p>この実装の見た目は仮置きです。Visual Authority の正本は docs/visual-authority/ です。</p>
+          <p>この実装の見た目は仮置きです。既存 Visual はデザイン仮説であり、freeze 正本ではありません。</p>
           <p>Production deploy は禁止。正本は GitHub latest main / docs / Issues / PRs です。</p>
         </div>
       </footer>

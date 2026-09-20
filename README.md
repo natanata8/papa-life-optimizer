@@ -57,6 +57,6 @@ Production への deploy はしないでください。
 
 ## 運用
 
-- 見た目の正本は [docs/visual-authority/](docs/visual-authority/README.md) です。朝寝坊 / 飲み会 / ソファ / ゲームは freeze、TOP は Visual approved です。画像未着なので代替画像は置かず、現行の仮 Visual はまだ寄せません。
+- 既存 Visual はデザイン仮説です。[docs/visual-authority/](docs/visual-authority/README.md) は参照用で、実装を拘束しません。父親を責めない、パートナーを敵にしない、自分時間を悪にしない、SaaS ダッシュボード化しない、過度なゲーミフィケーションをしない、は維持します。
 - `HUMAN_REQUIRED` 以外は止めずに進みます。
 - 完了時は changed files / tests / branch / commit / PR / blockers / HUMAN_REQUIRED を報告します。
