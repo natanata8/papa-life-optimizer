@@ -60,3 +60,18 @@ For any material UI/design generation, Figma proposal/revision, layout/component
 10. Record reviewed Design Intelligence commit SHA: `b647dadff2aea2e360496eef30714770e4f286fe` or newer reviewed SHA in Issue/PR evidence.
 
 A material design change is not complete without this evidence.
+
+
+## Visual exploration / Framer
+
+When the task is a new visual direction, a major redesign, or the Human explicitly judges the current design as generic/weak, do not converge on one average concept.
+
+Required:
+1. Read shared `visual-exploration/WORKFLOW.md`.
+2. Explore at least 3 meaningfully different directions before selection, unless the project already has a locked visual authority that makes broad exploration inappropriate.
+3. Use relevant shared art-direction files such as `art-direction/EDITORIAL.md`, `PHOTOGRAPHY_LED.md`, `BOLD_TYPOGRAPHY.md`, `ASYMMETRIC_COMPOSITION.md`, `PREMIUM_MINIMAL.md`, or `GRAPHIC_HEAVY.md`.
+4. When Framer is used, follow `visual-exploration/FRAMER_LAB.md`. Framer is exploration evidence, not final visual authority.
+5. Compare directions using `visual-exploration/SELECTION_CRITERIA.md` and record why the selected direction won.
+6. Formalize the selected direction in the project's Figma / approved visual authority before implementation, unless the project explicitly defines another visual SSOT.
+
+Do not use Framer simply because it is available; use it when broader visual exploration is valuable.
