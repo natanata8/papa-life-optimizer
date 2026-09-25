@@ -3,17 +3,28 @@
 ## Global AI Operating System
 
 Canonical global protocol: `natanata8/ai-operating-system`  
-Pinned protocol version: `1.0.0`
+Pinned protocol version: `1.0.1`
 
 Apply the global protocol for shared decision quality, research, handoff, AUTO-CONTINUE, and HUMAN_REQUIRED defaults.
 
 Precedence:
 1. explicit current Human instruction and authority boundaries;
 2. this repository's project-specific canonical rules, decisions, specs, and active Issue;
-3. global AI Operating System v1.0.0;
+3. global AI Operating System v1.0.1;
 4. chat history and inferred preferences.
 
 Project-specific rules in this repository override the global protocol where they are more specific.
+
+### Protocol read cadence
+
+Do not re-fetch the global protocol on every reply. Read or refresh it when:
+- starting or resuming substantial project work in a new chat/session;
+- the pinned global version changes;
+- making a consequential decision when the rules are not already loaded or may be stale;
+- project Goal/KPI/Scope, HUMAN_REQUIRED boundaries, or canonical handoff changes;
+- handing work to another executor or migrating to a new chat.
+
+During a continuous session, apply the already-loaded rules. Re-check current GitHub/runtime state separately whenever the answer depends on facts that may have changed.
 
 If an executor cannot read the private global repository, do not block solely for that reason. Local fallback:
 - optimize for explicit Goal / KPI rather than agreement with the proposed method;
