@@ -1,77 +1,179 @@
-# DESIGN_CONTEXT — Papa Life Optimizer
+# DESIGN_CONTEXT — Papa Life Optimizer V2
 
-## Purpose
-Use shared Design Intelligence to improve product clarity and interaction quality while preserving the product's adult lifestyle focus and low-friction operating model.
+## Product thesis
+Papa Life Optimizer starts from a father's personal desire and helps make that event workable by predicting and reducing the hidden household impact around it.
+
+Core line:
+> やりたい予定から、家庭の負担を先回りして整える。
+
+Brand line:
+> 自分の時間も、家族の余裕も。
+
+Brand principle:
+> 責めない。止めない。先回りする。
 
 ## Authority order
-1. Current product Goal / KPI / explicit Human decisions
-2. Project-specific product and family-context requirements
-3. Existing validated product behavior
-4. Project-specific visual decisions and any approved Figma/spec
-5. Shared Design Intelligence: https://github.com/natanata8/design-intelligence
-6. External references / trends
+1. Current Goal / KPI / explicit Human decisions
+2. `docs/PRODUCT_CONCEPT.md`
+3. `docs/LOAD_MODEL.md`
+4. `docs/UX_LOOP.md`
+5. active Issue / validated product behavior / approved visual authority
+6. Shared Design Intelligence: `natanata8/design-intelligence`
+7. external references / trends
 
-## Shared entrypoints
-- `principles/CORE.md`
-- `anti-patterns/AI_SLOP.md`
-- `patterns/PROGRESSIVE_DISCLOSURE.md`
-- `patterns/COMMAND_CENTER.md` where applicable
-- `motion/PRINCIPLES.md`
-- `patterns/MOTION_ROLES.md`
-- `evaluation/DESIGN_REVIEW.md`
+Project-specific product rules outrank shared visual guidance.
 
-## Project-specific rules
-- Keep the product practical, adult and low-friction.
-- Do not drift into a generic parenting app, chore tracker or therapy product.
-- Preserve the user's personal-time goal while making household consequences and trade-offs understandable.
-- Prefer clear recommendations and small next actions over dense dashboards.
-- Use cards only for meaningful independent objects/actions, not as default page structure.
-- Avoid cute/childlike decorative treatment unless explicitly approved.
-- Motion must clarify state/feedback and must not slow routine use.
+## Primary design job
+Make the product feel like an adult personal utility for fathers—not a parenting app, chore tracker, therapy product or household dashboard.
 
-## Required workflow
-1. Identify the concrete user problem.
-2. Read current project requirements / active Issue.
-3. Read relevant shared Design Intelligence.
-4. Check existing design authority/Figma if present.
-5. Propose the smallest coherent UX change.
-6. Implement with realistic content and mobile-first checks.
-7. Capture visual evidence.
-8. Run shared Design Review + AI-slop check.
-9. Keep privacy/payment/legal/production gates under local HUMAN_REQUIRED rules.
+The user should feel:
+- "I can say what I actually want."
+- "This understands what happens at home."
+- "It gives me a few useful actions."
+- "It is helping me go, not judging whether I should."
 
-## Reproducibility
-Record the reviewed Design Intelligence commit SHA in material design PR evidence.
-
-
-## Mandatory design-generation gate
-
-For any material UI/design generation, Figma proposal/revision, layout/component hierarchy change, meaningful styling change, interaction/motion change, implementation of an approved design, or visual QA:
-
-1. Read this file before generating or changing UI.
-2. Read current product requirements, active Issue/PR and any approved project-specific design authority.
-3. Inspect the current implementation and approved Figma/spec when available.
-4. Read relevant shared Design Intelligence files.
-5. Record applied shared principles and Papa Life-specific overrides.
-6. Run shared `evaluation/DESIGN_REVIEW.md` and `anti-patterns/AI_SLOP.md` before implementation handoff.
-7. If motion is present, run the shared motion checks.
-8. Capture realistic mobile/desktop visual evidence after implementation.
-9. Re-run design review after implementation.
-10. Record reviewed Design Intelligence commit SHA: `b647dadff2aea2e360496eef30714770e4f286fe` or newer reviewed SHA in Issue/PR evidence.
-
-A material design change is not complete without this evidence.
-
-
-## Visual exploration / Framer
-
-When the task is a new visual direction, a major redesign, or the Human explicitly judges the current design as generic/weak, do not converge on one average concept.
-
+## Brand personality
 Required:
-1. Read shared `visual-exploration/WORKFLOW.md`.
-2. Explore at least 3 meaningfully different directions before selection, unless the project already has a locked visual authority that makes broad exploration inappropriate.
-3. Use relevant shared art-direction files such as `art-direction/EDITORIAL.md`, `PHOTOGRAPHY_LED.md`, `BOLD_TYPOGRAPHY.md`, `ASYMMETRIC_COMPOSITION.md`, `PREMIUM_MINIMAL.md`, or `GRAPHIC_HEAVY.md`.
-4. When Framer is used, follow `visual-exploration/FRAMER_LAB.md`. Framer is exploration evidence, not final visual authority.
-5. Compare directions using `visual-exploration/SELECTION_CRITERIA.md` and record why the selected direction won.
-6. Formalize the selected direction in the project's Figma / approved visual authority before implementation, unless the project explicitly defines another visual SSOT.
+- intelligent
+- adult
+- practical
+- calm
+- slightly playful
 
-Do not use Framer simply because it is available; use it when broader visual exploration is valuable.
+Quality:
+- premium without luxury theatre
+- mature without corporate stiffness
+
+Avoid:
+- preachy
+- cute
+- maternal
+- macho
+- therapeutic
+- judgmental
+- gamified
+- corporate productivity SaaS
+
+## Core UX principles
+
+### 1. Desire First
+The visual hierarchy should begin with the desired event.
+
+Examples:
+- 飲みに行きたい。
+- 休日くらい、朝寝坊したい。
+- 土曜はゴルフに行きたい。
+
+Do not visually start from chores.
+
+### 2. Consequence Visibility
+Show household impact clearly but neutrally.
+
+Use:
+- sequence
+- timeline
+- grouped consequence
+- before / absence / recovery structure
+
+Avoid red-warning treatment unless there is an actual operational risk.
+
+### 3. Preparation, not Permission
+The UI must never look like a moral approval flow.
+
+Avoid:
+- confirmation dialogs asking whether the user should go
+- guilt meters
+- "fair / unfair" labels
+- partner mood prediction
+
+### 4. Small Next Actions
+Do not turn the vector model into a dashboard.
+
+Internally the model may be detailed.
+Externally the user usually gets 3–5 actions.
+
+### 5. Household Buffer
+Create visual room for recovery and contingency.
+Do not represent every minute as optimized.
+
+### 6. Partner value without partner burden
+Do not make the partner responsible for setup, scoring or approving.
+
+## Visual system guidance
+Prefer:
+- calm but confident typography
+- warm neutral surfaces
+- strong hierarchy
+- purposeful density
+- editorial sequencing when useful
+- asymmetric composition when it supports meaning
+- restrained accent color
+- realistic adult-life imagery only when it adds evidence
+
+Avoid:
+- generic SaaS cards
+- parenting-app pastel language
+- family stock-photo clichés
+- cute child illustrations
+- repetitive dashboard widgets
+- excessive rounded rectangles
+- gradients as identity
+- glassmorphism
+- gamified progress rings
+- "wife mood" visualizations
+
+Cards are allowed only for meaningful independent objects or actions.
+
+## Motion
+Use motion for:
+- state change
+- task completion feedback
+- transition between impact and preparation
+- spatial continuity
+
+Avoid:
+- repeated fade-up
+- decorative motion
+- dopamine mechanics
+- motion that delays task completion
+
+## Mandatory design-generation workflow
+For material UI / Figma / Framer / implementation:
+1. Read this file.
+2. Read `PRODUCT_CONCEPT.md`, `LOAD_MODEL.md`, `UX_LOOP.md`.
+3. Read active Issue/PR and current implementation.
+4. Read relevant shared Design Intelligence.
+5. Record shared principles + project overrides.
+6. Run Design Review + AI-slop review.
+7. If motion exists, run motion review.
+8. Capture realistic desktop/mobile evidence.
+9. Verify the result still satisfies Desire First / Preparation-not-Permission.
+10. Record reviewed Design Intelligence SHA.
+
+## Framer
+Framer is the Visual Exploration Lab, not final visual authority.
+
+For a major direction:
+- create at least 3 materially different directions
+- use real scenario content
+- do not create three color variants
+- compare with the project goal and product principles
+- formalize the selected/synthesized direction in Figma before implementation
+
+Required initial exploration:
+A. Life Operations
+B. Editorial Decision Assistant
+C. Desire-first Personal Utility
+
+See `docs/design/FRAMER_SKILL_SPEC.md`.
+
+## Final visual authority
+Framer exploration does not become production truth automatically.
+
+Flow:
+GitHub product SSOT
+→ Framer exploration
+→ comparison / synthesis
+→ Figma approved visual authority
+→ implementation
+→ Visual QA
