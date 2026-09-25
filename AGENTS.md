@@ -37,7 +37,11 @@ If an executor cannot read the private global repository, do not block solely fo
 
 ## Design Intelligence
 
-For material UI/design changes, read `docs/design/DESIGN_CONTEXT.md` and consult `natanata8/design-intelligence` as a secondary design-quality authority. Project-specific canonical state, approved visual authority, active Issues, explicit Human decisions and HUMAN_REQUIRED boundaries always outrank shared design guidance.
+For any material UI/design generation, Figma proposal or revision, implementation of an approved design, meaningful interaction/motion change, or visual QA, reading `docs/design/DESIGN_CONTEXT.md` is mandatory.
+
+The agent must consult relevant files in `natanata8/design-intelligence`, record the applied shared principles and local overrides, run the shared Design Review + AI-slop check, perform motion review when applicable, capture visual evidence, and record the reviewed Design Intelligence commit SHA in the material design Issue/PR.
+
+Project-specific canonical state, approved Figma/visual authority, active Issues, explicit Human decisions and HUMAN_REQUIRED boundaries always outrank shared design guidance.
 
 ## Project authority
 
