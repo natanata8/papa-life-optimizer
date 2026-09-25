@@ -56,7 +56,6 @@ Framer is exploration only.
 Figma / Human-approved visual authority becomes implementation-facing SSOT.
 
 ## HUMAN_REQUIRED
-- Provide/create the canonical Framer Project URL
 - Final visual direction approval after exploration
 - Production deployment
 - pricing / payment / privacy / legal decisions
@@ -70,9 +69,9 @@ Figma / Human-approved visual authority becomes implementation-facing SSOT.
 - production deploy
 
 ## Immediate next
-1. Register Framer Project URL.
-2. Explore A/B/C in Framer.
-3. Compare and synthesize.
-4. Human visual review.
-5. Formalize approved direction in Figma.
-6. Implement and run Visual QA.
+1. Explore A/B/C in the canonical Framer project:
+   https://framer.com/projects/Papa-Life-Optimizer-Visual-Exploration--45jodTjnbayF1b6sVyq3-4y0Me
+2. Compare and synthesize.
+3. Human visual review.
+4. Formalize approved direction in Figma.
+5. Implement and run Visual QA.
