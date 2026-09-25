@@ -42,3 +42,21 @@ Use shared Design Intelligence to improve product clarity and interaction qualit
 
 ## Reproducibility
 Record the reviewed Design Intelligence commit SHA in material design PR evidence.
+
+
+## Mandatory design-generation gate
+
+For any material UI/design generation, Figma proposal/revision, layout/component hierarchy change, meaningful styling change, interaction/motion change, implementation of an approved design, or visual QA:
+
+1. Read this file before generating or changing UI.
+2. Read current product requirements, active Issue/PR and any approved project-specific design authority.
+3. Inspect the current implementation and approved Figma/spec when available.
+4. Read relevant shared Design Intelligence files.
+5. Record applied shared principles and Papa Life-specific overrides.
+6. Run shared `evaluation/DESIGN_REVIEW.md` and `anti-patterns/AI_SLOP.md` before implementation handoff.
+7. If motion is present, run the shared motion checks.
+8. Capture realistic mobile/desktop visual evidence after implementation.
+9. Re-run design review after implementation.
+10. Record reviewed Design Intelligence commit SHA: `b647dadff2aea2e360496eef30714770e4f286fe` or newer reviewed SHA in Issue/PR evidence.
+
+A material design change is not complete without this evidence.
