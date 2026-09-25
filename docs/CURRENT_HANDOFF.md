@@ -1,14 +1,15 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
-Status: PRODUCT_CONCEPT_V2_CANONICALIZATION
+Status: REQUIREMENTS_BEFORE_FINAL_DESIGN
 
 Repository:
 `natanata8/papa-life-optimizer`
 
-## Current product thesis
-Papa Life Optimizer starts from a father's desired personal event and predicts the hidden household impact it creates.
+Latest dedicated handoff:
+`docs/NEW_CHAT_HANDOFF_20260925.md`
 
-Core:
+## Current product thesis
+
 > Personal Event → Household Impact → Load Absorption
 
 Brand:
@@ -20,58 +21,150 @@ Product explanation:
 Brand principle:
 > 責めない。止めない。先回りする。
 
-## Primary user
-Fathers raising children who want personal time but do not want to push the resulting household burden onto their partner.
+Primary user:
+> 育児中で、自分の時間も取りたいが、その結果の家庭負担を一方的にパートナーへ外部化したくない父親。
 
-## MVP
+## Current process decision
+
+Framer / Figma exploration has been useful, but final design work is paused.
+
+Reason:
+Site concept, MVP requirements, information architecture, screen inventory and free/paid boundaries are not yet sufficiently finalized.
+
+Current Figma must be treated as:
+> Design Spike / Reference Flow
+
+not final Visual Authority.
+
+## Product boundaries
+
+Do not drift into:
+- chore tracker
+- generic parenting app
+- therapy app
+- fairness score
+- partner mood inference
+- strict 50:50 accounting
+- wife-management / 妻攻略
+- full household OS before validating the event optimizer
+
+AI may predict operational consequences and suggest actions.
+AI must not decide fairness, relationship quality, who is right, or whether the user deserves permission.
+
+## MVP hypothesis
+
 Initial scenarios:
 1. 飲み会
 2. 休日朝寝坊
 3. ゴルフ
 
-Flow:
+Core loop:
 Event
-→ 2–4 context questions
-→ Impact Preview
+→ Context
+→ Household Impact Preview
 → 3–5 actions
 → Event
 → Recovery
 → Learn
 
-## Canonical docs
-- `docs/PRODUCT_CONCEPT.md`
-- `docs/LOAD_MODEL.md`
-- `docs/UX_LOOP.md`
-- `docs/design/DESIGN_CONTEXT.md`
-- `docs/design/FRAMER_PROJECT.md`
-- `docs/design/FRAMER_SKILL_SPEC.md`
+## Visual exploration state
 
-## Visual exploration
-Required initial Framer directions:
-A. Life Operations
-B. Editorial Decision Assistant
-C. Desire-first Personal Utility
+Framer:
+https://framer.com/projects/Papa-Life-Optimizer-Visual-Exploration--45jodTjnbayF1b6sVyq3-4y0Me
 
-Framer is exploration only.
-Figma / Human-approved visual authority becomes implementation-facing SSOT.
+Exploration:
+- A Life Operations
+- B Editorial Decision Assistant
+- C Desire-first Personal Utility
+- /synthesis
+- /synthesis-v2
 
-## HUMAN_REQUIRED
-- Final visual direction approval after exploration
-- Production deployment
-- pricing / payment / privacy / legal decisions
+Current strongest reference:
+`/synthesis-v2`
 
-## Do not do yet
-- full household OS expansion
-- fairness scoring
-- partner mood inference
-- partner account requirement
-- calendar integration
-- production deploy
+Flow:
+> Desire → Household Impact → Advisor → 3 Actions → Plan B → Restore
+
+Framer remains exploration only.
+
+## Figma reference state
+
+File:
+`Papa Life Optimizer — Final Synthesis v1`
+
+File key:
+`qbTwjl2xa1EW5hLuhcCyXT`
+
+URL:
+https://www.figma.com/design/qbTwjl2xa1EW5hLuhcCyXT
+
+Contains:
+- Desktop 1440 reference flow
+- Mobile 390 reference flow
+
+Status:
+> Design Spike / Reference Flow only. NOT final Visual Authority.
 
 ## Immediate next
-1. Explore A/B/C in the canonical Framer project:
-   https://framer.com/projects/Papa-Life-Optimizer-Visual-Exploration--45jodTjnbayF1b6sVyq3-4y0Me
-2. Compare and synthesize.
-3. Human visual review.
-4. Formalize approved direction in Figma.
-5. Implement and run Visual QA.
+
+STOP further final-design expansion.
+
+Proceed with:
+`SITE / MVP REQUIREMENTS DEFINITION`
+
+Resolve:
+1. Product Thesis
+2. Primary User
+3. MVP Scope
+4. 3 Core Scenarios
+5. Main User Flow
+6. Required Screens
+7. Free / Paid Boundary
+8. AI Responsibilities
+9. Non-goals
+10. Validation KPI
+
+Then:
+- information architecture
+- screen inventory
+- per-screen goal
+- per-screen inputs / outputs
+- onboarding requirements
+- household profile requirements
+- event-entry UX
+- result / action UX
+- learning / history requirements
+- MVP vs post-MVP split
+
+Only after these are sufficiently stable should Figma become implementation-facing Visual Authority.
+
+## Read next
+
+1. `AGENTS.md`
+2. `docs/NEW_CHAT_HANDOFF_20260925.md`
+3. `docs/PRODUCT_CONCEPT.md`
+4. `docs/LOAD_MODEL.md`
+5. `docs/UX_LOOP.md`
+6. `docs/design/DESIGN_CONTEXT.md`
+7. `docs/design/FRAMER_PROJECT.md`
+8. Issue #6
+9. latest main / open Issues / PRs
+
+## HUMAN_REQUIRED
+
+- requirements / scope approval
+- final Visual Authority approval
+- pricing / payment
+- privacy / legal
+- publish / production
+
+## Do not do yet
+
+- production deploy
+- full household OS expansion
+- partner account requirement
+- calendar integration
+- fairness scoring
+- partner mood inference
+- final design-system build
+- broad app-screen rollout
