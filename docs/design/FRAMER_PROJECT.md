@@ -1,6 +1,6 @@
 # FRAMER_PROJECT — Papa Life Optimizer
 
-Status: PROJECT_URL_REQUIRED
+Status: ACTIVE
 
 ## Role
 Framer is the Visual Exploration Lab for Papa Life Optimizer.
@@ -12,13 +12,14 @@ It is not:
 - a place to redefine product scope
 
 ## Project URL
-Not registered yet.
+Canonical project:
+https://framer.com/projects/Papa-Life-Optimizer-Visual-Exploration--45jodTjnbayF1b6sVyq3-4y0Me
 
-HUMAN_REQUIRED:
-Create or provide one Framer project for Papa Life Optimizer visual exploration, then replace this section with the canonical project URL.
-
-Suggested project name:
+Project name:
 `Papa Life Optimizer — Visual Exploration`
+
+Project ID:
+`45jodTjnbayF1b6sVyq3`
 
 ## Required directions
 - Life Operations
