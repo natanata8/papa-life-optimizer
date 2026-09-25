@@ -24,6 +24,10 @@ If an executor cannot read the private global repository, do not block solely fo
 - prefer reversible experiments under uncertainty;
 - keep durable state in GitHub and avoid using Human as an AI-to-AI transport layer.
 
+## Design Intelligence
+
+For material UI/design changes, read `docs/design/DESIGN_CONTEXT.md` and consult `natanata8/design-intelligence` as a secondary design-quality authority. Project-specific canonical state, approved visual authority, active Issues, explicit Human decisions and HUMAN_REQUIRED boundaries always outrank shared design guidance.
+
 ## Project authority
 
 - GitHub `natanata8/papa-life-optimizer` is the canonical development state for this project.
