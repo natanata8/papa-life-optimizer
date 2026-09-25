@@ -1,6 +1,6 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
-Status: REQUIREMENTS_BEFORE_FINAL_DESIGN
+Status: REQUIREMENTS_REVIEW_READY
 
 Repository:
 `natanata8/papa-life-optimizer`
@@ -109,8 +109,20 @@ Status:
 
 STOP further final-design expansion.
 
-Proceed with:
-`SITE / MVP REQUIREMENTS DEFINITION`
+Requirements draft is now defined in:
+`docs/SITE_MVP_REQUIREMENTS.md`
+
+Tracking:
+GitHub Issue #9
+
+Current gate:
+`HUMAN_REQUIRED — requirements / scope approval`
+
+After approval:
+- convert the requirements into implementation-facing information architecture / screen specs;
+- then resume Figma as the implementation-facing Visual Authority process.
+
+Do not resume broad visual exploration before this gate.
 
 Resolve:
 1. Product Thesis
