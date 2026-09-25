@@ -1,0 +1,12 @@
+extends: existence
+message: "誇張語「%s」は、裏づけられる具体情報がある場合だけ使ってください。"
+level: warning
+ignorecase: true
+nonword: true
+tokens:
+  - '革新的'
+  - '画期的'
+  - '圧倒的'
+  - '驚くべき'
+  - '次世代'
+  - '世界を変える'

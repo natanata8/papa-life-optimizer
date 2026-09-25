@@ -67,6 +67,10 @@ Brand principle:
 
 Do not expand into a full household OS until the Personal Event → Household Impact loop is validated.
 
+## Writing policy
+
+Before creating or materially revising user-facing prose, read all files under `docs/writing/`: `STYLE_GUIDE.md`, `VOICE.md`, `AI_TELLS.md`, `GOOD_EXAMPLES.md`, `BAD_EXAMPLES.md`, and `REVIEW_RUBRIC.md`. Preserve the product's non-judgment and no-emotion-diagnosis boundaries. Run Vale on changed Markdown. Do not use AI-detector scores as a quality or release gate.
+
 ## Operating rule
 
 Prefer practical, low-friction, reversible product experiments over broad feature expansion. Preserve important Human taste, family-context, production, payment, privacy, legal, or irreversible decisions as HUMAN_REQUIRED.
