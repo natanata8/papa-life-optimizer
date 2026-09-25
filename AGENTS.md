@@ -46,9 +46,26 @@ Project-specific canonical state, approved Figma/visual authority, active Issues
 ## Project authority
 
 - GitHub `natanata8/papa-life-optimizer` is the canonical development state for this project.
-- Product goal: help fathers raising children protect personal time while keeping household operations practical and reducing avoidable household friction.
+- Product goal: start from a father's desired personal event, predict the hidden household impact it creates, and reduce/absorb that impact so personal time and household buffer can coexist.
 - Project-specific Goal / KPI / Scope / Human decisions override global defaults where more specific.
 - Do not turn the product into a generic parenting, chore-tracking, or therapy product unless the project direction explicitly changes.
+
+## Canonical product documents
+
+Before substantial product, UX, design, Framer or implementation work, read:
+- `docs/PRODUCT_CONCEPT.md`
+- `docs/LOAD_MODEL.md`
+- `docs/UX_LOOP.md`
+- `docs/CURRENT_HANDOFF.md`
+- `docs/design/DESIGN_CONTEXT.md`
+
+Core product mechanism:
+`Personal Event → Household Impact → Load Absorption`
+
+Brand principle:
+`責めない。止めない。先回りする。`
+
+Do not expand into a full household OS until the Personal Event → Household Impact loop is validated.
 
 ## Operating rule
 
