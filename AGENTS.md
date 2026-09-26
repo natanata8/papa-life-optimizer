@@ -67,6 +67,21 @@ Brand principle:
 
 Do not expand into a full household OS until the Personal Event → Household Impact loop is validated.
 
+## Business decision protocol
+
+Before substantial business-model, monetization, positioning, KPI, acquisition, or validation work, read:
+- `docs/business/BUSINESS_DECISION_PROTOCOL.md`
+- `docs/business/BUSINESS_MODEL_STATUS.md`
+- `docs/business/ASSUMPTIONS.md`
+
+Required rule:
+- distinguish `DECIDED`, `HUMAN_HYPOTHESIS`, `VALIDATED`, `AI_PROPOSAL`, and `UNKNOWN`
+- never turn plausible AI output into an apparent Human decision
+- do not fill unknowns merely to make the plan look complete
+- present unresolved consequential decisions as bounded options with trade-offs and validation evidence
+- Human decides Goal / KPI / consequential business choices; research, comparison, validation design, classification, and documentation should AUTO-CONTINUE
+- separate business reasoning from polished writing; apply writing rules only after decision state is clear
+
 ## Writing policy
 
 Before creating or materially revising user-facing prose, read all files under `docs/writing/`: `STYLE_GUIDE.md`, `VOICE.md`, `AI_TELLS.md`, `GOOD_EXAMPLES.md`, `BAD_EXAMPLES.md`, and `REVIEW_RUBRIC.md`. Preserve the product's non-judgment and no-emotion-diagnosis boundaries. Run Vale on changed Markdown. Do not use AI-detector scores as a quality or release gate.
