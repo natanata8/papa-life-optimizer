@@ -105,6 +105,20 @@ Contains:
 Status:
 > Design Spike / Reference Flow only. NOT final Visual Authority.
 
+## Business decision-state protocol
+
+Canonical business-decision docs:
+- `docs/business/BUSINESS_DECISION_PROTOCOL.md`
+- `docs/business/BUSINESS_MODEL_STATUS.md`
+- `docs/business/ASSUMPTIONS.md`
+
+Current rule:
+- AI must not complete unknown business decisions just to make the strategy look polished.
+- Business statements must be tracked as `DECIDED`, `HUMAN_HYPOTHESIS`, `VALIDATED`, `AI_PROPOSAL`, or `UNKNOWN`.
+- Current product North Star `Balanced Freedom Event Rate` remains canonical.
+- For near-term validation, also track the simpler behavioral metric `30-day second-use rate` without treating it as a replacement North Star unless Human explicitly decides so.
+- Initial customer pain, willingness to pay, pricing, and channel choices remain hypotheses / unknowns until validated.
+
 ## Immediate next
 
 STOP further final-design expansion.
