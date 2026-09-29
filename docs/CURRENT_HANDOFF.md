@@ -1,5 +1,15 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Latest Human upstream FIX draft — 2026-09-29
+
+Canonical draft:
+`docs/UPSTREAM_FIX_DRAFT_20260929.md`
+
+Status:
+> HUMAN_DRAFT / NOT_FINAL_FIX
+
+This is the latest Human-authored upstream definition for MVP discussion and should be read before further MVP requirements, UX, design, or implementation work. Do not summarize, compress, or silently replace its ①〜⑥ definitions before Human approval.
+
 Status: REQUIREMENTS_BEFORE_FINAL_DESIGN
 
 Repository:
