@@ -1,5 +1,17 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Pre-Cursor review gate — Issue #13
+
+Before Cursor starts Issue #13, use:
+`docs/PRE_CURSOR_REVIEW_ISSUE13_20260929.md`
+
+Expected independent Review outcome:
+- READY
+- READY_WITH_CHANGES
+- NOT_READY
+
+Cursor should not start Issue #13 until this review is complete.
+
 ## Review Chat handoff
 
 Canonical reviewer handoff:
