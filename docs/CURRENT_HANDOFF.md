@@ -1,5 +1,20 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Project operating model — 2026-09-29
+
+Canonical:
+`docs/PROJECT_OPERATING_MODEL_20260929.md`
+
+Roles:
+- Main ChatGPT = Project Manager / Brain
+- Cursor = Builder
+- Review ChatGPT = independent Reviewer
+- GitHub = SSOT
+- Human = Goal / KPI / consequential decisions / discomfort signals
+
+Current execution rule:
+> Main does not re-implement Builder work. Cursor owns technical implementation choices after reading GitHub state. Review Chat independently checks quality and product fit.
+
 ## Current Human-approved MVP definition — 2026-09-29
 
 Upstream definition:
