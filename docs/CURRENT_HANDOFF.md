@@ -1,5 +1,12 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Review Chat handoff
+
+Canonical reviewer handoff:
+`docs/REVIEW_CHAT_HANDOFF_20260929.md`
+
+Use this when starting a separate independent Review Chat.
+
 ## Project operating model — 2026-09-29
 
 Canonical:
