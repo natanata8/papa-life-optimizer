@@ -1,0 +1,202 @@
+{
+  "WHAT_SHOULD_I_DO": {
+    "headline": "今やることは1つに絞ります。",
+    "body": "残りは明日に回すものと、今日やらないものに分けます。",
+    "actions": [
+      {
+        "action_type": "DO_NOW",
+        "title": "夕食の準備を先に終える",
+        "description": "食べる分だけ作って、片付けまで15分で終える。",
+        "effort": "LOW",
+        "reason": "clears the next fixed meal",
+        "expected_load_reduction": ["childcare_load", "time_constraint"]
+      },
+      {
+        "action_type": "DEFER",
+        "title": "掃除は明日に回す",
+        "description": "今日の判断から外し、明日の空きに残す。",
+        "effort": "LOW",
+        "reason": "not on the critical path today",
+        "expected_load_reduction": ["physical_load"]
+      },
+      {
+        "action_type": "SKIP",
+        "title": "今日は床拭きをやらない",
+        "description": "食事と寝かしつけが終われば、今日は足りる。",
+        "effort": "LOW",
+        "reason": "skip does not move the evening",
+        "expected_load_reduction": ["physical_load"]
+      }
+    ]
+  },
+  "TIRED": {
+    "headline": "今日は最低限にして、先に休みます。",
+    "body": "食事だけ出して、洗濯は明日の朝に回します。",
+    "actions": [
+      {
+        "action_type": "REST",
+        "title": "20分横になる",
+        "description": "次の食事の前に、横になる時間を先に取る。",
+        "effort": "LOW",
+        "reason": "capacity is the constraint",
+        "expected_load_reduction": ["fatigue_effect"]
+      },
+      {
+        "action_type": "DO_NOW",
+        "title": "子どもの食事だけ出す",
+        "description": "あるもので一食出して、作り足さない。",
+        "effort": "LOW",
+        "reason": "minimum viable childcare",
+        "expected_load_reduction": ["childcare_load"]
+      },
+      {
+        "action_type": "DEFER",
+        "title": "洗濯は明日の朝にする",
+        "description": "今夜の作業から外し、朝の洗濯だけ残す。",
+        "effort": "LOW",
+        "reason": "safe to move past bedtime",
+        "expected_load_reduction": ["physical_load"]
+      }
+    ]
+  },
+  "WANT_TO_DRINK": {
+    "headline": "行けるように、先に夕食まわりを整えます。",
+    "body": "増えるのは夕食、寝かしつけ、翌朝の準備です。",
+    "body_when_unknown": "開始時刻は未定のまま、先にできる準備だけ出します。",
+    "actions": [
+      {
+        "action_type": "PREPARE_AHEAD",
+        "title": "夕食の主菜を先に作る",
+        "description": "出る前に30分で作り、温めるだけで済むようにする。",
+        "effort": "MEDIUM",
+        "reason": "removes evening cooking during absence",
+        "expected_load_reduction": ["childcare_load", "physical_load"]
+      },
+      {
+        "action_type": "COMMUNICATE",
+        "title": "帰り時刻の目安を伝える",
+        "description": "未定なら、分かった時点で送ると一文で伝える。",
+        "effort": "LOW",
+        "reason": "reduces coordination uncertainty",
+        "expected_load_reduction": ["coordination_load"]
+      },
+      {
+        "action_type": "RECOVER",
+        "title": "翌朝の送迎を引き受ける",
+        "description": "夜に空いた分を、翌朝の支度で戻す。",
+        "effort": "MEDIUM",
+        "reason": "next-morning recovery",
+        "expected_load_reduction": ["recovery_load", "personal_time_loss"]
+      }
+    ],
+    "communication_draft": {
+      "purpose": "share the plan before leaving",
+      "message": "飲みに行きます。夕食は出る前に用意します。翌朝の支度はこちらで見ます。",
+      "includes_load_acknowledgement": false,
+      "includes_preparation": true,
+      "includes_alternative": false,
+      "includes_recovery": true
+    }
+  },
+  "WANT_PERSONAL_TIME": {
+    "headline": "戻る時刻を決めて、その前だけ整えます。",
+    "body": "入浴を先に終えて、90分だけ空ける形にします。",
+    "body_when_unknown": "時間帯は未定のまま、戻る時刻の決め方だけ出します。",
+    "actions": [
+      {
+        "action_type": "PREPARE_AHEAD",
+        "title": "その前に入浴を済ませる",
+        "description": "空ける前に、入浴と着替えまで終えておく。",
+        "effort": "MEDIUM",
+        "reason": "removes a colliding care task",
+        "expected_load_reduction": ["childcare_load", "time_constraint"]
+      },
+      {
+        "action_type": "DO_NOW",
+        "title": "90分だけ予定に入れる",
+        "description": "開始と終了を決めて、その枠だけ使う。",
+        "effort": "LOW",
+        "reason": "bounds personal time",
+        "expected_load_reduction": ["time_constraint"]
+      },
+      {
+        "action_type": "COMMUNICATE",
+        "title": "何時に戻るかを伝える",
+        "description": "戻る時刻を一文で伝えてから出る。",
+        "effort": "LOW",
+        "reason": "makes the handoff explicit",
+        "expected_load_reduction": ["coordination_load"]
+      }
+    ]
+  },
+  "PARTNER_UNHAPPY_OR_CONFLICT": {
+    "headline": "確認できたことだけで、今夜の対応を決めます。",
+    "body": "気持ちの評価はせず、今できる家事と確認だけにします。",
+    "body_with_fact": "{fact}。今夜できる対応だけ出します。",
+    "actions": [
+      {
+        "action_type": "COMMUNICATE",
+        "title": "何が困ったかを聞く",
+        "description": "評価せず、起きたことだけ短く聞く。",
+        "effort": "LOW",
+        "reason": "collects a user-reported fact",
+        "expected_load_reduction": ["coordination_load"]
+      },
+      {
+        "action_type": "DO_NOW",
+        "title": "今夜の寝かしつけを担当する",
+        "description": "話し合いの前に、今夜の担当を一つ終わらせる。",
+        "effort": "MEDIUM",
+        "reason": "concrete help tonight",
+        "expected_load_reduction": ["childcare_load"]
+      },
+      {
+        "action_type": "DEFER",
+        "title": "長い話し合いは明日にする",
+        "description": "今夜は担当を終えて、話は明日に残す。",
+        "effort": "LOW",
+        "reason": "does not force a long talk while tired",
+        "expected_load_reduction": ["fatigue_effect"]
+      }
+    ]
+  },
+  "OVERTIME": {
+    "headline": "遅れを先に伝えて、帰宅後の担当を決めます。",
+    "body": "今夜増えるのは夕食の時間と、帰宅後の片付けです。",
+    "body_when_unknown": "遅れ幅は未定のまま、今送る一文と帰宅後の担当を出します。",
+    "actions": [
+      {
+        "action_type": "COMMUNICATE",
+        "title": "遅れそうな時刻を今送る",
+        "description": "分かっている範囲の到着時刻を、今一文で送る。",
+        "effort": "LOW",
+        "reason": "early coordination",
+        "expected_load_reduction": ["coordination_load", "time_constraint"]
+      },
+      {
+        "action_type": "SUBSTITUTE",
+        "title": "夕食は作り置きを使う",
+        "description": "新規で作らず、冷蔵庫の作り置きで一食にする。",
+        "effort": "LOW",
+        "reason": "substitutes a late cooking task",
+        "expected_load_reduction": ["physical_load", "childcare_load"]
+      },
+      {
+        "action_type": "RECOVER",
+        "title": "帰宅後の片付けを担当する",
+        "description": "帰ってから食器と翌朝の荷物だけ終わらせる。",
+        "effort": "MEDIUM",
+        "reason": "same-night recovery",
+        "expected_load_reduction": ["recovery_load"]
+      }
+    ],
+    "communication_draft": {
+      "purpose": "share a late return early",
+      "message": "帰りが遅れそうです。到着が分かったらすぐ送ります。帰宅後の片付けはこちらでやります。",
+      "includes_load_acknowledgement": false,
+      "includes_preparation": false,
+      "includes_alternative": true,
+      "includes_recovery": true
+    }
+  }
+}

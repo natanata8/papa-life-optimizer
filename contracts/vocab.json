@@ -1,0 +1,231 @@
+{
+  "version": "mvp-contracts-2026-09-29",
+  "confidence_threshold": 0.75,
+  "intents": [
+    "WHAT_SHOULD_I_DO",
+    "TIRED",
+    "WANT_TO_DRINK",
+    "WANT_PERSONAL_TIME",
+    "PARTNER_UNHAPPY_OR_CONFLICT",
+    "OVERTIME",
+    "FREE_CONSULT"
+  ],
+  "intent_labels": {
+    "WHAT_SHOULD_I_DO": "今日やること",
+    "TIRED": "疲れているとき",
+    "WANT_TO_DRINK": "飲み会",
+    "WANT_PERSONAL_TIME": "自分の時間",
+    "PARTNER_UNHAPPY_OR_CONFLICT": "家庭のすれ違い",
+    "OVERTIME": "残業",
+    "FREE_CONSULT": "相談"
+  },
+  "context_modes": [
+    "HOUSEHOLD_IMPACT",
+    "PRIORITY",
+    "CAPACITY",
+    "TIME_OPPORTUNITY",
+    "SITUATION_SUMMARY",
+    "ROUTED_CONTEXT"
+  ],
+  "intent_context_mode": {
+    "WHAT_SHOULD_I_DO": "PRIORITY",
+    "TIRED": "CAPACITY",
+    "WANT_TO_DRINK": "HOUSEHOLD_IMPACT",
+    "WANT_PERSONAL_TIME": "TIME_OPPORTUNITY",
+    "PARTNER_UNHAPPY_OR_CONFLICT": "SITUATION_SUMMARY",
+    "OVERTIME": "HOUSEHOLD_IMPACT"
+  },
+  "entry_choices": {
+    "何をしたらいいか分からない": "WHAT_SHOULD_I_DO",
+    "疲れた": "TIRED",
+    "飲みに行きたい": "WANT_TO_DRINK",
+    "自分の時間がほしい": "WANT_PERSONAL_TIME",
+    "妻が不機嫌 / また怒られた": "PARTNER_UNHAPPY_OR_CONFLICT",
+    "残業になりそう": "OVERTIME",
+    "自由に相談する": "FREE_CONSULT"
+  },
+  "desire_intents": ["WANT_TO_DRINK", "WANT_PERSONAL_TIME", "TIRED"],
+  "action_types": [
+    "DO_NOW",
+    "PREPARE_AHEAD",
+    "REST",
+    "DEFER",
+    "SKIP",
+    "COMMUNICATE",
+    "SUBSTITUTE",
+    "RECOVER"
+  ],
+  "rest_skip_defer": ["REST", "DEFER", "SKIP"],
+  "stages": ["HOME", "CLARIFY", "CONTEXT", "ACTION", "FEEDBACK", "MEMORY"],
+  "memory_types": [
+    "HOUSEHOLD_ATTRIBUTE",
+    "ROUTINE",
+    "TASK_OWNERSHIP",
+    "PREFERENCE",
+    "FATIGUE_PATTERN",
+    "CONFLICT_PATTERN",
+    "SUCCESS_PATTERN",
+    "FAILURE_PATTERN",
+    "SCHEDULE_PATTERN"
+  ],
+  "outcome_required_memory_types": [
+    "SUCCESS_PATTERN",
+    "FAILURE_PATTERN",
+    "CONFLICT_PATTERN"
+  ],
+  "cross_intent_memory_types": [
+    "HOUSEHOLD_ATTRIBUTE",
+    "ROUTINE",
+    "TASK_OWNERSHIP",
+    "PREFERENCE",
+    "FATIGUE_PATTERN"
+  ],
+  "context_sources": [
+    "USER_INPUT",
+    "HOUSEHOLD_PROFILE",
+    "SCHEDULE",
+    "TASK_MODEL",
+    "MEMORY",
+    "DERIVED"
+  ],
+  "field_statuses": ["KNOWN", "UNKNOWN", "NOT_REQUIRED"],
+  "load_dimensions": [
+    "physical_load",
+    "childcare_load",
+    "cognitive_load",
+    "time_constraint",
+    "coordination_load",
+    "recovery_load",
+    "fatigue_effect",
+    "risk_load",
+    "personal_time_loss"
+  ],
+  "forbidden_stored_keys": [
+    "partner_feeling",
+    "partner_mood",
+    "who_is_right",
+    "fairness",
+    "relationship_quality",
+    "emotional_load"
+  ],
+  "profile_keys": [
+    "child_count",
+    "child_ages",
+    "work_pattern",
+    "usual_return_time",
+    "weekday_routine",
+    "usual_responsibilities",
+    "wake_time",
+    "child_bedtime",
+    "daycare_school_constraints"
+  ],
+  "askable": [
+    {
+      "intent": "WANT_TO_DRINK",
+      "key": "event_window",
+      "prompt": "いつ頃行きたいですか？"
+    },
+    {
+      "intent": "OVERTIME",
+      "key": "expected_delay",
+      "prompt": "帰りはどのくらい遅れそうですか？"
+    },
+    {
+      "intent": "WANT_PERSONAL_TIME",
+      "key": "desired_window",
+      "prompt": "どの時間帯がほしいですか？"
+    },
+    {
+      "intent": "PARTNER_UNHAPPY_OR_CONFLICT",
+      "key": "observed_facts",
+      "prompt": "何があったか、分かる範囲で教えてください。"
+    }
+  ],
+  "free_text_patterns": [
+    {
+      "intent": "WHAT_SHOULD_I_DO",
+      "phrases": ["何をしたらいい", "何をすればいい", "何すればいい", "何をしたら良い"]
+    },
+    {
+      "intent": "TIRED",
+      "phrases": ["疲れた", "つかれた", "しんどい"]
+    },
+    {
+      "intent": "WANT_TO_DRINK",
+      "phrases": ["飲みに", "飲み会", "飲みたい"]
+    },
+    {
+      "intent": "WANT_PERSONAL_TIME",
+      "phrases": ["自分の時間", "一人の時間", "自分時間"]
+    },
+    {
+      "intent": "PARTNER_UNHAPPY_OR_CONFLICT",
+      "phrases": ["不機嫌", "怒られた", "けんか", "ケンカ", "すれ違い"]
+    },
+    {
+      "intent": "OVERTIME",
+      "phrases": ["残業", "帰りが遅", "終電"]
+    }
+  ],
+  "limits": {
+    "max_questions": 4,
+    "min_actions_when_resolved": 1,
+    "max_actions": 5,
+    "headline_max": 48,
+    "body_max": 140,
+    "question_max": 60,
+    "action_title_max": 32,
+    "action_detail_max": 80,
+    "memory_note_max": 80,
+    "user_visible_max_chars": 420,
+    "memory_retrieval_limit": 5
+  },
+  "forbidden_user_visible_substrings": [
+    "Intent",
+    "intent",
+    "Context mode",
+    "context_mode",
+    "Load Vector",
+    "load_vector",
+    "Router",
+    "router",
+    "Memory schema",
+    "confidence",
+    "インテント",
+    "コンテキスト",
+    "負荷ベクトル",
+    "ルーター",
+    "メモリ",
+    "信頼度",
+    "fairness",
+    "公平",
+    "機嫌",
+    "怒り",
+    "怒って",
+    "不満",
+    "スコア",
+    "UNKNOWN",
+    "partner_feeling",
+    "who_is_right",
+    "emotional_load",
+    "わがまま",
+    "ごめん",
+    "許して",
+    "本当に行",
+    "妻への負担",
+    "良い夫",
+    "悪い夫",
+    "childcare_load",
+    "recovery_load"
+  ],
+  "load_outcome_labels": {
+    "LIGHTER": "軽くなった",
+    "SAME": "変わらなかった",
+    "HEAVIER": "増えた",
+    "UNKNOWN": "まだ分からない"
+  },
+  "unresolved_question": {
+    "key": "intent",
+    "prompt": "今いちばん近いのはどれですか？"
+  }
+}

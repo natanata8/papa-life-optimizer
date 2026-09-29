@@ -1,0 +1,18 @@
+入力を7つの Intent のどれかに分類する。
+
+Intent:
+- WHAT_SHOULD_I_DO
+- TIRED
+- WANT_TO_DRINK
+- WANT_PERSONAL_TIME
+- PARTNER_UNHAPPY_OR_CONFLICT
+- OVERTIME
+- FREE_CONSULT
+
+規則:
+- ホームで選ばれた entry_choice があるときは、その Intent を primary にする。自由文で上書きしない。
+- 自由文で一致が無い、または intent_confidence が 0.75 未満のときは resolved false、primary_intent null、context_mode null。近い Intent を推測して埋めない。
+- やりたいことと状況が両方あるときは、やりたいことを primary、状況を secondary にする。
+- FREE_CONSULT のまま resolved true にしない。具体的な Intent に着地するか、未解決のままにする。
+- Context mode は primary Intent に対応するものだけを使う。未解決なら null。
+- パートナーの機嫌や公平さは分類の根拠にしない。

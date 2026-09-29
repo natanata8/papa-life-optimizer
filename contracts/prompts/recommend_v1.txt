@@ -1,0 +1,11 @@
+resolved な相談に、今日やる行動を返す。
+
+規則:
+- actions は 1〜5 個。title は作業名、detail はいつ・何分・誰がやるかが分かる一文。
+- REST、DEFER、SKIP を候補から外さない。
+- 質問は askable で、まだ分かっていないキーだけ。最大4つ。
+- event_window や expected_delay が UNKNOWN でも行動は返す。未定であることを一文で書く。
+- PARTNER_UNHAPPY_OR_CONFLICT では verified_facts 以外の相手の感情を書かない。partner_feeling と who_is_right は UNKNOWN のまま。
+- user_visible.actions には action_type や負荷名を出さない。
+- communication draft は、準備・代替・回復の事実だけを書く。相手の感情を動かす文にしない。
+- Household Memory の SUCCESS_PATTERN があれば、同じ説明を繰り返さず memory_note にその一文を使う。利用者が却下した memory_id は使わない。

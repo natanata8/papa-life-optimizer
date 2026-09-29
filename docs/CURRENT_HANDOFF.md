@@ -2,15 +2,13 @@
 
 ## Pre-Cursor review gate — Issue #13
 
-Before Cursor starts Issue #13, use:
+Gate packet:
 `docs/PRE_CURSOR_REVIEW_ISSUE13_20260929.md`
 
-Expected independent Review outcome:
-- READY
-- READY_WITH_CHANGES
-- NOT_READY
+Result on 2026-09-29:
+> READY_WITH_CHANGES
 
-Cursor should not start Issue #13 until this review is complete.
+The requested Human UX criteria were added to Issue #13 before contract work started. The gate is closed.
 
 ## Review Chat handoff
 
@@ -48,8 +46,14 @@ Screen specification:
 Data specification:
 `docs/MVP_DATA_SPEC_20260929.md`
 
+Implementation contracts:
+`docs/MVP_IMPLEMENTATION_CONTRACTS_20260929.md`
+
+Machine contracts, fixtures, and tests:
+`contracts/`
+
 Status:
-> MVP_WIREFLOW_FROZEN / SCREEN_AND_DATA_SPEC_IN_PROGRESS
+> MVP_WIREFLOW_FROZEN / IMPLEMENTATION_CONTRACTS_DEFINED
 
 Human Gate approved the MVP wireflow on 2026-09-29.
 
@@ -65,7 +69,7 @@ Important:
 - Unknown must not be filled by unsupported inference.
 - Household Memory must learn from actual outcome, not only chat history.
 
-Status: REQUIREMENTS_BEFORE_FINAL_DESIGN
+Status: IMPLEMENTATION_CONTRACTS_DEFINED / VISUAL_AUTHORITY_STILL_OPEN
 
 Repository:
 `natanata8/papa-life-optimizer`
@@ -186,40 +190,41 @@ Current rule:
 
 ## Immediate next
 
-Proceed with:
-`Issue #13 — Define MVP implementation contracts before coding`
+Issue #13 contracts are in:
+`docs/MVP_IMPLEMENTATION_CONTRACTS_20260929.md`
 
-Pre-Cursor Review result:
-> READY_WITH_CHANGES
+They include the DB DDL, OpenAPI boundary, 7-intent router, prompt and structured-output guard, Household Memory rules, fixtures, and the first vertical-slice plan (`WANT_TO_DRINK`).
 
-Changes applied before Cursor start:
-- Human UX acceptance criteria added to Issue #13
-- internal complexity must not become user-facing complexity
-- no heavy upfront profile requirement
-- unnecessary / repeated questions prohibited
-- internal Intent / Router / Load / Memory terminology must remain hidden
-- clear next action must be prioritized over long AI explanation
-- contract tests must verify UX behavior, not only schema/routing correctness
+Contract checks:
+`python3 -m unittest contracts.tests.test_mvp_contracts`
 
 Next execution:
-1. Cursor implements Issue #13
-2. Cursor records contracts, fixtures, tests, and evidence in GitHub
-3. Main Chat summarizes the result without re-implementing
-4. Review Chat independently reviews the completed contracts
-5. Minor findings return to Cursor
-6. Human Gate only for consequential decisions
+1. Main Chat summarizes the contract result
+2. Review Chat independently reviews the contracts
+3. Minor findings return to Cursor
+4. After review, implement the drink vertical slice from the contract doc
+5. Human Gate only for consequential decisions
+
+Human UX rules now encoded in the contracts:
+- no profile gate before the first useful answer
+- known facts are not asked again
+- Unknown stays empty when it was not reported
+- internal Intent / Router / Load / Memory terms stay out of `user_visible`
+- the visible card ends in concrete actions
+- a later consultation reuses outcome-backed memory and asks less
 
 ## Read next
 
-1. `AGENTS.md`
-2. `docs/NEW_CHAT_HANDOFF_20260925.md`
-3. `docs/PRODUCT_CONCEPT.md`
-4. `docs/LOAD_MODEL.md`
-5. `docs/UX_LOOP.md`
-6. `docs/design/DESIGN_CONTEXT.md`
-7. `docs/design/FRAMER_PROJECT.md`
-8. Issue #6
-9. latest main / open Issues / PRs
+1. `docs/MVP_IMPLEMENTATION_CONTRACTS_20260929.md`
+2. `AGENTS.md`
+3. `docs/NEW_CHAT_HANDOFF_20260925.md`
+4. `docs/PRODUCT_CONCEPT.md`
+5. `docs/LOAD_MODEL.md`
+6. `docs/UX_LOOP.md`
+7. `docs/design/DESIGN_CONTEXT.md`
+8. `docs/design/FRAMER_PROJECT.md`
+9. Issue #6
+10. latest main / open Issues / PRs
 
 ## HUMAN_REQUIRED
 

@@ -1,0 +1,380 @@
+[
+  {
+    "id": "what-should-i-do",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "何をしたらいいか分からない",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "entry_intent": "WHAT_SHOULD_I_DO",
+      "primary_intent": "WHAT_SHOULD_I_DO",
+      "context_mode": "PRIORITY",
+      "question_keys": [],
+      "action_types_include": ["DO_NOW", "DEFER", "SKIP"]
+    }
+  },
+  {
+    "id": "tired",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "疲れた",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "entry_intent": "TIRED",
+      "primary_intent": "TIRED",
+      "context_mode": "CAPACITY",
+      "question_keys": [],
+      "action_types_include": ["REST", "DO_NOW", "DEFER"]
+    }
+  },
+  {
+    "id": "want-to-drink",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "金曜の夜に飲みに行きたい",
+      "known_context": {
+        "event_window": "金曜20時",
+        "child_count": 1,
+        "child_ages": ["2歳"],
+        "work_pattern": "平日オフィス",
+        "usual_return_time": "19:00"
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "entry_intent": "WANT_TO_DRINK",
+      "primary_intent": "WANT_TO_DRINK",
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "question_keys": [],
+      "must_not_ask_keys": ["child_count", "child_ages", "work_pattern", "usual_return_time", "event_window"],
+      "action_types_include": ["PREPARE_AHEAD", "COMMUNICATE", "RECOVER"],
+      "unknown_keys_exclude": ["event_window", "partner_feeling"]
+    }
+  },
+  {
+    "id": "want-personal-time",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "自分の時間がほしい",
+      "raw_user_input": "",
+      "known_context": {"desired_window": "土曜の午後90分"},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "primary_intent": "WANT_PERSONAL_TIME",
+      "context_mode": "TIME_OPPORTUNITY",
+      "question_keys": [],
+      "action_types_include": ["PREPARE_AHEAD", "DO_NOW", "COMMUNICATE"]
+    }
+  },
+  {
+    "id": "partner-conflict",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "妻が不機嫌 / また怒られた",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": ["昨日の寝かしつけを頼んだ"],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "primary_intent": "PARTNER_UNHAPPY_OR_CONFLICT",
+      "context_mode": "SITUATION_SUMMARY",
+      "question_keys": [],
+      "action_types_include": ["COMMUNICATE", "DO_NOW", "DEFER"],
+      "unknown_keys_include": ["partner_feeling", "who_is_right"],
+      "body_includes": ["昨日の寝かしつけを頼んだ"],
+      "prose_excludes": ["怒", "機嫌", "公平"]
+    }
+  },
+  {
+    "id": "overtime",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "残業になりそう",
+      "raw_user_input": "",
+      "known_context": {"expected_delay": "20時帰宅"},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "primary_intent": "OVERTIME",
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "question_keys": [],
+      "action_types_include": ["COMMUNICATE", "SUBSTITUTE", "RECOVER"]
+    }
+  },
+  {
+    "id": "free-consult-routed",
+    "input": {
+      "source": "FREE_TEXT",
+      "entry_choice": null,
+      "raw_user_input": "今夜残業になりそう",
+      "known_context": {"expected_delay": "21時"},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "entry_intent": "FREE_CONSULT",
+      "primary_intent": "OVERTIME",
+      "secondary_intent": null,
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "resolved": true,
+      "question_keys": []
+    }
+  },
+  {
+    "id": "free-consult-unresolved",
+    "input": {
+      "source": "FREE_TEXT",
+      "entry_choice": null,
+      "raw_user_input": "なんかモヤモヤする",
+      "known_context": {},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "CLARIFY",
+      "entry_intent": "FREE_CONSULT",
+      "primary_intent": null,
+      "secondary_intent": null,
+      "context_mode": null,
+      "resolved": false,
+      "question_keys": ["intent"],
+      "action_count": 0,
+      "unknown_keys_include": ["intent"]
+    }
+  },
+  {
+    "id": "no-profile-still-useful",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "primary_intent": "WANT_TO_DRINK",
+      "question_keys": ["event_window"],
+      "must_not_ask_keys": [
+        "child_count",
+        "child_ages",
+        "work_pattern",
+        "usual_return_time",
+        "weekday_routine",
+        "usual_responsibilities"
+      ],
+      "unknown_keys_include": ["event_window", "child_ages"],
+      "min_actions": 1,
+      "body_includes": ["未定"]
+    }
+  },
+  {
+    "id": "do-not-reask-known",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "土曜18時",
+        "child_count": 2,
+        "child_ages": ["1歳", "4歳"],
+        "work_pattern": "フルタイム",
+        "usual_return_time": "19:30",
+        "weekday_routine": "保育園送りは父",
+        "usual_responsibilities": "入浴"
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "question_keys": [],
+      "must_not_ask_keys": ["event_window", "child_ages", "usual_return_time", "weekday_routine"]
+    }
+  },
+  {
+    "id": "unknown-conflict-without-facts",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "妻が不機嫌 / また怒られた",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "question_keys": ["observed_facts"],
+      "unknown_keys_include": ["partner_feeling", "who_is_right", "observed_facts"],
+      "min_actions": 1,
+      "prose_excludes": ["怒", "機嫌", "公平", "不満"]
+    }
+  },
+  {
+    "id": "do-not-echo-mood",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "妻が不機嫌 / また怒られた",
+      "raw_user_input": "妻が怒っている",
+      "known_context": {},
+      "reported_facts": ["妻が怒っている"],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "question_keys": [],
+      "fact_stored": "妻が怒っている",
+      "prose_excludes": ["怒", "機嫌"],
+      "body_excludes": ["妻が怒っている"]
+    }
+  },
+  {
+    "id": "memory-second-visit",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "また金曜に飲みに行きたい",
+      "known_context": {},
+      "reported_facts": [],
+      "rejected_memory_ids": [],
+      "memory": [
+        {
+          "memory_id": "mem-drink-1",
+          "memory_type": "SUCCESS_PATTERN",
+          "subject": "飲み会",
+          "statement": "平日の飲み会前は夕食準備が有効だった。",
+          "source_consultation_id": "consult-1",
+          "outcome_backed": true,
+          "intent": "WANT_TO_DRINK",
+          "covered_keys": ["event_window"],
+          "importance": 4,
+          "confidence": "OUTCOME_BACKED",
+          "superseded_by": null,
+          "last_confirmed_at": "2026-09-20T10:00:00Z"
+        }
+      ]
+    },
+    "expect": {
+      "question_keys": [],
+      "retrieved_memory_ids": ["mem-drink-1"],
+      "memory_note": "平日の飲み会前は夕食準備が有効だった。",
+      "unknown_keys_exclude": ["event_window"]
+    }
+  },
+  {
+    "id": "memory-rejected",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "rejected_memory_ids": ["mem-drink-1"],
+      "memory": [
+        {
+          "memory_id": "mem-drink-1",
+          "memory_type": "SUCCESS_PATTERN",
+          "subject": "飲み会",
+          "statement": "平日の飲み会前は夕食準備が有効だった。",
+          "source_consultation_id": "consult-1",
+          "outcome_backed": true,
+          "intent": "WANT_TO_DRINK",
+          "covered_keys": ["event_window"],
+          "importance": 4,
+          "confidence": "OUTCOME_BACKED",
+          "superseded_by": null,
+          "last_confirmed_at": "2026-09-20T10:00:00Z"
+        }
+      ]
+    },
+    "expect": {
+      "question_keys": ["event_window"],
+      "retrieved_memory_ids": [],
+      "memory_note": null
+    }
+  },
+  {
+    "id": "chat-only-memory-ignored",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {},
+      "reported_facts": [],
+      "rejected_memory_ids": [],
+      "memory": [
+        {
+          "memory_id": "mem-chat-1",
+          "memory_type": "SUCCESS_PATTERN",
+          "subject": "飲み会",
+          "statement": "チャットだけで夕食準備が有効だった。",
+          "source_consultation_id": "consult-0",
+          "outcome_backed": false,
+          "intent": "WANT_TO_DRINK",
+          "covered_keys": ["event_window"],
+          "importance": 5,
+          "confidence": "CHAT",
+          "superseded_by": null,
+          "last_confirmed_at": "2026-09-28T10:00:00Z"
+        }
+      ]
+    },
+    "expect": {
+      "question_keys": ["event_window"],
+      "retrieved_memory_ids": [],
+      "memory_note": null,
+      "prose_excludes": ["チャットだけで"]
+    }
+  },
+  {
+    "id": "secondary-intent-desire-first",
+    "input": {
+      "source": "FREE_TEXT",
+      "entry_choice": null,
+      "raw_user_input": "残業のあと飲みに行きたい",
+      "known_context": {"event_window": "金曜22時"},
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "entry_intent": "FREE_CONSULT",
+      "primary_intent": "WANT_TO_DRINK",
+      "secondary_intent": "OVERTIME",
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "resolved": true
+    }
+  }
+]

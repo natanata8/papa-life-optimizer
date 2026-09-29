@@ -1,0 +1,237 @@
+[
+  {
+    "id": "low-confidence-must-not-resolve",
+    "known_context": {},
+    "output": {
+      "primary_intent": "WANT_TO_DRINK",
+      "secondary_intent": null,
+      "intent_confidence": 0.2,
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "resolved": true,
+      "unknowns": [],
+      "verified_facts": [],
+      "questions": [],
+      "user_visible": {
+        "headline": "行けるように、先に夕食まわりを整えます。",
+        "body": "増えるのは夕食、寝かしつけ、翌朝の準備です。",
+        "questions": [],
+        "choices": [],
+        "actions": [
+          {"title": "夕食の主菜を先に作る", "detail": "出る前に30分で作り、温めるだけで済むようにする。"}
+        ],
+        "memory_note": null
+      },
+      "actions": [
+        {
+          "action_type": "PREPARE_AHEAD",
+          "title": "夕食の主菜を先に作る",
+          "description": "出る前に30分で作り、温めるだけで済むようにする。",
+          "rank": 1,
+          "effort": "MEDIUM",
+          "reason": "preparation",
+          "expected_load_reduction": ["physical_load"],
+          "status": "PROPOSED"
+        }
+      ],
+      "memory_candidates": []
+    },
+    "expect": {
+      "violation_includes": ["resolved below confidence threshold"]
+    }
+  },
+  {
+    "id": "do-not-reask-known-child-age",
+    "known_context": {"child_ages": ["2歳"], "event_window": "金曜20時"},
+    "output": {
+      "primary_intent": "WANT_TO_DRINK",
+      "secondary_intent": null,
+      "intent_confidence": 0.9,
+      "context_mode": "HOUSEHOLD_IMPACT",
+      "resolved": true,
+      "unknowns": [],
+      "verified_facts": [],
+      "questions": [
+        {"key": "child_ages", "prompt": "子どもの年齢を教えてください。"},
+        {"key": "event_window", "prompt": "いつ頃行きたいですか？"}
+      ],
+      "user_visible": {
+        "headline": "行けるように、先に夕食まわりを整えます。",
+        "body": "増えるのは夕食、寝かしつけ、翌朝の準備です。",
+        "questions": ["子どもの年齢を教えてください。", "いつ頃行きたいですか？"],
+        "choices": [],
+        "actions": [
+          {"title": "夕食の主菜を先に作る", "detail": "出る前に30分で作り、温めるだけで済むようにする。"}
+        ],
+        "memory_note": null
+      },
+      "actions": [
+        {
+          "action_type": "PREPARE_AHEAD",
+          "title": "夕食の主菜を先に作る",
+          "description": "出る前に30分で作り、温めるだけで済むようにする。",
+          "rank": 1,
+          "effort": "MEDIUM",
+          "reason": "preparation",
+          "expected_load_reduction": ["physical_load"],
+          "status": "PROPOSED"
+        }
+      ],
+      "memory_candidates": []
+    },
+    "expect": {
+      "violation_includes": ["asked profile key child_ages", "reasked known key event_window"]
+    }
+  },
+  {
+    "id": "mood-copy-rejected",
+    "known_context": {},
+    "output": {
+      "primary_intent": "PARTNER_UNHAPPY_OR_CONFLICT",
+      "secondary_intent": null,
+      "intent_confidence": 0.9,
+      "context_mode": "SITUATION_SUMMARY",
+      "resolved": true,
+      "unknowns": [
+        {"key": "partner_feeling", "status": "UNKNOWN", "required": false, "infer": false}
+      ],
+      "verified_facts": [],
+      "questions": [],
+      "user_visible": {
+        "headline": "確認できたことだけで、今夜の対応を決めます。",
+        "body": "公平ではありません。相手は怒っています。",
+        "questions": [],
+        "choices": [],
+        "actions": [
+          {"title": "今夜の寝かしつけを担当する", "detail": "話し合いの前に、今夜の担当を一つ終わらせる。"}
+        ],
+        "memory_note": null
+      },
+      "actions": [
+        {
+          "action_type": "DO_NOW",
+          "title": "今夜の寝かしつけを担当する",
+          "description": "話し合いの前に、今夜の担当を一つ終わらせる。",
+          "rank": 1,
+          "effort": "MEDIUM",
+          "reason": "concrete help",
+          "expected_load_reduction": ["childcare_load"],
+          "status": "PROPOSED"
+        }
+      ],
+      "memory_candidates": []
+    },
+    "expect": {
+      "violation_includes": ["forbidden visible term 公平", "forbidden visible term 怒って"]
+    }
+  },
+  {
+    "id": "chat-memory-rejected",
+    "known_context": {},
+    "output": {
+      "primary_intent": "TIRED",
+      "secondary_intent": null,
+      "intent_confidence": 0.95,
+      "context_mode": "CAPACITY",
+      "resolved": true,
+      "unknowns": [],
+      "verified_facts": [],
+      "questions": [],
+      "user_visible": {
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "食事だけ出して、洗濯は明日の朝に回します。",
+        "questions": [],
+        "choices": [],
+        "actions": [
+          {"title": "20分横になる", "detail": "次の食事の前に、横になる時間を先に取る。"}
+        ],
+        "memory_note": null
+      },
+      "actions": [
+        {
+          "action_type": "REST",
+          "title": "20分横になる",
+          "description": "次の食事の前に、横になる時間を先に取る。",
+          "rank": 1,
+          "effort": "LOW",
+          "reason": "rest",
+          "expected_load_reduction": ["fatigue_effect"],
+          "status": "PROPOSED"
+        }
+      ],
+      "memory_candidates": [
+        {
+          "memory_type": "SUCCESS_PATTERN",
+          "statement": "休むと楽だった。",
+          "outcome_backed": false
+        }
+      ]
+    },
+    "expect": {
+      "violation_includes": ["memory candidate is not outcome backed"]
+    }
+  },
+  {
+    "id": "unresolved-must-not-invent-intent",
+    "known_context": {},
+    "output": {
+      "primary_intent": "TIRED",
+      "secondary_intent": null,
+      "intent_confidence": 0.1,
+      "context_mode": "CAPACITY",
+      "resolved": false,
+      "unknowns": [{"key": "intent", "status": "UNKNOWN", "required": true}],
+      "verified_facts": [],
+      "questions": [{"key": "intent", "prompt": "今いちばん近いのはどれですか？"}],
+      "user_visible": {
+        "headline": "状況がまだ足りません。",
+        "body": "近いものを一つ選ぶと、今日の行動を出せます。",
+        "questions": ["今いちばん近いのはどれですか？"],
+        "choices": [],
+        "actions": [],
+        "memory_note": null
+      },
+      "actions": [],
+      "memory_candidates": []
+    },
+    "expect": {
+      "violation_includes": [
+        "unresolved output must not invent a primary intent",
+        "unresolved output must not invent a context mode"
+      ]
+    }
+  },
+  {
+    "id": "six-actions-rejected",
+    "known_context": {},
+    "output": {
+      "primary_intent": "TIRED",
+      "secondary_intent": null,
+      "intent_confidence": 0.9,
+      "context_mode": "CAPACITY",
+      "resolved": true,
+      "unknowns": [],
+      "verified_facts": [],
+      "questions": [],
+      "user_visible": {
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "食事だけ出して、洗濯は明日の朝に回します。",
+        "questions": [],
+        "choices": [],
+        "actions": [
+          {"title": "一つ目", "detail": "詳細"},
+          {"title": "二つ目", "detail": "詳細"},
+          {"title": "三つ目", "detail": "詳細"},
+          {"title": "四つ目", "detail": "詳細"},
+          {"title": "五つ目", "detail": "詳細"},
+          {"title": "六つ目", "detail": "詳細"}
+        ],
+        "memory_note": null
+      },
+      "actions": [],
+      "memory_candidates": []
+    },
+    "expect": {
+      "violation_includes": ["more than 5 items"]
+    }
+  }
+]
