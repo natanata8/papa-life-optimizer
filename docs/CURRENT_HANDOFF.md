@@ -186,36 +186,28 @@ Current rule:
 
 ## Immediate next
 
-STOP further final-design expansion.
-
 Proceed with:
-`SITE / MVP REQUIREMENTS DEFINITION`
+`Issue #13 — Define MVP implementation contracts before coding`
 
-Resolve:
-1. Product Thesis
-2. Primary User
-3. MVP Scope
-4. 3 Core Scenarios
-5. Main User Flow
-6. Required Screens
-7. Free / Paid Boundary
-8. AI Responsibilities
-9. Non-goals
-10. Validation KPI
+Pre-Cursor Review result:
+> READY_WITH_CHANGES
 
-Then:
-- information architecture
-- screen inventory
-- per-screen goal
-- per-screen inputs / outputs
-- onboarding requirements
-- household profile requirements
-- event-entry UX
-- result / action UX
-- learning / history requirements
-- MVP vs post-MVP split
+Changes applied before Cursor start:
+- Human UX acceptance criteria added to Issue #13
+- internal complexity must not become user-facing complexity
+- no heavy upfront profile requirement
+- unnecessary / repeated questions prohibited
+- internal Intent / Router / Load / Memory terminology must remain hidden
+- clear next action must be prioritized over long AI explanation
+- contract tests must verify UX behavior, not only schema/routing correctness
 
-Only after these are sufficiently stable should Figma become implementation-facing Visual Authority.
+Next execution:
+1. Cursor implements Issue #13
+2. Cursor records contracts, fixtures, tests, and evidence in GitHub
+3. Main Chat summarizes the result without re-implementing
+4. Review Chat independently reviews the completed contracts
+5. Minor findings return to Cursor
+6. Human Gate only for consequential decisions
 
 ## Read next
 
