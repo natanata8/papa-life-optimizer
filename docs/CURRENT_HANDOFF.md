@@ -1,14 +1,35 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
-## Latest Human upstream FIX draft — 2026-09-29
+## Current Human-approved MVP definition — 2026-09-29
 
-Canonical draft:
+Upstream definition:
 `docs/UPSTREAM_FIX_DRAFT_20260929.md`
 
-Status:
-> HUMAN_DRAFT / NOT_FINAL_FIX
+Wireflow authority:
+Figma `[FROZEN] MVP Wireflow v0.5` / node `25:2`
 
-This is the latest Human-authored upstream definition for MVP discussion and should be read before further MVP requirements, UX, design, or implementation work. Do not summarize, compress, or silently replace its ①〜⑥ definitions before Human approval.
+Screen specification:
+`docs/MVP_SCREEN_SPEC_20260929.md`
+
+Data specification:
+`docs/MVP_DATA_SPEC_20260929.md`
+
+Status:
+> MVP_WIREFLOW_FROZEN / SCREEN_AND_DATA_SPEC_IN_PROGRESS
+
+Human Gate approved the MVP wireflow on 2026-09-29.
+
+Canonical MVP stages:
+`Home → Clarify → Context → Action → Feedback → Memory`
+
+Important:
+- The six items are common stages, not six rigid visual screens.
+- Context and Action vary by Intent.
+- Initial seven Intents are fixed for MVP.
+- No partner mood inference.
+- Rest / skip / defer are valid actions.
+- Unknown must not be filled by unsupported inference.
+- Household Memory must learn from actual outcome, not only chat history.
 
 Status: REQUIREMENTS_BEFORE_FINAL_DESIGN
 
