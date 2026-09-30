@@ -1,5 +1,17 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Latest Main Chat handoff — 2026-09-30
+
+Canonical restart document:
+`docs/NEW_CHAT_HANDOFF_20260930.md`
+
+Latest team upstream review:
+`docs/TEAM_REVIEW_UPSTREAM_20260930.md`
+
+Current execution gate:
+> Draft PR #14 independent Review Chat review before first WANT_TO_DRINK vertical slice.
+
+
 ## Pre-Cursor review gate — Issue #13
 
 Before Cursor starts Issue #13, use:
@@ -71,7 +83,7 @@ Repository:
 `natanata8/papa-life-optimizer`
 
 Latest dedicated handoff:
-`docs/NEW_CHAT_HANDOFF_20260925.md`
+`docs/NEW_CHAT_HANDOFF_20260930.md`
 
 ## Current product thesis
 
