@@ -5,7 +5,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "何をしたらいいか分からない",
       "raw_user_input": "",
-      "known_context": {},
+      "known_context": {"usual_responsibilities": "掃除"},
       "reported_facts": [],
       "memory": [],
       "rejected_memory_ids": []
@@ -25,7 +25,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "疲れた",
       "raw_user_input": "",
-      "known_context": {},
+      "known_context": {"child_count": 1, "usual_responsibilities": "洗濯"},
       "reported_facts": [],
       "memory": [],
       "rejected_memory_ids": []
@@ -50,7 +50,8 @@
         "child_count": 1,
         "child_ages": ["2歳"],
         "work_pattern": "平日オフィス",
-        "usual_return_time": "19:00"
+        "usual_return_time": "19:00",
+        "weekday_routine": "夕食と翌朝の送迎"
       },
       "reported_facts": [],
       "memory": [],
@@ -73,7 +74,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "自分の時間がほしい",
       "raw_user_input": "",
-      "known_context": {"desired_window": "土曜の午後90分"},
+      "known_context": {"desired_window": "土曜の午後90分", "child_count": 1},
       "reported_facts": [],
       "memory": [],
       "rejected_memory_ids": []
@@ -92,7 +93,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "妻が不機嫌 / また怒られた",
       "raw_user_input": "",
-      "known_context": {},
+      "known_context": {"child_count": 1},
       "reported_facts": ["昨日の寝かしつけを頼んだ"],
       "memory": [],
       "rejected_memory_ids": []
@@ -114,7 +115,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "残業になりそう",
       "raw_user_input": "",
-      "known_context": {"expected_delay": "20時帰宅"},
+      "known_context": {"expected_delay": "20時帰宅", "usual_responsibilities": "夕食と片付け"},
       "reported_facts": [],
       "memory": [],
       "rejected_memory_ids": []
@@ -278,7 +279,8 @@
           "source_consultation_id": "consult-1",
           "outcome_backed": true,
           "intent": "WANT_TO_DRINK",
-          "covered_keys": ["event_window"],
+          "covered_keys": ["usual_responsibilities"],
+          "action_keys": ["prepare_main_dish"],
           "importance": 4,
           "confidence": "OUTCOME_BACKED",
           "superseded_by": null,
@@ -287,10 +289,11 @@
       ]
     },
     "expect": {
-      "question_keys": [],
+      "question_keys": ["event_window"],
       "retrieved_memory_ids": ["mem-drink-1"],
       "memory_note": "平日の飲み会前は夕食準備が有効だった。",
-      "unknown_keys_exclude": ["event_window"]
+      "unknown_keys_include": ["event_window"],
+      "unknown_keys_exclude": ["usual_responsibilities"]
     }
   },
   {
@@ -299,7 +302,7 @@
       "source": "HOME_CHOICE",
       "entry_choice": "飲みに行きたい",
       "raw_user_input": "",
-      "known_context": {},
+      "known_context": {"child_count": 1, "usual_responsibilities": "夕食"},
       "reported_facts": [],
       "rejected_memory_ids": ["mem-drink-1"],
       "memory": [
@@ -311,7 +314,8 @@
           "source_consultation_id": "consult-1",
           "outcome_backed": true,
           "intent": "WANT_TO_DRINK",
-          "covered_keys": ["event_window"],
+          "covered_keys": ["usual_responsibilities"],
+          "action_keys": ["prepare_main_dish"],
           "importance": 4,
           "confidence": "OUTCOME_BACKED",
           "superseded_by": null,
@@ -322,7 +326,8 @@
     "expect": {
       "question_keys": ["event_window"],
       "retrieved_memory_ids": [],
-      "memory_note": null
+      "memory_note": null,
+      "action_keys_exclude": ["prepare_main_dish"]
     }
   },
   {
@@ -344,6 +349,7 @@
           "outcome_backed": false,
           "intent": "WANT_TO_DRINK",
           "covered_keys": ["event_window"],
+          "action_keys": ["prepare_main_dish"],
           "importance": 5,
           "confidence": "CHAT",
           "superseded_by": null,
@@ -356,6 +362,73 @@
       "retrieved_memory_ids": [],
       "memory_note": null,
       "prose_excludes": ["チャットだけで"]
+    }
+  },
+  {
+    "id": "memory-failure-changes-actions",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "土曜に飲みに行きたい",
+      "known_context": {"event_window": "土曜20時", "child_count": 1, "usual_responsibilities": "夕食"},
+      "reported_facts": [],
+      "rejected_memory_ids": [],
+      "memory": [
+        {
+          "memory_id": "mem-drink-failure-1",
+          "memory_type": "FAILURE_PATTERN",
+          "subject": "飲み会",
+          "statement": "飲み会で夕食準備は次回そのまま使わない。",
+          "source_consultation_id": "consult-failure-1",
+          "outcome_backed": true,
+          "intent": "WANT_TO_DRINK",
+          "covered_keys": [],
+          "action_keys": ["prepare_main_dish"],
+          "importance": 4,
+          "confidence": "OUTCOME_BACKED",
+          "superseded_by": null,
+          "last_confirmed_at": "2026-09-22T10:00:00Z"
+        }
+      ]
+    },
+    "expect": {
+      "question_keys": [],
+      "retrieved_memory_ids": ["mem-drink-failure-1"],
+      "action_keys_exclude": ["prepare_main_dish"]
+    }
+  },
+  {
+    "id": "memory-failure-user-override",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "土曜に飲みに行きたい",
+      "known_context": {"event_window": "土曜20時", "child_count": 1, "usual_responsibilities": "夕食"},
+      "reported_facts": [],
+      "rejected_memory_ids": [],
+      "override_action_keys": ["prepare_main_dish"],
+      "memory": [
+        {
+          "memory_id": "mem-drink-failure-1",
+          "memory_type": "FAILURE_PATTERN",
+          "subject": "飲み会",
+          "statement": "飲み会で夕食準備は次回そのまま使わない。",
+          "source_consultation_id": "consult-failure-1",
+          "outcome_backed": true,
+          "intent": "WANT_TO_DRINK",
+          "covered_keys": [],
+          "action_keys": ["prepare_main_dish"],
+          "importance": 4,
+          "confidence": "OUTCOME_BACKED",
+          "superseded_by": null,
+          "last_confirmed_at": "2026-09-22T10:00:00Z"
+        }
+      ]
+    },
+    "expect": {
+      "question_keys": [],
+      "retrieved_memory_ids": ["mem-drink-failure-1"],
+      "action_keys_include": ["prepare_main_dish"]
     }
   },
   {

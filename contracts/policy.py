@@ -22,6 +22,7 @@ THRESHOLD = VOCAB["confidence_threshold"]
 LIMITS = VOCAB["limits"]
 DESIRE = set(VOCAB["desire_intents"])
 PROFILE_KEYS = set(VOCAB["profile_keys"])
+REUSABLE_MEMORY_KEYS = PROFILE_KEYS
 FORBIDDEN_STORED = set(VOCAB["forbidden_stored_keys"])
 LOAD_LABELS = VOCAB["load_outcome_labels"]
 
@@ -43,7 +44,7 @@ def consult(payload):
         )
         for item in retrieved:
             for key in item.get("covered_keys") or []:
-                if not _present(known.get(key)):
+                if key in REUSABLE_MEMORY_KEYS and not _present(known.get(key)):
                     known[key] = {"from_memory": item["memory_id"]}
     if payload.get("reported_facts"):
         known["observed_facts"] = payload["reported_facts"]
@@ -80,7 +81,14 @@ def consult(payload):
         }
     else:
         stage = "ACTION"
-        built = build_recommendation(resolution["primary_intent"], known, facts, retrieved)
+        blocked_action_keys = _blocked_action_keys(
+            payload.get("memory") or [],
+            payload.get("rejected_memory_ids") or [],
+            payload.get("override_action_keys") or [],
+        )
+        built = build_recommendation(
+            resolution["primary_intent"], known, facts, retrieved, blocked_action_keys
+        )
         actions = built["actions"]
         draft = built["communication_draft"]
         context = {
@@ -236,6 +244,9 @@ def retrieve_memory(memories, intent, rejected_ids):
 
 def record_outcome(consultation, outcome):
     """Create memory only from an executed outcome chain."""
+    input_errors = validate(outcome, {"$ref": "#/$defs/ConsultationOutcome", **SCHEMA})
+    if input_errors:
+        raise ContractError("consultation outcome schema: " + "; ".join(input_errors))
     if outcome.get("derivation") == "CHAT_ONLY":
         memories = []
     else:
@@ -327,16 +338,24 @@ def visible_violations(user_visible):
     return violations
 
 
-def build_recommendation(intent, known, facts, retrieved):
+def build_recommendation(intent, known, facts, retrieved, blocked_action_keys=None):
     template = TEMPLATES[intent]
+    blocked = set(blocked_action_keys or [])
+    has_household_context = any(_present(known.get(key)) for key in PROFILE_KEYS)
     actions = []
-    for rank, source in enumerate(template["actions"], start=1):
+    for source in template["actions"]:
+        if source["action_key"] in blocked:
+            continue
+        required_context = source.get("requires_context_any") or []
+        if required_context and not any(_present(known.get(key)) for key in required_context):
+            continue
         actions.append(
             {
+                "action_key": source["action_key"],
                 "action_type": source["action_type"],
                 "title": source["title"],
                 "description": source["description"],
-                "rank": rank,
+                "rank": len(actions) + 1,
                 "effort": source["effort"],
                 "reason": source["reason"],
                 "expected_load_reduction": list(source["expected_load_reduction"]),
@@ -351,6 +370,8 @@ def build_recommendation(intent, known, facts, retrieved):
             body = rendered
     elif _missing_askable(intent, known) and template.get("body_when_unknown"):
         body = template["body_when_unknown"]
+    elif not has_household_context and template.get("body_without_household_context"):
+        body = template["body_without_household_context"]
 
     memory_note = _memory_note(retrieved)
     user_visible = {
@@ -362,6 +383,9 @@ def build_recommendation(intent, known, facts, retrieved):
         "memory_note": memory_note,
     }
     draft = template.get("communication_draft")
+    draft_context = template.get("communication_draft_requires_context_any") or []
+    if draft_context and not any(_present(known.get(key)) for key in draft_context):
+        draft = None
     return {
         "actions": actions,
         "user_visible": user_visible,
@@ -437,6 +461,7 @@ def _memory_from_outcome(consultation, outcome):
     label = VOCAB["intent_labels"][intent]
     load = LOAD_LABELS[outcome["household_load_outcome"]]
     executed = outcome.get("actions_executed") or []
+    action_keys = list(outcome.get("action_keys") or [])
     if reusable is True:
         if not executed:
             return []
@@ -458,7 +483,10 @@ def _memory_from_outcome(consultation, outcome):
             "source_consultation_id": consultation["consultation_id"],
             "outcome_backed": True,
             "intent": intent,
-            "covered_keys": list(outcome.get("covered_keys") or []),
+            "covered_keys": [
+                key for key in (outcome.get("covered_keys") or []) if key in REUSABLE_MEMORY_KEYS
+            ],
+            "action_keys": action_keys,
             "importance": 4 if reusable is True else 3,
             "confidence": "OUTCOME_BACKED",
             "superseded_by": None,
@@ -473,6 +501,18 @@ def _memory_note(retrieved):
             if len(note) <= LIMITS["memory_note_max"]:
                 return note
     return None
+
+
+def _blocked_action_keys(memories, rejected_ids, override_action_keys):
+    rejected = set(rejected_ids or [])
+    overrides = set(override_action_keys or [])
+    blocked = set()
+    for item in memories:
+        is_rejected = item.get("memory_id") in rejected
+        is_failure = item.get("memory_type") == "FAILURE_PATTERN" and item.get("outcome_backed")
+        if is_rejected or is_failure:
+            blocked.update(item.get("action_keys") or [])
+    return blocked - overrides
 
 
 def _missing_askable(intent, known):

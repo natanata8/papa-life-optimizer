@@ -282,10 +282,12 @@
       "ConsultationOutcome": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["actions_executed", "household_load_outcome", "reusable_next_time"],
+        "required": ["derivation", "actions_executed", "household_load_outcome", "reusable_next_time"],
         "properties": {
+          "derivation": {"type": "string", "enum": ["OUTCOME", "CHAT_ONLY"]},
           "intent_executed": {"type": ["boolean", "null"]},
           "actions_executed": {"type": "array", "items": {"type": "string"}},
+          "action_keys": {"type": "array", "items": {"type": "string"}},
           "household_load_outcome": {
             "type": "string",
             "enum": ["LIGHTER", "SAME", "HEAVIER", "UNKNOWN"]
@@ -294,6 +296,7 @@
           "user_burden": {"type": ["string", "null"]},
           "household_atmosphere_user_reported": {"type": ["string", "null"]},
           "reusable_next_time": {"type": ["boolean", "null"]},
+          "covered_keys": {"type": "array", "items": {"type": "string"}},
           "free_note": {"type": ["string", "null"]}
         }
       },
@@ -307,7 +310,7 @@
       },
       "MemoryItem": {
         "type": "object",
-        "required": ["memory_type", "statement", "outcome_backed"],
+        "required": ["memory_type", "statement", "outcome_backed", "action_keys"],
         "properties": {
           "memory_type": {
             "type": "string",
@@ -324,7 +327,8 @@
             ]
           },
           "statement": {"type": "string"},
-          "outcome_backed": {"type": "boolean"}
+          "outcome_backed": {"type": "boolean"},
+          "action_keys": {"type": "array", "items": {"type": "string"}}
         }
       },
       "HouseholdProfile": {

@@ -1,7 +1,7 @@
 resolved な相談に、今日やる行動を返す。
 
 規則:
-- actions は 1〜5 個。title は作業名、detail はいつ・何分・誰がやるかが分かる一文。
+- actions は 1〜5 個。各 action_key はテンプレートの安定した識別子を使う。title は作業名、detail はいつ・何分・誰がやるかが分かる一文。
 - REST、DEFER、SKIP を候補から外さない。
 - 質問は askable で、まだ分かっていないキーだけ。最大4つ。
 - event_window や expected_delay が UNKNOWN でも行動は返す。未定であることを一文で書く。
@@ -9,3 +9,5 @@ resolved な相談に、今日やる行動を返す。
 - user_visible.actions には action_type や負荷名を出さない。
 - communication draft は、準備・代替・回復の事実だけを書く。相手の感情を動かす文にしない。
 - Household Memory の SUCCESS_PATTERN があれば、同じ説明を繰り返さず memory_note にその一文を使う。利用者が却下した memory_id は使わない。
+- FAILURE_PATTERN または却下された memory_id に紐づく action_key は、そのまま再提案しない。利用者が今回明示的に上書きした action_key だけ再提案できる。
+- 家庭情報がないときは、子ども、食事、洗濯、送迎、担当を事実として補わない。確認済みの文脈で成立する行動だけ返す。

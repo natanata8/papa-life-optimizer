@@ -215,6 +215,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
+        "action_key",
         "action_type",
         "title",
         "description",
@@ -225,6 +226,7 @@
         "status"
       ],
       "properties": {
+        "action_key": {"type": "string", "minLength": 1},
         "action_type": {"$ref": "#/$defs/ActionType"},
         "title": {"type": "string", "minLength": 1, "maxLength": 32},
         "description": {"type": "string", "minLength": 1, "maxLength": 80},
@@ -321,6 +323,7 @@
         "outcome_backed",
         "intent",
         "covered_keys",
+        "action_keys",
         "importance",
         "confidence",
         "superseded_by"
@@ -333,6 +336,7 @@
         "outcome_backed": {"const": true},
         "intent": {"$ref": "#/$defs/ConcreteIntent"},
         "covered_keys": {"type": "array", "items": {"type": "string"}},
+        "action_keys": {"type": "array", "items": {"type": "string"}},
         "importance": {"type": "integer", "minimum": 1, "maximum": 5},
         "confidence": {"const": "OUTCOME_BACKED"},
         "superseded_by": {"type": ["string", "null"]}
@@ -415,6 +419,7 @@
       "additionalProperties": false,
       "required": [
         "consultation_id",
+        "derivation",
         "intent_executed",
         "actions_executed",
         "household_load_outcome",
@@ -423,14 +428,17 @@
       ],
       "properties": {
         "consultation_id": {"type": "string"},
+        "derivation": {"type": "string", "enum": ["OUTCOME", "CHAT_ONLY"]},
         "intent_executed": {"type": "boolean"},
         "actions_executed": {"type": "array", "items": {"type": "string"}},
+        "action_keys": {"type": "array", "items": {"type": "string"}},
         "household_load_outcome": {
           "type": "string",
           "enum": ["LIGHTER", "SAME", "HEAVIER", "UNKNOWN"]
         },
         "partner_response_user_reported": {"type": ["string", "null"]},
         "reusable_next_time": {"type": ["boolean", "null"]},
+        "covered_keys": {"type": "array", "items": {"type": "string"}},
         "free_note": {"type": ["string", "null"]}
       }
     }

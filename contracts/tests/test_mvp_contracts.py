@@ -78,13 +78,24 @@ class ConsultationFixtures(unittest.TestCase):
                 self._assert_common(result)
                 self._assert_expect(result, case["expect"])
 
-    def test_memory_second_visit_asks_less_than_first(self):
-        first = consult(self._case("no-profile-still-useful")["input"])
+    def test_memory_second_visit_reuses_only_stable_household_context(self):
         second = consult(self._case("memory-second-visit")["input"])
-        self.assertGreater(len(first["audit"]["questions"]), len(second["audit"]["questions"]))
-        self.assertIsNone(first["user_visible"]["memory_note"])
+        asked = {item["key"] for item in second["audit"]["questions"]}
+        unknown = {item["key"] for item in second["audit"]["context"]["unknowns"]}
+        self.assertIn("event_window", asked)
+        self.assertIn("event_window", unknown)
+        self.assertNotIn("usual_responsibilities", unknown)
         self.assertTrue(second["user_visible"]["memory_note"])
         self.assertIn("夕食準備", second["user_visible"]["memory_note"])
+
+    def test_zero_profile_fallback_does_not_assert_household_tasks(self):
+        result = consult(self._case("no-profile-still-useful")["input"])
+        action_keys = {item["action_key"] for item in result["audit"]["actions"]}
+        self.assertEqual(action_keys, {"share_return_time"})
+        self.assertIsNone(result["audit"]["communication_draft"])
+        text = prose(result["user_visible"])
+        for unsupported in ("夕食の主菜", "寝かしつけ", "翌朝の送迎"):
+            self.assertNotIn(unsupported, text)
 
     def test_home_choice_beats_free_text(self):
         result = consult(
@@ -162,6 +173,11 @@ class ConsultationFixtures(unittest.TestCase):
             types = [item["action_type"] for item in result["audit"]["actions"]]
             for action_type in expect["action_types_include"]:
                 self.assertIn(action_type, types)
+        action_keys = [item["action_key"] for item in result["audit"]["actions"]]
+        for action_key in expect.get("action_keys_include", []):
+            self.assertIn(action_key, action_keys)
+        for action_key in expect.get("action_keys_exclude", []):
+            self.assertNotIn(action_key, action_keys)
         unknowns = {item["key"] for item in result["audit"]["context"]["unknowns"]}
         for key in expect.get("unknown_keys_include", []):
             self.assertIn(key, unknowns)
@@ -201,6 +217,10 @@ class OutcomeFixtures(unittest.TestCase):
     def test_outcomes(self):
         for case in OUTCOMES:
             with self.subTest(case=case["id"]):
+                self.assertEqual(
+                    validate(case["outcome"], {"$ref": "#/$defs/ConsultationOutcome", **SCHEMA}),
+                    [],
+                )
                 result = record_outcome(case["consultation"], case["outcome"])
                 expect = case["expect"]
                 self.assertEqual(result["stage"], expect["stage"])
@@ -210,6 +230,7 @@ class OutcomeFixtures(unittest.TestCase):
                     memory = result["memories"][0]
                     self.assertTrue(memory["outcome_backed"])
                     self.assertEqual(memory["confidence"], "OUTCOME_BACKED")
+                    self.assertEqual(memory["action_keys"], case["outcome"].get("action_keys", []))
                     self.assertNotIn(memory["intent"], memory["statement"])
                 if "memory_type" in expect:
                     self.assertEqual(result["memories"][0]["memory_type"], expect["memory_type"])
@@ -222,6 +243,12 @@ class OutcomeFixtures(unittest.TestCase):
                     partner_text = case["outcome"].get("partner_response_user_reported")
                     if partner_text:
                         self.assertNotIn(partner_text, statement)
+
+    def test_outcome_without_provenance_is_rejected(self):
+        case = dict(OUTCOMES[0]["outcome"])
+        case.pop("derivation")
+        with self.assertRaisesRegex(ValueError, "consultation outcome schema"):
+            record_outcome(OUTCOMES[0]["consultation"], case)
 
 
 class ModelOutputGuard(unittest.TestCase):
