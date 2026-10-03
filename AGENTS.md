@@ -3,14 +3,14 @@
 ## Global AI Operating System
 
 Canonical global protocol: `natanata8/ai-operating-system`  
-Pinned protocol version: `1.1.0`
+Pinned protocol version: `1.3.0`
 
 Apply the global protocol for shared decision quality, research, handoff, AUTO-CONTINUE, and HUMAN_REQUIRED defaults.
 
 Precedence:
 1. explicit current Human instruction and authority boundaries;
 2. this repository's project-specific canonical rules, decisions, specs, and active Issue;
-3. global AI Operating System v1.1.0;
+3. global AI Operating System v1.3.0;
 4. chat history and inferred preferences.
 
 Project-specific rules in this repository override the global protocol where they are more specific.
