@@ -1,131 +1,108 @@
 # PAPA CODE — Review Chat Handoff
 
 Status: ACTIVE_REVIEW_HANDOFF  
-Date: 2026-09-29  
+Updated: 2026-09-30  
 Repository: `natanata8/papa-life-optimizer`
 
 ## 1. Review Chat role
 
-This Review ChatGPT is an independent Reviewer.
+This Review ChatGPT is the independent Reviewer.
 
-It does NOT own implementation and should not become the Builder.
+It does not implement Builder work.
 
-Primary review lenses:
-- user perspective
-- UX
-- design
-- specification alignment
+Review lenses:
+- Human/user perspective
+- UX simplicity
+- frozen MVP/spec alignment
+- DB/API/router/prompt/memory contract quality
 - product-goal alignment
-- omissions / hidden assumptions
-- whether the result is actually good, not merely technically correct
+- hidden assumptions / omissions
+- whether the result is actually usable, not merely technically valid
 
-Minor findings should be returned to Cursor.
-Consequential findings that imply Goal / KPI / frozen scope / irreversible change should be marked HUMAN_REQUIRED.
+Minor/important implementation findings return to Cursor.
+Only consequential findings requiring Goal/KPI/frozen-scope/privacy/legal/payment/production decisions are HUMAN_REQUIRED.
 
-## 2. Current project operating model
+## 2. Operating model
 
 Canonical:
 `docs/PROJECT_OPERATING_MODEL_20260929.md`
 
 Roles:
 - Main ChatGPT = Project Manager / Brain
-- Cursor = Builder / implementation executor
+- Cursor = Builder
 - Review ChatGPT = independent Reviewer
 - GitHub = SSOT
-- Human = Goal / KPI / consequential decisions / discomfort signals
+- Human = Goal / KPI / important decisions / discomfort signals
 
-Default loop:
-```
-Main defines Goal
-→ Cursor builds
-→ Cursor records evidence in GitHub
-→ Main summarizes
-→ Review Chat independently reviews
-→ minor issues return to Cursor
-→ Human Gate only for consequential decisions
-```
+## 3. Current review target
 
-## 3. Product upstream definition
+GitHub Issue #13:
+`Define MVP implementation contracts before coding`
 
-Canonical upstream draft / Human-authored definition:
-`docs/UPSTREAM_FIX_DRAFT_20260929.md`
+Draft PR #14:
+`Define MVP implementation contracts before coding`
 
-Current product direction:
-- Target = プレパパ〜未就学児の子どもがいる20〜40代の父親
-- Purpose = 仕事・育児・家事・自分時間を無理なく回し、気持ちよく一緒に暮らせる家庭を増やす
-- Core problem = 家庭の負担や状況が見えにくく、「今、自分が何をすればいいか」が分からない
-- Core value = 家庭負担を見えるようにし、その家庭に合った「今やること」「先回りしてやること」「問題が起きた時の対応」を具体的に提案
-- Product stance = 家事・育児を増やすのではなく、家庭を回しながら自分時間・夫婦時間・家族時間も作る
-- AI is the main interaction surface, but AI itself is not the product purpose
+Review exact submitted head:
+`5cd0d362e8c12eccae7521178c2d803d0cafee8d`
 
-Important positioning:
-> 入口はパパ、視野は家庭全体、成果は家族全体
+Known state:
+- Draft / open
+- 21 changed files
+- 15 local contract tests reported PASS
+- no Production deploy
+- no GitHub review submissions or review threads recorded at handoff
 
-## 4. MVP prioritization decisions
+Important repository state:
+- current `main` is `961331e2cb960fbfda4dc7ba0d563429cbdcd075`
+- PR #14 is 2 commits ahead / 3 commits behind current main
+- merge base is `a7b099b218e1461cfee5eecd22369e3b5b68ea30`
+- review must therefore compare PR #14 against the latest main upstream documents, not only the older branch copy of `CURRENT_HANDOFF.md`
 
-Initial MVP Core was prioritized around:
-1. 気分・困りごと・やりたいこと選択
-2. AI chat / clarification
-3. Household Profile / personalization
-4. household task/load data
-5. household impact / context organization
-6. next-action proposal
-7. partner communication support
-8. execution feedback
-9. Household Memory
+Do not start the WANT_TO_DRINK implementation slice before this review gate is complete.
 
-Post-MVP / lower-priority candidates:
-- external calendar sync
-- reminder engine
-- monthly dashboard
-- household余裕 visualization
-- outing/local-data proposal
-- partner account
+## 4. Latest upstream framing
 
-Do not pull Post-MVP features into the MVP unless Human explicitly changes scope.
+Read:
+- `docs/UPSTREAM_FIX_DRAFT_20260929.md`
+- `docs/TEAM_REVIEW_UPSTREAM_20260930.md`
+- `docs/NEW_CHAT_HANDOFF_20260930.md`
 
-## 5. MVP Intent decisions
+Latest refinement to use as review context:
 
-Initial seven MVP Intents are frozen:
+### Purpose
+> 家庭の負担や摩擦を減らし、自分時間・夫婦時間・家族時間を含めた「家庭の余白」を増やす。
 
-- WHAT_SHOULD_I_DO
-- TIRED
-- WANT_TO_DRINK
-- WANT_PERSONAL_TIME
-- PARTNER_UNHAPPY_OR_CONFLICT
-- OVERTIME
-- FREE_CONSULT
+### Target
 
-Relevant docs:
-- `docs/MVP_SCREEN_SPEC_20260929.md`
-- `docs/MVP_DATA_SPEC_20260929.md`
+Brand Audience:
+> 家庭を今より良くしたい父親
 
-## 6. Figma / wireflow history
+MVP Primary Customer:
+> プレパパ〜未就学児の子どもがいる20〜40代の父親
 
-Figma file:
-`Papa Life Optimizer — Final Synthesis v1`
+Do not broaden MVP validation merely because Brand Audience is broader.
 
-File key:
-`qbTwjl2xa1EW5hLuhcCyXT`
+### Problem
+> 自分なりに頑張っているのに、自分の認識と実際の家庭の状態が噛み合わず、何を変えれば家庭の摩擦や負担が減るのか分からない。
 
-URL:
-https://www.figma.com/design/qbTwjl2xa1EW5hLuhcCyXT
+### Value
+> 家庭の状況を整理し、その家庭に合った「次の一手」を具体的にする。
 
-Development path:
-- Reference-led low-fi wireflow created
-- Target-user copy pass performed
-- Kansai dialect and over-written copy removed
-- natural standard Japanese adopted
-- spacing / readability pass performed
-- 7 Intent Stress Test performed
-- six common stages validated
-- Human Gate approved
-- wireflow frozen
+Load visualization is a means, not the final Value.
 
-Current authority:
-> Figma `[FROZEN] MVP Wireflow v0.5` / node `25:2`
+### Strength hypotheses
+1. 家庭全体の文脈を横断して判断する
+2. 実体験を再利用可能な判断知識に変える
+3. 使うほど、その家庭での成功・失敗を学習して提案を変える
 
-Current canonical stages:
+These are differentiation hypotheses, not validated moats.
+
+## 5. Frozen MVP authority
+
+Figma:
+`[FROZEN] MVP Wireflow v0.5` / node `25:2`
+
+Canonical stages:
 ```
 Home
 → Clarify
@@ -135,152 +112,151 @@ Home
 → Memory
 ```
 
-Important:
-These are six common stages, not six rigid fixed screens.
+These are six common stages, not six visually rigid screens.
 
-## 7. Stress Test findings
+Initial seven Intents:
+- WHAT_SHOULD_I_DO
+- TIRED
+- WANT_TO_DRINK
+- WANT_PERSONAL_TIME
+- PARTNER_UNHAPPY_OR_CONFLICT
+- OVERTIME
+- FREE_CONSULT
 
-7 Intent Stress Test showed the six-stage skeleton can remain common.
-
-Largest variation:
-- Stage 03 Context
-- Stage 04 Action
-
-Required additional states:
-- Intent Router
-- Situation Summary
-- No-action / Rest
-- Confidence / Unknown
-
-Intent-specific examples:
-- WHAT_SHOULD_I_DO → Context = priority organization
-- TIRED → Context = household load + user capacity; Action may be Rest / Defer / Skip
-- WANT_TO_DRINK → Context = household impact; Action = preparation + communication + recovery
-- WANT_PERSONAL_TIME → Context = time opportunity + collision with household tasks
-- PARTNER_UNHAPPY_OR_CONFLICT → Context = verified Situation Summary, not emotion inference
-- OVERTIME → Context = shifted tasks / load
-- FREE_CONSULT → Intent Router before Context
-
-## 8. Frozen UX / product constraints
-
-Do not change without Human Gate:
-- six-stage MVP structure
-- seven initial Intents
+Frozen constraints:
 - no partner mood inference
-- No-action / Rest as valid action
-- minimal follow-up question policy
-- Household Memory feedback loop
+- Rest / Skip / Defer are valid actions
+- ask only necessary missing information
+- do not re-ask known information
+- Unknown may remain Unknown
+- internal Intent / Router / Load / Memory terminology remains hidden
+- Household Memory learns from actual outcomes
+- internal complexity must not become user-facing complexity
 
-Core behavioral rules:
-- known information should not be asked again
-- only ask for missing information
-- do not infer partner emotion or resentment
-- do not decide who is right
-- do not frame as permission from wife
-- do not make father the villain
-- do not make wife the villain
-- do not default to “do more chores”
-- Rest / Skip / Defer are valid
-- Unknown must not be silently filled
-- Household Memory should learn from actual outcomes, not only raw chat history
+Canonical specs:
+- `docs/MVP_SCREEN_SPEC_20260929.md`
+- `docs/MVP_DATA_SPEC_20260929.md`
 
-## 9. Tone / visual direction
+## 6. PR #14 claims to verify independently
 
-Review must preserve:
-- natural standard Japanese
-- slightly conversational, not overly formal
-- no forced Kansai dialect
-- no strong mascot dependence
-- subtle “trusted household-aware partner” feeling rather than “cute AI bot”
-- no generic SaaS card-grid dashboard
-- no generic long-chat-first UI
-- no pastel parenting-app cliché
-- no permission / guilt UI
+PR #14 says it contains:
+- PostgreSQL 15+ MVP DDL
+- OpenAPI 3.1 boundary
+- deterministic seven-intent router / question policy
+- prompt / structured-output contracts
+- model-output guard
+- outcome-backed Household Memory
+- fixtures / contract tests
+- first WANT_TO_DRINK vertical-slice plan
 
-Reference process:
-Public Figma Community / UI examples were used only to extract transferable layout principles, not to copy visuals literally.
+PR #14 also claims:
+- no profile gate before useful value
+- known data is not asked again
+- missing data may remain Unknown
+- internal schema terminology is hidden from user-visible output
+- responses end in 1–5 concrete actions
+- later consultation can reuse outcome-backed Memory and ask less
 
-## 10. Current implementation state
+Do not accept these claims from the PR description alone; inspect the actual changed files/tests.
 
-Current status:
-> MVP_WIREFLOW_FROZEN / IMPLEMENTATION_CONTRACTS_NEXT
+## 7. Required review questions
 
-Current Builder task:
-GitHub Issue #13
-`Define MVP implementation contracts before coding`
+### Human UX
+- Can a father get useful output without completing a large profile?
+- Are questions limited to information that changes the current recommendation?
+- Is known information actually not re-asked?
+- Can Unknown remain Unknown without blocking useful action?
+- Is the visible result short and action-first rather than an explanatory AI essay?
+- Does Memory reduce repeated explanation in a later consultation?
 
-Goal of Issue #13:
-Turn frozen wireflow + Screen/Data specs into implementation-ready contracts for:
-- DB schema / persistence
-- API boundaries
-- Intent Router
-- AI prompt / structured output
-- Household Memory update / retrieval
-- representative fixtures / contract tests
+### Upstream/product fit
+- Does the implementation help produce the household-specific “next action”?
+- Does it avoid turning load visualization into the product itself?
+- Does it preserve the narrow MVP ICP?
+- Does it avoid generic chore tracker / generic AI chat drift?
+- Does it avoid treating AI/calendar/database/dashboard as product strengths?
 
-Technical implementation details are owned by Cursor after reading the repository.
+### Safety / relationship boundary
+- No partner emotion is inferred as fact.
+- No fairness / who-is-right scoring.
+- No permission-from-wife framing.
+- Partner-reported statements remain user-reported data.
 
-No Production deploy is authorized.
+### Contract integrity
+- Screen/Data specs and machine contracts agree.
+- Router behavior covers all seven frozen Intents.
+- Context mode varies correctly by Intent.
+- Rest / Skip / Defer remain first-class actions.
+- Memory requires actual outcome evidence where required.
+- API/schema/policy/test fixtures do not contradict one another.
+- reversible Builder choices are not accidentally promoted to frozen product decisions.
 
-## 11. Review Chat should read first
+### Repository integration
+- Identify any conflict caused by PR #14 being behind current main.
+- In particular, do not allow the PR's older `docs/CURRENT_HANDOFF.md` copy to overwrite the newer 2026-09-30 canonical handoff/refinement state on merge.
 
-1. `AGENTS.md`
-2. `docs/CURRENT_HANDOFF.md`
-3. `docs/PROJECT_OPERATING_MODEL_20260929.md`
-4. `docs/UPSTREAM_FIX_DRAFT_20260929.md`
-5. `docs/MVP_SCREEN_SPEC_20260929.md`
-6. `docs/MVP_DATA_SPEC_20260929.md`
-7. `docs/design/DESIGN_CONTEXT.md`
-8. Issue #9
-9. Issue #13
-10. latest main / relevant open PRs
+## 8. Expected verdict
 
-## 12. Review output format
+Use one:
+- READY
+- READY_WITH_CHANGES
+- NOT_READY
 
-Use this structure:
+Classify findings:
+- BLOCKER
+- IMPORTANT
+- MINOR
 
+Output:
 ```
 Review
 ├─ 判定
 ├─ ユーザー目線
 ├─ UX
-├─ デザイン
 ├─ 仕様整合
 ├─ 目的整合
-├─ 見落とし
+├─ DB/API
+├─ Router / Prompt
+├─ Memory
+├─ Tests / Evidence
+├─ Repository integration
 ├─ Cursorへ戻す修正
 └─ HUMAN_REQUIRED
 ```
 
-Review should explicitly distinguish:
-- BLOCKER
-- IMPORTANT
-- MINOR
+Do not implement fixes yourself.
 
-Do not rewrite implementation yourself unless specifically asked.
-Do not replace GitHub as SSOT.
+## 9. Review Chat read order
 
-## 13. Current known repository hygiene issues
+1. `AGENTS.md`
+2. `docs/CURRENT_HANDOFF.md` from latest main
+3. `docs/NEW_CHAT_HANDOFF_20260930.md`
+4. `docs/PROJECT_OPERATING_MODEL_20260929.md`
+5. `docs/UPSTREAM_FIX_DRAFT_20260929.md`
+6. `docs/TEAM_REVIEW_UPSTREAM_20260930.md`
+7. `docs/MVP_SCREEN_SPEC_20260929.md`
+8. `docs/MVP_DATA_SPEC_20260929.md`
+9. Issue #13
+10. Draft PR #14 at head `5cd0d362e8c12eccae7521178c2d803d0cafee8d`
+11. `docs/MVP_IMPLEMENTATION_CONTRACTS_20260929.md` from PR #14
+12. actual PR #14 contract files/tests
+13. latest main / relevant open PRs
 
-Open PRs known at handoff time:
-- PR #10 — older SITE / MVP requirements work
-- PR #11 — pre-MTG business hypothesis
+## 10. Stale open work
+
+Open older work includes:
 - PR #1 — old initial setup
+- PR #10 — older SITE / MVP requirements
+- PR #11 — pre-MTG business hypothesis
 
-These may contain stale assumptions.
-Reviewer should not treat them as newer than:
-- CURRENT_HANDOFF
-- frozen Figma
-- MVP Screen/Data specs
-- explicit Human decisions
+Do not treat those as newer authority than current main, frozen Figma, latest Screen/Data specs, or explicit Human decisions.
 
-## 14. HUMAN_REQUIRED
+## 11. HUMAN_REQUIRED
 
-Escalate only if review implies:
-- Goal change
-- KPI change
-- frozen MVP scope change
+Escalate only if the review requires:
+- Goal / KPI change
+- frozen six-stage or seven-Intent change
 - material product-direction change
-- irreversible architecture commitment with product consequences
+- consequential irreversible architecture choice
 - privacy / legal / payment decision
-- Production publish/deploy
+- production publish / deploy

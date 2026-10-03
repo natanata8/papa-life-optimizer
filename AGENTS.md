@@ -3,14 +3,14 @@
 ## Global AI Operating System
 
 Canonical global protocol: `natanata8/ai-operating-system`  
-Pinned protocol version: `1.0.1`
+Pinned protocol version: `1.3.0`
 
 Apply the global protocol for shared decision quality, research, handoff, AUTO-CONTINUE, and HUMAN_REQUIRED defaults.
 
 Precedence:
 1. explicit current Human instruction and authority boundaries;
 2. this repository's project-specific canonical rules, decisions, specs, and active Issue;
-3. global AI Operating System v1.0.1;
+3. global AI Operating System v1.3.0;
 4. chat history and inferred preferences.
 
 Project-specific rules in this repository override the global protocol where they are more specific.
@@ -49,6 +49,8 @@ Project-specific canonical state, approved Figma/visual authority, active Issues
 - Product goal: start from a father's desired personal event, predict the hidden household impact it creates, and reduce/absorb that impact so personal time and household buffer can coexist.
 - Project-specific Goal / KPI / Scope / Human decisions override global defaults where more specific.
 - Do not turn the product into a generic parenting, chore-tracking, or therapy product unless the project direction explicitly changes.
+
+Before substantial execution, also read `docs/PROJECT_CONTRACT.md`. It defines project-specific HARD / SOFT / HUMAN GATE constraints and Builder boundaries.
 
 ## Canonical product documents
 

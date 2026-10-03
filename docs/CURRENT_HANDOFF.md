@@ -1,5 +1,17 @@
 # CURRENT_HANDOFF — Papa Life Optimizer
 
+## Latest Main Chat handoff — 2026-09-30
+
+Canonical restart document:
+`docs/NEW_CHAT_HANDOFF_20260930.md`
+
+Latest team upstream review:
+`docs/TEAM_REVIEW_UPSTREAM_20260930.md`
+
+Current execution gate:
+> Draft PR #14 independent Review Chat review before first WANT_TO_DRINK vertical slice.
+
+
 ## Pre-Cursor review gate — Issue #13
 
 Gate packet:
@@ -75,7 +87,7 @@ Repository:
 `natanata8/papa-life-optimizer`
 
 Latest dedicated handoff:
-`docs/NEW_CHAT_HANDOFF_20260925.md`
+`docs/NEW_CHAT_HANDOFF_20260930.md`
 
 ## Current product thesis
 
@@ -244,3 +256,32 @@ Human UX rules now encoded in the contracts:
 - partner mood inference
 - final design-system build
 - broad app-screen rollout
+
+
+## Dot Project Operator — 2026-10-03
+
+Canonical operator contract:
+`docs/DOT_OPERATOR.md`
+
+Startup prompt:
+`docs/DOT_START_PROMPT.md`
+
+Role:
+> Dot = always-on Project Operator
+
+Dot may AUTO-CONTINUE reversible low-risk work inside approved scope, including GitHub/Slack state reconciliation, handoff maintenance, Builder task preparation, non-production QA/evidence, and SNS Acquisition Lane preparation.
+
+Dot must not silently finalize or change:
+- Purpose / Customer / Problem / Value
+- KPI
+- MVP scope
+- service name / brand
+- pricing / payment
+- privacy / legal
+- production release
+
+Current operator priority:
+1. reconcile latest team upstream discussion with GitHub canonical docs
+2. gap-review existing MVP / PR #14 against the new upstream
+3. preserve reusable implementation work
+4. run Product Lane and SNS Acquisition Lane in parallel
