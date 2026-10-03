@@ -1,7 +1,7 @@
 # PROJECT_CONTRACT — Papa Life Optimizer
 
 Status: CURRENT PROJECT EXECUTION CONTRACT
-Global contract: `natanata8/ai-operating-system/AI_OPERATING_CONTRACT.md` v1.1.0
+Global contract: `natanata8/ai-operating-system/AI_OPERATING_CONTRACT.md` v1.3.0
 
 This file adds project-specific constraints. Product/business/writing source documents remain authoritative.
 
