@@ -11,6 +11,14 @@ Latest team upstream review:
 Current execution gate:
 > Draft PR #14 independent Review Chat review before first WANT_TO_DRINK vertical slice.
 
+Issue #17 reconciliation and independent review packet:
+`docs/ISSUE17_PR14_REVIEW_DELTA_20261003.md`
+
+Current review verdict:
+> READY_WITH_CHANGES — return the bounded contract findings to Cursor before any new vertical slice.
+
+Follow-up at PR #14 head `aa8f26877cf2f2572026b89c3336f22106a5e6ed` confirmed four remaining contract edge cases; use the packet's follow-up section for the exact repair task and regression tests.
+
 
 ## Pre-Cursor review gate — Issue #13
 
