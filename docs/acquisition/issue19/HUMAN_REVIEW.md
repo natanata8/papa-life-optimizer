@@ -6,6 +6,45 @@ Six original copy packets, two per proposed role. A1 and A2 are complete text po
 
 Reviewer should see the final rendered asset again before publishing. Approval of this writing does not approve an unseen image/video, a new destination or a different account.
 
+## First review set: A2 / B1 / C2
+
+Editorial selection updated October 3, 2026, 22:44 UTC. **AI_PROPOSAL**. These are the strongest starting candidates for product fit, distinct usefulness and low production burden, not measured performance winners. Keep all six packets below; no new backlog is needed.
+
+| Packet | First job to test | Why first | Evidence and limitation | Risk flag / remaining gate |
+|---|---|---|---|---|
+| A2 / A07 | Separate event finish from arrival home, then handle an uncertain return time. | Most direct personal-event entry; text-only production. | Canonical golf/time-constraint scenario; no admitted recent X performance evidence. | LOW / HUMAN_REVIEW_REQUIRED. Confirm founder voice and exact account; no invented golf experience. |
+| B1 / B01 | Plan an outing through the return and reset. | A reusable sequence with no filming, location recommendation or child image. | Existing caption-level father-led-day and practical-checklist patterns in RESEARCH.md; no full-media or save-rate validation. | LOW / HUMAN_REVIEW_REQUIRED. Render five panels and check reading order/legibility; household schedules must remain conditional. |
+| C2 / C28 | Choose one preparation using the next known use. | A single image; no recipe, appliance claim or filming requirement. | Canonical before/after-event model; T2 below is historical expert context, not effectiveness evidence. | LOW / HUMAN_REVIEW_REQUIRED. Render one image; do not imply measured time saving or hygiene advice. |
+
+A1 remains an alternate for a founder who does not want a golf example. B2 requires filming and subtitle/audio review, so defer it. C1 remains a useful second topic, but its measurement framing asks more of the reader than C2. These are editorial trade-offs, not a new commitment to three launches.
+
+### Review order and smallest pilot
+
+1. Review the three selected copy packets and account-role fit together.
+2. After copy approval, prepare only B1's five panels and C2's single image; apply current design authority before rendering. A2 needs no image.
+3. Review final assets, accessibility text and exact destinations. All three retain Human approval before any publication.
+4. If launch is separately authorized, use these as the first production/review batch. One post per account cannot select a winning account, platform or hypothesis. The four-week proposal in PILOT_SPEC.md remains an optional later learning batch.
+
+Before expanding production, record minutes spent drafting, making assets, reviewing and revising each item. Ask whether each founder can sustain the role and whether the intended action is understood. Do not set an invented engagement threshold. If these checks fail, revise the selected packets before producing the remaining ideas.
+
+### Accessibility copy for selected media
+
+These are text alternatives for the proposed compositions, not claims that images already exist. Match them to the final renders and review again.
+
+B1, one alternative per panel:
+1. 外出先より先に、帰宅後を決めてみる。
+2. 帰宅後に、すでに決まっている予定があるか確認する。
+3. 決まっている予定から、帰宅の目安を考える。未定の予定は確認する。
+4. 荷物を戻し、使った物を片付けるところまで外出の予定に入れる。
+5. 次の休日用に保存。家の予定に合わせて、必要なところだけ使う。
+
+C2:
+明日の朝に使う道具がシンクにある場面。帰宅後に慌てそうなら、出かける前に一つだけ片付けておく、という提案。
+
+### Additional source T2
+
+[Tokyo TEAM household-work expert interview, March 10, 2023](https://team-kaji-ikuji.metro.tokyo.lg.jp/couple/20230310-1/), read October 3, 2026. The interview discusses preparing for the next use and household-specific arrangements. It supports the topic's relevance as editorial context only. Do not import its predictions about family reactions, gendered examples, cleaning instructions or implied universal effects.
+
 ## A1 — Proposed X account A
 
 Backlog A02. Low-risk operational copy.

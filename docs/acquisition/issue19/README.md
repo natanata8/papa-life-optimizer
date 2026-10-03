@@ -10,6 +10,12 @@ Prepared October 3, 2026. **AI_PROPOSAL / RESEARCH_PARTIAL / HUMAN_REVIEW_REQUIR
 4. [First six copy packets](HUMAN_REVIEW.md): two text-only posts plus four media-copy/script packets; assets not generated.
 5. [101 source observations](source-observations.json): actual public URLs, UTC dates, raw numeric UI displays and screening classifications.
 
+## Smallest review set
+
+Start with **A2 / B1 / C2** in [Human review](HUMAN_REVIEW.md): one complete X text, one five-panel carousel copy packet and one single-image copy packet. Selection reasons, source limits, risk flags and proposed accessibility copy are included. These are editorial choices, not performance winners. The remaining three packets and 90 ideas stay available; no larger backlog is proposed.
+
+The 22:44 UTC follow-up added no admissible recent X posts. Coverage counts are unchanged. Further generic Instagram collection would not resolve the material uncertainty: whether Japanese coordination content belongs on X, and which B/C formats work for smaller accounts. See the evidence assessment at the end of RESEARCH.md.
+
 ## Acceptance state
 
 | Issue #19 requirement | State | Evidence / remaining work |

@@ -186,3 +186,24 @@ The three strength hypotheses map to evidence needs: low input requires observed
 - Independently review the strategy, original copy and eventual assets before launch.
 
 Next research batch: prioritize Japanese coordination/handoff posts and smaller accounts rather than more celebrity or cookbook examples. Use at least two recent posts per admitted account, keep pins, sponsorships and reposts tagged, and retain excluded records separately. Stop a collection route if permission is unresolved; do not buy access or request credentials as a workaround.
+
+## Follow-up evidence assessment: October 3, 2026, 22:44 UTC
+
+Current objective: reduce uncertainty that could change the three-account pilot, rather than increase the backlog.
+
+Public web searches targeted X posts about Japanese parenting, household preparation and returning home, using 2026/August/September/October date terms and status-URL filters. Nine queries were run across three calls. No additional relevant post with a verifiable recent publication date was admitted. An X-generated trending summary about childcare policy was excluded: it is not a creator post or evidence for this pilot. Search absence is not proof that relevant content does not exist. The browser route with the earlier dismissed permission check was not retried or bypassed.
+
+**Coverage is unchanged:** 37 mapped accounts at mixed depth; 101 Instagram observations, 78 recent and 31 pattern candidates; two historical X examples; zero admitted recent X examples and zero direct TikTok post samples. The 100–300 strong recent-post target remains unmet. No additional engagement metrics were established.
+
+One additional primary editorial source was read: [T2, Tokyo TEAM expert interview, March 10, 2023](https://team-kaji-ikuji.metro.tokyo.lg.jp/couple/20230310-1/). Its next-use preparation and household-variation discussion provides context for C2. This historical article is not added to social-post counts. No recipes, personal stories or full article text are reproduced.
+
+### Would more evidence change the proposal?
+
+- **Recent Japanese coordination content is the consequential gap.** It could change A's platform, vocabulary and opening format. Keep A-on-X provisional; do not claim the present corpus selects X.
+- **Small-account and full-media coverage could change production choices.** The caption-heavy sample cannot tell whether a carousel, single image or filmed demonstration earns qualified saves/shares. Inspecting those formats could change B/C's mix.
+- **More generic recipe or celebrity records have low marginal value now.** They are unlikely to settle event-related demand or founder fit; do not gather them merely to reach the target.
+- **Three editorial roles can remain a reversible proposal.** They cover coordination, an outing and a concrete preparation, but the audience, founder fit and acquisition quality are still unvalidated. Human review and eventual authorized first-party learning are required.
+
+The immediate proposal is the existing A2/B1/C2 copy set in HUMAN_REVIEW.md. Production effort and role clarity can be evaluated before expanding beyond it. Do not spend on API access, add accounts or enlarge the publishing plan to compensate for missing research.
+
+Exit for this follow-up: shortlist, source limits and review sequence documented. Independent/Human review and rendered-media QA remain pending. Resume targeted source collection only through permitted access when it can answer the specific platform/format uncertainty above.
