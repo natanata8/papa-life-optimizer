@@ -1,0 +1,93 @@
+[
+  {
+    "id": "outcome-success",
+    "consultation": {
+      "consultation_id": "consult-22",
+      "primary_intent": "WANT_TO_DRINK"
+    },
+    "outcome": {
+      "consultation_id": "consult-22",
+      "derivation": "OUTCOME",
+      "intent_executed": true,
+      "actions_executed": ["夕食の主菜を先に作る"],
+      "action_keys": ["prepare_main_dish"],
+      "household_load_outcome": "LIGHTER",
+      "reusable_next_time": true,
+      "covered_keys": ["usual_responsibilities"],
+      "partner_response_user_reported": "少し嬉しそうだった"
+    },
+    "expect": {
+      "stage": "MEMORY",
+      "memory_count": 1,
+      "memory_type": "SUCCESS_PATTERN",
+      "outcome_backed": true,
+      "statement_includes": ["夕食の主菜を先に作る", "軽くなった"],
+      "statement_excludes": ["WANT_TO_DRINK", "少し嬉しそうだった", "機嫌", "SUCCESS_PATTERN"]
+    }
+  },
+  {
+    "id": "outcome-failure",
+    "consultation": {
+      "consultation_id": "consult-23",
+      "primary_intent": "OVERTIME"
+    },
+    "outcome": {
+      "consultation_id": "consult-23",
+      "derivation": "OUTCOME",
+      "intent_executed": true,
+      "actions_executed": ["遅れそうな時刻を今送る"],
+      "action_keys": ["share_expected_delay"],
+      "household_load_outcome": "HEAVIER",
+      "reusable_next_time": false,
+      "covered_keys": [],
+      "partner_response_user_reported": null
+    },
+    "expect": {
+      "stage": "MEMORY",
+      "memory_type": "FAILURE_PATTERN",
+      "statement_includes": ["次回そのまま使わない"]
+    }
+  },
+  {
+    "id": "outcome-chat-only",
+    "consultation": {
+      "consultation_id": "consult-24",
+      "primary_intent": "WANT_TO_DRINK"
+    },
+    "outcome": {
+      "consultation_id": "consult-24",
+      "derivation": "CHAT_ONLY",
+      "intent_executed": false,
+      "actions_executed": ["夕食の主菜を先に作る"],
+      "action_keys": ["prepare_main_dish"],
+      "household_load_outcome": "LIGHTER",
+      "reusable_next_time": true,
+      "partner_response_user_reported": null
+    },
+    "expect": {
+      "stage": "FEEDBACK",
+      "memory_count": 0
+    }
+  },
+  {
+    "id": "outcome-reusable-unknown",
+    "consultation": {
+      "consultation_id": "consult-25",
+      "primary_intent": "TIRED"
+    },
+    "outcome": {
+      "consultation_id": "consult-25",
+      "derivation": "OUTCOME",
+      "intent_executed": true,
+      "actions_executed": ["20分横になる"],
+      "action_keys": ["rest_twenty_minutes"],
+      "household_load_outcome": "UNKNOWN",
+      "reusable_next_time": null,
+      "partner_response_user_reported": null
+    },
+    "expect": {
+      "stage": "FEEDBACK",
+      "memory_count": 0
+    }
+  }
+]
