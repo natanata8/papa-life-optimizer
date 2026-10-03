@@ -1,0 +1,1219 @@
+{
+  "status": "CONVENIENCE_SAMPLE_NOT_VALIDATED_PERFORMANCE",
+  "access_window_utc": "2026-10-03T13:41:00Z/2026-10-03T13:49:32Z",
+  "recent_definition": "Published 2026-07-05 through 2026-10-03, inclusive.",
+  "read_depth": "Public caption/date/format URL and numeric action-row text. Full videos and carousel panels not reviewed.",
+  "counts_note": "Verbatim numeric UI text in action-row order; metric labels not independently verified for every row. Do not compare or benchmark. Missing is unavailable, never zero. Saves/shares/reach/clicks/DMs not available.",
+  "privacy": "No commenter identities, child identities, copied personal narratives or recipes retained.",
+  "stats": {
+    "total": 101,
+    "recent90": 78,
+    "classification": {
+      "pattern_candidate": 31,
+      "reference_only": 25,
+      "historical": 22,
+      "excluded": 23
+    },
+    "post_author_accounts": 17
+  },
+  "observations": [
+    {
+      "id": "IG001",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/Dd6KBGEzdoE/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "1.6万",
+        "182"
+      ],
+      "topic": "phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG002",
+      "url": "https://www.instagram.com/kinoshitayuki_official/p/Ddv-LiTEzGC/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-26",
+      "public_numeric_button_text": [
+        "9,685",
+        "148"
+      ],
+      "topic": "creator-lifestyle",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG003",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/DdtRq9KzdQm/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-25",
+      "public_numeric_button_text": [
+        "1.7万",
+        "232"
+      ],
+      "topic": "event-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG004",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/DdjBqayzSMv/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-21",
+      "public_numeric_button_text": [
+        "1.7万",
+        "148"
+      ],
+      "topic": "phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG005",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/DdYsERGThN6/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-17",
+      "public_numeric_button_text": [
+        "2.9万",
+        "211"
+      ],
+      "topic": "phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG006",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/DdLz4QUzAdj/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-12",
+      "public_numeric_button_text": [
+        "5.3万",
+        "305"
+      ],
+      "topic": "phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG007",
+      "url": "https://www.instagram.com/kinoshitayuki_official/reel/DdGuMc2Tl7J/",
+      "account": "kinoshitayuki_official",
+      "published_date_utc": "2026-09-10",
+      "public_numeric_button_text": [
+        "4.5万",
+        "394"
+      ],
+      "topic": "phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG008",
+      "url": "https://www.instagram.com/nobinobi_fes/reel/Dd8oavyBoLq/",
+      "account": "nobinobi_fes",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "1,361",
+        "6"
+      ],
+      "topic": "event-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG009",
+      "url": "https://www.instagram.com/nobinobi_fes/reel/DdqtaBYSv-C/",
+      "account": "nobinobi_fes",
+      "published_date_utc": "2026-09-24",
+      "public_numeric_button_text": [
+        "1,474",
+        "5"
+      ],
+      "topic": "event-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG010",
+      "url": "https://www.instagram.com/tsumugitopan/p/Dd00E5hGK3p/",
+      "account": "tsumugitopan",
+      "published_date_utc": "2026-09-28",
+      "public_numeric_button_text": [
+        "2.9万",
+        "120"
+      ],
+      "topic": "AI-family-presentation",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG011",
+      "url": "https://www.instagram.com/tsumugitopan/reel/DdvynkAhqi8/",
+      "account": "tsumugitopan",
+      "published_date_utc": "2026-09-26",
+      "public_numeric_button_text": [
+        "723",
+        "4"
+      ],
+      "topic": "event-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG012",
+      "url": "https://www.instagram.com/tsumugitopan/reel/DddwQUQMrTo/",
+      "account": "tsumugitopan",
+      "published_date_utc": "2026-09-19",
+      "public_numeric_button_text": [
+        "984"
+      ],
+      "topic": "event-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG013",
+      "url": "https://www.instagram.com/tsumugitopan/p/DdYfUrqmHGZ/",
+      "account": "tsumugitopan",
+      "published_date_utc": "2026-09-17",
+      "public_numeric_button_text": [
+        "1,642",
+        "7"
+      ],
+      "topic": "merchandise",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG014",
+      "url": "https://www.instagram.com/mihajlo0011/reel/Dd_brK5hZHQ/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "239"
+      ],
+      "topic": "appliance-promotion",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG015",
+      "url": "https://www.instagram.com/mihajlo0011/p/Dd74kdIHRMs/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "9,912",
+        "101"
+      ],
+      "topic": "sports",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG016",
+      "url": "https://www.instagram.com/mihajlo0011/p/DdzztASDMD-/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-27",
+      "public_numeric_button_text": [
+        "7,433",
+        "85"
+      ],
+      "topic": "sports",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG017",
+      "url": "https://www.instagram.com/mihajlo0011/p/DdtXvZOncZp/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-25",
+      "public_numeric_button_text": [
+        "2,212",
+        "12"
+      ],
+      "topic": "remote-work-comic",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG018",
+      "url": "https://www.instagram.com/mihajlo0011/p/Ddge9OdHQ5f/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-20",
+      "public_numeric_button_text": [
+        "1,205",
+        "16"
+      ],
+      "topic": "device-promotion",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG019",
+      "url": "https://www.instagram.com/mihajlo0011/p/DdWIRwKHfeU/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-16",
+      "public_numeric_button_text": [
+        "3,335",
+        "25"
+      ],
+      "topic": "seasonal-comic",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG020",
+      "url": "https://www.instagram.com/mihajlo0011/p/DdJXF2CHZEu/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-11",
+      "public_numeric_button_text": [
+        "3,918",
+        "11"
+      ],
+      "topic": "meal-choice-comic",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG021",
+      "url": "https://www.instagram.com/mihajlo0011/p/Dc_Aj-SHX7T/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-07",
+      "public_numeric_button_text": [
+        "3,426",
+        "7"
+      ],
+      "topic": "family-retrospective",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG022",
+      "url": "https://www.instagram.com/mihajlo0011/p/Dc3OwZSHd6Q/",
+      "account": "mihajlo0011",
+      "published_date_utc": "2026-09-04",
+      "public_numeric_button_text": [
+        "2,666",
+        "17"
+      ],
+      "topic": "unfinished-preparation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG023",
+      "url": "https://www.instagram.com/mamatastv/reel/DSkKHWEk-IH/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-12-22",
+      "public_numeric_button_text": [
+        "238"
+      ],
+      "topic": "disposal-explainer",
+      "classification": "historical"
+    },
+    {
+      "id": "IG024",
+      "url": "https://www.instagram.com/mamatastv/reel/DSSIi5SjyNz/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-12-15",
+      "public_numeric_button_text": [
+        "299"
+      ],
+      "topic": "food-demonstration",
+      "classification": "historical"
+    },
+    {
+      "id": "IG025",
+      "url": "https://www.instagram.com/mamatastv/reel/DSAG7jPDTTb/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-12-08",
+      "public_numeric_button_text": [
+        "104"
+      ],
+      "topic": "wrapping-shortcut",
+      "classification": "historical"
+    },
+    {
+      "id": "IG026",
+      "url": "https://www.instagram.com/mamatastv/reel/DRtHoh7jKj5/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-12-01",
+      "public_numeric_button_text": [
+        "247"
+      ],
+      "topic": "paper-craft",
+      "classification": "historical"
+    },
+    {
+      "id": "IG027",
+      "url": "https://www.instagram.com/mamatastv/reel/DReScRZgtPe/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-11-25",
+      "public_numeric_button_text": [
+        "612"
+      ],
+      "topic": "cleaning",
+      "classification": "historical"
+    },
+    {
+      "id": "IG028",
+      "url": "https://www.instagram.com/mamatastv/reel/DRJEfJGDKpS/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-11-17",
+      "public_numeric_button_text": [
+        "193"
+      ],
+      "topic": "cooking-shortcut",
+      "classification": "historical"
+    },
+    {
+      "id": "IG029",
+      "url": "https://www.instagram.com/mamatastv/reel/DQ6FON8kn6b/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-11-11",
+      "public_numeric_button_text": [
+        "456",
+        "2"
+      ],
+      "topic": "batch-preparation",
+      "classification": "historical"
+    },
+    {
+      "id": "IG030",
+      "url": "https://www.instagram.com/mamatastv/reel/DQoEcAEEgKb/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-11-04",
+      "public_numeric_button_text": [
+        "318",
+        "1"
+      ],
+      "topic": "meal-decision",
+      "classification": "historical"
+    },
+    {
+      "id": "IG031",
+      "url": "https://www.instagram.com/mamatastv/reel/DQS_zNHEuIA/",
+      "account": "mamatastv",
+      "published_date_utc": "2025-10-27",
+      "public_numeric_button_text": [
+        "228"
+      ],
+      "topic": "few-ingredients",
+      "classification": "historical"
+    },
+    {
+      "id": "IG032",
+      "url": "https://www.instagram.com/tomonite_official/p/Dd75MeWjj53/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "160",
+        "89"
+      ],
+      "topic": "giveaway",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG033",
+      "url": "https://www.instagram.com/tomonite_official/reel/DdU15WKDaaW/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-09-15",
+      "public_numeric_button_text": [
+        "9,892",
+        "43"
+      ],
+      "topic": "cooking-arrangements",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG034",
+      "url": "https://www.instagram.com/tomonite_official/reel/DZlX-SjDdbQ/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-06-14",
+      "public_numeric_button_text": [
+        "1.2万",
+        "47"
+      ],
+      "topic": "batch-recipe",
+      "classification": "historical"
+    },
+    {
+      "id": "IG035",
+      "url": "https://www.instagram.com/tomonite_official/reel/DeAncjOmXSI/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "273"
+      ],
+      "topic": "practical-preparation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG036",
+      "url": "https://www.instagram.com/tomonite_official/reel/Dd_AYw_jFIP/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "298"
+      ],
+      "topic": "paper-craft",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG037",
+      "url": "https://www.instagram.com/tomonite_official/reel/Dd-eD5gkXMS/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "590",
+        "16"
+      ],
+      "topic": "health-product",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG038",
+      "url": "https://www.instagram.com/tomonite_official/reel/Dd8bn54DfYW/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "301"
+      ],
+      "topic": "leftover-use",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG039",
+      "url": "https://www.instagram.com/tomonite_official/reel/Dd5v_e7AeuW/",
+      "account": "tomonite_official",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "161"
+      ],
+      "topic": "seasonal-laundry",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG040",
+      "url": "https://www.instagram.com/sugiurataiyou_official/reel/Dd58A2NRvNv/",
+      "account": "sugiurataiyou_official",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "2,240"
+      ],
+      "topic": "toy-promotion",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG041",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/DdBNV2hBY60/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-09-08",
+      "public_numeric_button_text": [
+        "2,249",
+        "33"
+      ],
+      "topic": "cookbook-promotion",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG042",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/DaKY0aZz2SK/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-06-29",
+      "public_numeric_button_text": [
+        "4,024",
+        "71"
+      ],
+      "topic": "cookbook-promotion",
+      "classification": "historical"
+    },
+    {
+      "id": "IG043",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/DEzGzWATn4w/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2025-01-14",
+      "public_numeric_button_text": [
+        "2,437",
+        "53"
+      ],
+      "topic": "health-claim",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG044",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/DeBlLVJhTPt/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-10-03",
+      "public_numeric_button_text": [
+        "974",
+        "13"
+      ],
+      "topic": "one-device-meal",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG045",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/Dd_AVHVBfBn/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "1,875",
+        "39"
+      ],
+      "topic": "ingredient-substitution",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG046",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/Dd7XOWDS9pG/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "2,545",
+        "45"
+      ],
+      "topic": "cleanup-saving",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG047",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/Dd520BqhWpd/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "2,959",
+        "45"
+      ],
+      "topic": "familiar-food-variation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG048",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/Dd3R-6yhiJ7/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-09-29",
+      "public_numeric_button_text": [
+        "1,635",
+        "40"
+      ],
+      "topic": "sponsored-recipe",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG049",
+      "url": "https://www.instagram.com/marumi_kitchen/reel/Dd0tPWTh_92/",
+      "account": "marumi_kitchen",
+      "published_date_utc": "2026-09-28",
+      "public_numeric_button_text": [
+        "5,603",
+        "91"
+      ],
+      "topic": "few-step-preparation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG050",
+      "url": "https://www.instagram.com/tsenseidayo/reel/Czi6oHcy8E3/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2023-11-12",
+      "public_numeric_button_text": [
+        "4.5万",
+        "882"
+      ],
+      "topic": "advice-overload",
+      "classification": "historical"
+    },
+    {
+      "id": "IG051",
+      "url": "https://www.instagram.com/tsenseidayo/reel/CxppFqOydOM/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2023-09-26",
+      "public_numeric_button_text": [
+        "6,023",
+        "125"
+      ],
+      "topic": "subscription-promotion",
+      "classification": "historical"
+    },
+    {
+      "id": "IG052",
+      "url": "https://www.instagram.com/tsenseidayo/reel/CwNGVv2MYJ3/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2023-08-21",
+      "public_numeric_button_text": [
+        "6.2万",
+        "1,558"
+      ],
+      "topic": "live-QA",
+      "classification": "historical"
+    },
+    {
+      "id": "IG053",
+      "url": "https://www.instagram.com/tsenseidayo/reel/Dd6GVpNTOlW/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "194",
+        "10"
+      ],
+      "topic": "meal-service-time",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG054",
+      "url": "https://www.instagram.com/tsenseidayo/reel/DdbQQouzfZN/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2026-09-18",
+      "public_numeric_button_text": [
+        "1,362",
+        "26"
+      ],
+      "topic": "baby-care-sponsorship",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG055",
+      "url": "https://www.instagram.com/tsenseidayo/reel/DbdXQdaT3r9/",
+      "account": "tsenseidayo",
+      "published_date_utc": "2026-07-31",
+      "public_numeric_button_text": [
+        "2,065",
+        "26"
+      ],
+      "topic": "safety-campaign",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG056",
+      "url": "https://www.instagram.com/cbsmornings/reel/Dd9EcGOyXck/",
+      "account": "cbsmornings",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "1,267",
+        "28"
+      ],
+      "topic": "coaching-interview",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG057",
+      "url": "https://www.instagram.com/cbsmornings/reel/Dd9egJ4SzCz/",
+      "account": "cbsmornings",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "741",
+        "30"
+      ],
+      "topic": "visible-planned-work",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG058",
+      "url": "https://www.instagram.com/everodsky/p/Dbvx78jmlSL/",
+      "account": "everodsky",
+      "published_date_utc": "2026-08-07",
+      "public_numeric_button_text": [
+        "423",
+        "12"
+      ],
+      "topic": "facilitator-promotion",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG059",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/DeA-y0yu6uv/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-10-03",
+      "public_numeric_button_text": [
+        "41",
+        "4"
+      ],
+      "topic": "health-advocacy",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG060",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/Dd6DkzkOBYu/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "2,290",
+        "109"
+      ],
+      "topic": "street-question",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG061",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/Dd4WrPZiEAs/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-09-29",
+      "public_numeric_button_text": [
+        "1,605",
+        "45"
+      ],
+      "topic": "invisible-work-resource",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG062",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/Dd1rBb-Djw_/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-09-28",
+      "public_numeric_button_text": [
+        "633",
+        "33"
+      ],
+      "topic": "crisis-hook",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG063",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/DduKW3-DO93/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-09-25",
+      "public_numeric_button_text": [
+        "1,736",
+        "23"
+      ],
+      "topic": "identity-contrast",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG064",
+      "url": "https://www.instagram.com/zachmentalloadcoach/reel/DdrdI5Nj7lS/",
+      "account": "zachmentalloadcoach",
+      "published_date_utc": "2026-09-24",
+      "public_numeric_button_text": [
+        "174",
+        "2"
+      ],
+      "topic": "corrective-hook",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG065",
+      "url": "https://www.instagram.com/jimmy_on_relationships/reel/Dd3xelwCktM/",
+      "account": "jimmy_on_relationships",
+      "published_date_utc": "2026-09-29",
+      "public_numeric_button_text": [
+        "1.3万",
+        "236"
+      ],
+      "topic": "relationship-framing",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG066",
+      "url": "https://www.instagram.com/jimmy_on_relationships/reel/DdthLq9RUag/",
+      "account": "jimmy_on_relationships",
+      "published_date_utc": "2026-09-25",
+      "public_numeric_button_text": [
+        "2.9万",
+        "434"
+      ],
+      "topic": "dating-advice",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG067",
+      "url": "https://www.instagram.com/jimmy_on_relationships/reel/DdqzRdLxEVr/",
+      "account": "jimmy_on_relationships",
+      "published_date_utc": "2026-09-24",
+      "public_numeric_button_text": [
+        "5万",
+        "752"
+      ],
+      "topic": "conflict-humor",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG068",
+      "url": "https://www.instagram.com/jimmy_on_relationships/reel/Ddl8Z9XRIXf/",
+      "account": "jimmy_on_relationships",
+      "published_date_utc": "2026-09-22",
+      "public_numeric_button_text": [
+        "1.4万",
+        "391"
+      ],
+      "topic": "high-risk-relationship",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG069",
+      "url": "https://www.instagram.com/jimmy_on_relationships/reel/DdjkCE6RrI2/",
+      "account": "jimmy_on_relationships",
+      "published_date_utc": "2026-09-21",
+      "public_numeric_button_text": [
+        "2万",
+        "595"
+      ],
+      "topic": "high-risk-relationship",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG070",
+      "url": "https://www.instagram.com/everything.husband/reel/DajL-9vP34w/",
+      "account": "everything.husband",
+      "published_date_utc": "2026-07-08",
+      "public_numeric_button_text": [
+        "7.2万",
+        "806"
+      ],
+      "topic": "early-kitchen-preparation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG071",
+      "url": "https://www.instagram.com/everything.husband/reel/DZwOA4pP50B/",
+      "account": "everything.husband",
+      "published_date_utc": "2026-06-19",
+      "public_numeric_button_text": [
+        "2.2万",
+        "159"
+      ],
+      "topic": "preparation-personal-time",
+      "classification": "historical"
+    },
+    {
+      "id": "IG072",
+      "url": "https://www.instagram.com/everything.husband/reel/DQT8-lNkcl3/",
+      "account": "everything.husband",
+      "published_date_utc": "2025-10-27",
+      "public_numeric_button_text": [
+        "3,594",
+        "148"
+      ],
+      "topic": "family-retrospective",
+      "classification": "historical"
+    },
+    {
+      "id": "IG073",
+      "url": "https://www.instagram.com/everything.husband/reel/Dd7npJOPzcu/",
+      "account": "everything.husband",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "27",
+        "1"
+      ],
+      "topic": "seasonal-outing",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG074",
+      "url": "https://www.instagram.com/everything.husband/reel/Dd1tw2BP7oH/",
+      "account": "everything.husband",
+      "published_date_utc": "2026-09-28",
+      "public_numeric_button_text": [
+        "196",
+        "6"
+      ],
+      "topic": "sleep-and-coverage",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG075",
+      "url": "https://www.instagram.com/hiropy_family/reel/Dd_E7lkxoZ3/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-10-02",
+      "public_numeric_button_text": [
+        "8,005",
+        "70"
+      ],
+      "topic": "father-led-day",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG076",
+      "url": "https://www.instagram.com/hiropy_family/reel/DdxmCunNzyS/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-27",
+      "public_numeric_button_text": [
+        "6,665",
+        "46"
+      ],
+      "topic": "comic-reversal",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG077",
+      "url": "https://www.instagram.com/hiropy_family/reel/DdjEbC8Rc9B/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-21",
+      "public_numeric_button_text": [
+        "8,902",
+        "42"
+      ],
+      "topic": "family-phrase-series",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG078",
+      "url": "https://www.instagram.com/hiropy_family/reel/DdTlBntPr25/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-15",
+      "public_numeric_button_text": [
+        "3万",
+        "97"
+      ],
+      "topic": "TV-appearance",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG079",
+      "url": "https://www.instagram.com/hiropy_family/reel/DdOVWrsRiox/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-13",
+      "public_numeric_button_text": [
+        "5,715",
+        "42"
+      ],
+      "topic": "day-vignette",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG080",
+      "url": "https://www.instagram.com/hiropy_family/reel/DdI7qU9BXBA/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-11",
+      "public_numeric_button_text": [
+        "6,866",
+        "60"
+      ],
+      "topic": "event-recap",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG081",
+      "url": "https://www.instagram.com/hiropy_family/reel/Dc5A3aQxuFH/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-05",
+      "public_numeric_button_text": [
+        "2万",
+        "171"
+      ],
+      "topic": "shared-activity",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG082",
+      "url": "https://www.instagram.com/hiropy_family/reel/Dc0ZcuYxQ5u/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-09-03",
+      "public_numeric_button_text": [
+        "4,661",
+        "36"
+      ],
+      "topic": "food-sponsorship",
+      "classification": "excluded"
+    },
+    {
+      "id": "IG083",
+      "url": "https://www.instagram.com/hiropy_family/reel/Dcm7BmbzIQk/",
+      "account": "hiropy_family",
+      "published_date_utc": "2026-08-29",
+      "public_numeric_button_text": [
+        "7,508",
+        "63"
+      ],
+      "topic": "shopping-vignette",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG084",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DVnxod0EQ4E/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-03-08",
+      "public_numeric_button_text": [
+        "2.7万",
+        "216"
+      ],
+      "topic": "alone-time-contrast",
+      "classification": "historical"
+    },
+    {
+      "id": "IG085",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DRuD9imEUJ4/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2025-12-01",
+      "public_numeric_button_text": [
+        "2.6万",
+        "162"
+      ],
+      "topic": "family-retrospective",
+      "classification": "historical"
+    },
+    {
+      "id": "IG086",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DITb-3vzdU9/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2025-04-11",
+      "public_numeric_button_text": [
+        "1.6万",
+        "406"
+      ],
+      "topic": "book-launch",
+      "classification": "historical"
+    },
+    {
+      "id": "IG087",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/Dd6Lh_qiQn6/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "1.3万",
+        "122"
+      ],
+      "topic": "family-retrospective",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG088",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DdlXh0ZCS_-/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-22",
+      "public_numeric_button_text": [
+        "4,983",
+        "23"
+      ],
+      "topic": "routine-imitation",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG089",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/Ddd8FtlCWs-/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-19",
+      "public_numeric_button_text": [
+        "7,752",
+        "128"
+      ],
+      "topic": "partner-preparation-question",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG090",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DdbD7YuCQvr/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-18",
+      "public_numeric_button_text": [
+        "5,471",
+        "53"
+      ],
+      "topic": "story-solicitation",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG091",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DdYt1anCVaj/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-17",
+      "public_numeric_button_text": [
+        "7,695",
+        "31"
+      ],
+      "topic": "explicit-older-vignette-repost",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG092",
+      "url": "https://www.instagram.com/orenoatamanonaka/p/DdJP-CvCclu/",
+      "account": "orenoatamanonaka",
+      "published_date_utc": "2026-09-11",
+      "public_numeric_button_text": [
+        "1.3万",
+        "87"
+      ],
+      "topic": "family-vignette",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG093",
+      "url": "https://www.instagram.com/saki_takada_/p/DZ-PkCZmel4/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-06-24",
+      "public_numeric_button_text": [
+        "2,428",
+        "62"
+      ],
+      "topic": "cookbook-preview",
+      "classification": "historical"
+    },
+    {
+      "id": "IG094",
+      "url": "https://www.instagram.com/saki_takada_/reel/DYwQ2qPxp4p/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-05-25",
+      "public_numeric_button_text": [
+        "2.8万",
+        "409"
+      ],
+      "topic": "book-announcement",
+      "classification": "historical"
+    },
+    {
+      "id": "IG095",
+      "url": "https://www.instagram.com/saki_takada_/reel/DO-xufqkdsx/",
+      "account": "saki_takada_",
+      "published_date_utc": "2025-09-24",
+      "public_numeric_button_text": [
+        "1.8万",
+        "86"
+      ],
+      "topic": "quick-meal",
+      "classification": "historical"
+    },
+    {
+      "id": "IG096",
+      "url": "https://www.instagram.com/saki_takada_/reel/Dd8idERxyJV/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-10-01",
+      "public_numeric_button_text": [
+        "2,299",
+        "33"
+      ],
+      "topic": "play-vignette",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG097",
+      "url": "https://www.instagram.com/saki_takada_/reel/Dd58yyhRkm2/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-09-30",
+      "public_numeric_button_text": [
+        "1,464",
+        "18"
+      ],
+      "topic": "sponsored-recipe",
+      "classification": "reference_only"
+    },
+    {
+      "id": "IG098",
+      "url": "https://www.instagram.com/saki_takada_/reel/Dd3P9RfR470/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-09-29",
+      "public_numeric_button_text": [
+        "2,737",
+        "23"
+      ],
+      "topic": "low-energy-meal",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG099",
+      "url": "https://www.instagram.com/saki_takada_/reel/Dd00UPsRJMe/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-09-28",
+      "public_numeric_button_text": [
+        "2,162",
+        "19"
+      ],
+      "topic": "interrupted-cooking",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG100",
+      "url": "https://www.instagram.com/saki_takada_/reel/DdyZ3rMTYBg/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-09-27",
+      "public_numeric_button_text": [
+        "3,614",
+        "47"
+      ],
+      "topic": "familiar-food",
+      "classification": "pattern_candidate"
+    },
+    {
+      "id": "IG101",
+      "url": "https://www.instagram.com/saki_takada_/reel/DdbBl9Wx1Br/",
+      "account": "saki_takada_",
+      "published_date_utc": "2026-09-18",
+      "public_numeric_button_text": [
+        "1,443",
+        "9"
+      ],
+      "topic": "medical-product",
+      "classification": "excluded"
+    }
+  ]
+}
