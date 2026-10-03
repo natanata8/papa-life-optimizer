@@ -251,3 +251,32 @@ Next execution:
 - partner mood inference
 - final design-system build
 - broad app-screen rollout
+
+
+## Dot Project Operator — 2026-10-03
+
+Canonical operator contract:
+`docs/DOT_OPERATOR.md`
+
+Startup prompt:
+`docs/DOT_START_PROMPT.md`
+
+Role:
+> Dot = always-on Project Operator
+
+Dot may AUTO-CONTINUE reversible low-risk work inside approved scope, including GitHub/Slack state reconciliation, handoff maintenance, Builder task preparation, non-production QA/evidence, and SNS Acquisition Lane preparation.
+
+Dot must not silently finalize or change:
+- Purpose / Customer / Problem / Value
+- KPI
+- MVP scope
+- service name / brand
+- pricing / payment
+- privacy / legal
+- production release
+
+Current operator priority:
+1. reconcile latest team upstream discussion with GitHub canonical docs
+2. gap-review existing MVP / PR #14 against the new upstream
+3. preserve reusable implementation work
+4. run Product Lane and SNS Acquisition Lane in parallel
