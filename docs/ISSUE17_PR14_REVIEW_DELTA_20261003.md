@@ -1,12 +1,13 @@
 # Issue #17 — Upstream / PR #14 Independent Review Delta
 
-- Status: `NOT_READY`
+- Status: `READY` (bounded contract review only; no merge or production approval)
 - Initial review date: 2026-10-03
 - Final re-review date: 2026-10-04
 - Initial review target: PR #14 at `5cd0d362e8c12eccae7521178c2d803d0cafee8d`
 - Follow-up review target: PR #14 at `aa8f26877cf2f2572026b89c3336f22106a5e6ed`
 - Prior final re-review target: PR #14 at `1f3f1018eb878fa021ad45d25503b2c6c874e434`
-- Latest independent re-review target: PR #14 at `91eddda5e46d391626ab4237f0967fc7e904cbb7`
+- Prior independent re-review target: PR #14 at `91eddda5e46d391626ab4237f0967fc7e904cbb7`
+- Latest independent re-review target: PR #14 at `92303a141d29a6f8fda160fa7c3b2c1a2cf37c58`
 - Current main: `f151e101a6a4db683369724251c6b70ea19f914d`
 
 ## Current objective
@@ -446,6 +447,35 @@ Keep the correction in the contract layer:
 
 No new feature, UI slice, merge, production action, or Human-owned Product, KPI, naming, privacy, pricing, household-inference, or model-policy decision is authorized by this follow-up.
 
+## Closure re-review — `92303a1`
+
+Verdict: `READY` for the bounded contract-review scope.
+
+The sole blocker from `91eddda` is closed. Normalized polite negatives are checked before positive token matching, and independent probes confirmed that each of the seven positive-task predicates rejects its corresponding polite negative while an affirmative control remains eligible:
+
+- cleaning, laundry, dinner preparation, morning transport, bath, bedtime, and cleanup;
+- `ありません`, `ありませんでした`, `必要ありません`, `担当ではありません`, `担当していません`, `しません`, and whitespace-separated polite forms;
+- the rejected action, task-specific visible copy, and task-specific communication draft remain absent.
+
+The prior boundary corrections remain intact:
+
+- false, zero, string-zero, and boolean child-count values do not authorize child-specific actions; a positive integer does;
+- visible copy follows the exact eligible action set for zero-, single-, and mixed-task cases;
+- blocked-only fallback remains bounded `CLARIFY` with a current-consultation question;
+- cross-intent household memory cannot block current-intent actions, while same-intent blocking and explicit override still work;
+- JSON Schema and OpenAPI reject empty-action `ACTION` and action-bearing `CLARIFY` turns.
+
+### Closure evidence
+
+- `python3 -m unittest contracts.tests.test_mvp_contracts` — 26 tests passed at exact head `92303a1`;
+- `python3 contracts/validate.py` — validated 52 consultation turns against schema and OpenAPI;
+- independent seven-predicate negative/positive matrix, polite-inflection, child-count, copy/action, fallback, memory, and schema/OpenAPI mutation probes — passed;
+- GitHub Contract tests run `37168349212` — success;
+- GitHub Writing lint run `37168349184` — success;
+- candidate delta from `91eddda` is limited to policy normalization, vocabulary markers, fixtures, and contract tests.
+
+`READY` does not authorize a merge, feature slice, deployment, or any Human-owned Product, KPI, naming, privacy, pricing, household-inference, or model-policy decision. PR #14 remains open and draft for maintainer action.
+
 ## Initial Cursor repair task — superseded by follow-up
 
 This task produced `aa8f268`; the follow-up section above now contains the current exact repair task.
@@ -470,6 +500,6 @@ Acceptance:
 
 ## Issue #17 Exit / next gate
 
-This packet completes the safe reconciliation and independent-review preparation slice for Issue #17. PR #14 at `91eddda` is `NOT_READY`, not ready to merge, and the first Builder vertical slice remains gated on the polite-negation contract correction above plus independent re-review.
+This packet completes the safe reconciliation and independent-review slice for Issue #17. PR #14 at `92303a1` is `READY` for the bounded contract-review scope. No merge, feature implementation, or deployment was performed; those remain separate maintainer-authorized actions.
 
 No Human decision is needed to make the listed contract fixes. The unresolved items above remain explicitly HUMAN_REQUIRED.

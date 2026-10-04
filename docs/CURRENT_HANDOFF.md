@@ -15,9 +15,9 @@ Issue #17 reconciliation and independent review packet:
 `docs/ISSUE17_PR14_REVIEW_DELTA_20261003.md`
 
 Current review verdict:
-> NOT_READY — latest independent re-review at PR #14 head `91eddda5e46d391626ab4237f0967fc7e904cbb7` confirms copy/action parity, fallback-question, cross-intent blocker, and OpenAPI parity repairs, but polite negative evidence such as `送迎はありません` still authorizes positive task actions. Return only the packet's bounded polarity correction to Cursor before re-review.
+> READY — closure re-review at PR #14 head `92303a141d29a6f8fda160fa7c3b2c1a2cf37c58` confirms the polite-negation blocker is closed across all seven positive-task predicates and all prior boundary corrections remain intact. This is contract-review readiness only; no merge, feature implementation, deployment, or Human-owned policy decision is authorized.
 
-Do not start the first vertical slice or merge PR #14 until independent re-review passes.
+Independent contract review has passed. PR #14 remains open and draft; merge and any first vertical slice remain separate maintainer-authorized actions.
 
 
 ## Pre-Cursor review gate — Issue #13
