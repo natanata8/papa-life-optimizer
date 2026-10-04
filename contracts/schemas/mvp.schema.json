@@ -1,0 +1,510 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://papa-life-optimizer.local/schemas/mvp.schema.json",
+  "title": "PAPA CODE MVP implementation contracts",
+  "$defs": {
+    "Intent": {
+      "type": "string",
+      "enum": [
+        "WHAT_SHOULD_I_DO",
+        "TIRED",
+        "WANT_TO_DRINK",
+        "WANT_PERSONAL_TIME",
+        "PARTNER_UNHAPPY_OR_CONFLICT",
+        "OVERTIME",
+        "FREE_CONSULT"
+      ]
+    },
+    "ConcreteIntent": {
+      "type": "string",
+      "enum": [
+        "WHAT_SHOULD_I_DO",
+        "TIRED",
+        "WANT_TO_DRINK",
+        "WANT_PERSONAL_TIME",
+        "PARTNER_UNHAPPY_OR_CONFLICT",
+        "OVERTIME"
+      ]
+    },
+    "ContextMode": {
+      "type": "string",
+      "enum": [
+        "HOUSEHOLD_IMPACT",
+        "PRIORITY",
+        "CAPACITY",
+        "TIME_OPPORTUNITY",
+        "SITUATION_SUMMARY",
+        "ROUTED_CONTEXT"
+      ]
+    },
+    "ActionType": {
+      "type": "string",
+      "enum": [
+        "DO_NOW",
+        "PREPARE_AHEAD",
+        "REST",
+        "DEFER",
+        "SKIP",
+        "COMMUNICATE",
+        "SUBSTITUTE",
+        "RECOVER"
+      ]
+    },
+    "Stage": {
+      "type": "string",
+      "enum": ["HOME", "CLARIFY", "CONTEXT", "ACTION", "FEEDBACK", "MEMORY"]
+    },
+    "MemoryType": {
+      "type": "string",
+      "enum": [
+        "HOUSEHOLD_ATTRIBUTE",
+        "ROUTINE",
+        "TASK_OWNERSHIP",
+        "PREFERENCE",
+        "FATIGUE_PATTERN",
+        "CONFLICT_PATTERN",
+        "SUCCESS_PATTERN",
+        "FAILURE_PATTERN",
+        "SCHEDULE_PATTERN"
+      ]
+    },
+    "LoadDimension": {
+      "type": "string",
+      "enum": [
+        "physical_load",
+        "childcare_load",
+        "cognitive_load",
+        "time_constraint",
+        "coordination_load",
+        "recovery_load",
+        "fatigue_effect",
+        "risk_load",
+        "personal_time_loss"
+      ]
+    },
+    "ContextSource": {
+      "type": "string",
+      "enum": [
+        "USER_INPUT",
+        "HOUSEHOLD_PROFILE",
+        "SCHEDULE",
+        "TASK_MODEL",
+        "MEMORY",
+        "DERIVED"
+      ]
+    },
+    "UserVisibleAction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "detail"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1, "maxLength": 32},
+        "detail": {"type": "string", "minLength": 1, "maxLength": 80}
+      }
+    },
+    "UserVisible": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["headline", "body", "questions", "choices", "actions", "memory_note"],
+      "properties": {
+        "headline": {"type": "string", "minLength": 1, "maxLength": 48},
+        "body": {"type": "string", "minLength": 1, "maxLength": 140},
+        "questions": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {"type": "string", "maxLength": 60}
+        },
+        "choices": {
+          "type": "array",
+          "maxItems": 6,
+          "items": {"type": "string"}
+        },
+        "actions": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/UserVisibleAction"}
+        },
+        "memory_note": {"type": ["string", "null"], "maxLength": 80}
+      }
+    },
+    "Resolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entry_intent",
+        "primary_intent",
+        "secondary_intent",
+        "context_mode",
+        "confidence",
+        "resolved"
+      ],
+      "properties": {
+        "entry_intent": {"$ref": "#/$defs/Intent"},
+        "primary_intent": {"type": ["string", "null"]},
+        "secondary_intent": {"type": ["string", "null"]},
+        "context_mode": {"type": ["string", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "resolved": {"type": "boolean"}
+      }
+    },
+    "VerifiedFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "source"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "source": {"const": "USER_INPUT"}
+      }
+    },
+    "UnknownField": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "status", "required"],
+      "properties": {
+        "key": {"type": "string"},
+        "status": {"const": "UNKNOWN"},
+        "required": {"type": "boolean"},
+        "infer": {"type": "boolean"}
+      }
+    },
+    "ContextSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "verified_facts",
+        "unknowns",
+        "relevant_tasks",
+        "load_changes",
+        "capacity_state",
+        "priority_state"
+      ],
+      "properties": {
+        "mode": {"type": ["string", "null"]},
+        "verified_facts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/VerifiedFact"}
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/UnknownField"}
+        },
+        "relevant_tasks": {"type": "array", "items": {"type": "string"}},
+        "load_changes": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/LoadDimension"}
+        },
+        "capacity_state": {"type": ["string", "null"]},
+        "priority_state": {"type": ["string", "null"]}
+      }
+    },
+    "Question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "prompt"],
+      "properties": {
+        "key": {"type": "string"},
+        "prompt": {"type": "string", "minLength": 1, "maxLength": 60},
+        "choices": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "ActionProposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action_key",
+        "action_type",
+        "title",
+        "description",
+        "rank",
+        "effort",
+        "reason",
+        "expected_load_reduction",
+        "status"
+      ],
+      "properties": {
+        "action_key": {"type": "string", "minLength": 1},
+        "action_type": {"$ref": "#/$defs/ActionType"},
+        "title": {"type": "string", "minLength": 1, "maxLength": 32},
+        "description": {"type": "string", "minLength": 1, "maxLength": 80},
+        "rank": {"type": "integer", "minimum": 1, "maximum": 5},
+        "effort": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"]},
+        "reason": {"type": "string"},
+        "expected_load_reduction": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/LoadDimension"}
+        },
+        "status": {"const": "PROPOSED"}
+      }
+    },
+    "CommunicationDraft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "purpose",
+        "message",
+        "includes_load_acknowledgement",
+        "includes_preparation",
+        "includes_alternative",
+        "includes_recovery"
+      ],
+      "properties": {
+        "purpose": {"type": "string"},
+        "message": {"type": "string", "minLength": 1, "maxLength": 140},
+        "includes_load_acknowledgement": {"type": "boolean"},
+        "includes_preparation": {"type": "boolean"},
+        "includes_alternative": {"type": "boolean"},
+        "includes_recovery": {"type": "boolean"}
+      }
+    },
+    "ConsultationTurn": {
+      "allOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["stage", "user_visible", "audit"],
+          "properties": {
+            "stage": {"type": "string", "enum": ["CLARIFY", "ACTION"]},
+            "user_visible": {"$ref": "#/$defs/UserVisible"},
+            "audit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "resolution",
+                "context",
+                "questions",
+                "actions",
+                "communication_draft",
+                "retrieved_memory_ids",
+                "stage_trace",
+                "render_only"
+              ],
+              "properties": {
+                "resolution": {"$ref": "#/$defs/Resolution"},
+                "context": {"$ref": "#/$defs/ContextSnapshot"},
+                "questions": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "items": {"$ref": "#/$defs/Question"}
+                },
+                "actions": {
+                  "type": "array",
+                  "maxItems": 5,
+                  "items": {"$ref": "#/$defs/ActionProposal"}
+                },
+                "communication_draft": {
+                  "type": ["object", "null"]
+                },
+                "retrieved_memory_ids": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "stage_trace": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/Stage"}
+                },
+                "render_only": {
+                  "type": "array",
+                  "items": {"const": "user_visible"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["stage"],
+            "properties": {"stage": {"const": "ACTION"}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "user_visible": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "minItems": 1, "maxItems": 5}
+                }
+              },
+              "audit": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "minItems": 1, "maxItems": 5}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["stage"],
+            "properties": {"stage": {"const": "CLARIFY"}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "user_visible": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "maxItems": 0}
+                }
+              },
+              "audit": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "maxItems": 0}
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "MemoryItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_type",
+        "subject",
+        "statement",
+        "source_consultation_id",
+        "outcome_backed",
+        "intent",
+        "covered_keys",
+        "action_keys",
+        "importance",
+        "confidence",
+        "superseded_by"
+      ],
+      "properties": {
+        "memory_type": {"$ref": "#/$defs/MemoryType"},
+        "subject": {"type": "string"},
+        "statement": {"type": "string", "minLength": 1, "maxLength": 80},
+        "source_consultation_id": {"type": "string", "minLength": 1},
+        "outcome_backed": {"const": true},
+        "intent": {"$ref": "#/$defs/ConcreteIntent"},
+        "covered_keys": {"type": "array", "items": {"type": "string"}},
+        "covered_values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "integer", "array", "object"]
+          }
+        },
+        "action_keys": {"type": "array", "items": {"type": "string"}},
+        "importance": {"type": "integer", "minimum": 1, "maximum": 5},
+        "confidence": {"const": "OUTCOME_BACKED"},
+        "superseded_by": {"type": ["string", "null"]}
+      }
+    },
+    "OutcomeResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "stage_trace", "memories"],
+      "properties": {
+        "stage": {"type": "string", "enum": ["FEEDBACK", "MEMORY"]},
+        "stage_trace": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Stage"}
+        },
+        "memories": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/MemoryItem"}
+        }
+      }
+    },
+    "AiStructuredOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_intent",
+        "secondary_intent",
+        "intent_confidence",
+        "context_mode",
+        "resolved",
+        "unknowns",
+        "verified_facts",
+        "questions",
+        "user_visible",
+        "actions",
+        "memory_candidates"
+      ],
+      "properties": {
+        "primary_intent": {"type": ["string", "null"]},
+        "secondary_intent": {"type": ["string", "null"]},
+        "intent_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "context_mode": {"type": ["string", "null"]},
+        "resolved": {"type": "boolean"},
+        "unknowns": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/UnknownField"}
+        },
+        "verified_facts": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/VerifiedFact"}
+        },
+        "questions": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {"$ref": "#/$defs/Question"}
+        },
+        "user_visible": {"$ref": "#/$defs/UserVisible"},
+        "actions": {
+          "type": "array",
+          "maxItems": 5,
+          "items": {"$ref": "#/$defs/ActionProposal"}
+        },
+        "memory_candidates": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["memory_type", "statement", "outcome_backed"],
+            "properties": {
+              "memory_type": {"$ref": "#/$defs/MemoryType"},
+              "statement": {"type": "string"},
+              "outcome_backed": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "ConsultationOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consultation_id",
+        "derivation",
+        "intent_executed",
+        "actions_executed",
+        "household_load_outcome",
+        "partner_response_user_reported",
+        "reusable_next_time"
+      ],
+      "properties": {
+        "consultation_id": {"type": "string"},
+        "derivation": {"type": "string", "enum": ["OUTCOME", "CHAT_ONLY"]},
+        "intent_executed": {"type": "boolean"},
+        "actions_executed": {"type": "array", "items": {"type": "string"}},
+        "action_keys": {"type": "array", "items": {"type": "string"}},
+        "household_load_outcome": {
+          "type": "string",
+          "enum": ["LIGHTER", "SAME", "HEAVIER", "UNKNOWN"]
+        },
+        "partner_response_user_reported": {"type": ["string", "null"]},
+        "reusable_next_time": {"type": ["boolean", "null"]},
+        "covered_keys": {"type": "array", "items": {"type": "string"}},
+        "covered_values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "integer", "array", "object"]
+          }
+        },
+        "free_note": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

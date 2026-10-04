@@ -1,0 +1,14 @@
+Household Memory の候補は、次の鎖が揃ったときだけ作る。
+
+situation → proposal → actual action → result → learning
+
+規則:
+- derivation が CHAT_ONLY のときは memory_candidates を空にする。
+- reusable_next_time が null のときは学習を作らない。
+- SUCCESS_PATTERN は、実行した行動が一つ以上あり、次回も使うと利用者が答えたときだけ。
+- FAILURE_PATTERN は、次回はそのまま使わないと利用者が答えたときだけ。
+- 実行した行動の安定した action_key を action_keys に保存する。
+- event_window、expected_delay、desired_window は今回の相談だけの値なので covered_keys に保存しない。covered_keys は再利用可能な家庭情報だけにする。
+- パートナーの返答は、利用者が書いた文だけを outcome に保存する。記憶の statement には感情の評価を書かない。
+- statement は利用者向けの短い日本語にする。Intent 名や schema 名を入れない。
+- 既存の成功パターンを今回却下された場合、その文を再表示しない。
