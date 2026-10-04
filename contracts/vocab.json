@@ -227,5 +227,43 @@
   "unresolved_question": {
     "key": "intent",
     "prompt": "今いちばん近いのはどれですか？"
+  },
+  "missing_evidence_question": {
+    "key": "observed_facts",
+    "prompt": "今日、夕食や送迎で影響しそうなことはありますか？"
+  },
+  "evidence_predicates": {
+    "child_present": {
+      "fields": ["child_count", "child_ages"],
+      "any_value": true
+    },
+    "cleaning_task": {
+      "fields": ["usual_responsibilities", "weekday_routine"],
+      "tokens": ["掃除", "床", "片付け"]
+    },
+    "laundry_task": {
+      "fields": ["usual_responsibilities", "weekday_routine"],
+      "tokens": ["洗濯"]
+    },
+    "dinner_prep": {
+      "fields": ["usual_responsibilities", "weekday_routine"],
+      "tokens": ["夕食", "夕飯", "食事", "料理", "主菜", "作り置き"]
+    },
+    "morning_transport": {
+      "fields": ["weekday_routine", "usual_responsibilities", "daycare_school_constraints"],
+      "tokens": ["送迎", "保育園", "幼稚園", "登園", "通学", "送り"]
+    },
+    "bath_task": {
+      "fields": ["usual_responsibilities", "weekday_routine", "child_ages"],
+      "tokens": ["入浴", "風呂", "お風呂"]
+    },
+    "bedtime_task": {
+      "fields": ["usual_responsibilities", "weekday_routine", "child_bedtime"],
+      "tokens": ["寝かしつけ", "就寝", "寝る"]
+    },
+    "cleanup_task": {
+      "fields": ["usual_responsibilities", "weekday_routine"],
+      "tokens": ["片付け", "食器", "掃除"]
+    }
   }
 }

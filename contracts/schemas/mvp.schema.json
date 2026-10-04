@@ -261,56 +261,108 @@
       }
     },
     "ConsultationTurn": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["stage", "user_visible", "audit"],
-      "properties": {
-        "stage": {"type": "string", "enum": ["CLARIFY", "ACTION"]},
-        "user_visible": {"$ref": "#/$defs/UserVisible"},
-        "audit": {
+      "allOf": [
+        {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "resolution",
-            "context",
-            "questions",
-            "actions",
-            "communication_draft",
-            "retrieved_memory_ids",
-            "stage_trace",
-            "render_only"
-          ],
+          "required": ["stage", "user_visible", "audit"],
           "properties": {
-            "resolution": {"$ref": "#/$defs/Resolution"},
-            "context": {"$ref": "#/$defs/ContextSnapshot"},
-            "questions": {
-              "type": "array",
-              "maxItems": 4,
-              "items": {"$ref": "#/$defs/Question"}
-            },
-            "actions": {
-              "type": "array",
-              "maxItems": 5,
-              "items": {"$ref": "#/$defs/ActionProposal"}
-            },
-            "communication_draft": {
-              "type": ["object", "null"]
-            },
-            "retrieved_memory_ids": {
-              "type": "array",
-              "items": {"type": "string"}
-            },
-            "stage_trace": {
-              "type": "array",
-              "items": {"$ref": "#/$defs/Stage"}
-            },
-            "render_only": {
-              "type": "array",
-              "items": {"const": "user_visible"}
+            "stage": {"type": "string", "enum": ["CLARIFY", "ACTION"]},
+            "user_visible": {"$ref": "#/$defs/UserVisible"},
+            "audit": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "resolution",
+                "context",
+                "questions",
+                "actions",
+                "communication_draft",
+                "retrieved_memory_ids",
+                "stage_trace",
+                "render_only"
+              ],
+              "properties": {
+                "resolution": {"$ref": "#/$defs/Resolution"},
+                "context": {"$ref": "#/$defs/ContextSnapshot"},
+                "questions": {
+                  "type": "array",
+                  "maxItems": 4,
+                  "items": {"$ref": "#/$defs/Question"}
+                },
+                "actions": {
+                  "type": "array",
+                  "maxItems": 5,
+                  "items": {"$ref": "#/$defs/ActionProposal"}
+                },
+                "communication_draft": {
+                  "type": ["object", "null"]
+                },
+                "retrieved_memory_ids": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "stage_trace": {
+                  "type": "array",
+                  "items": {"$ref": "#/$defs/Stage"}
+                },
+                "render_only": {
+                  "type": "array",
+                  "items": {"const": "user_visible"}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["stage"],
+            "properties": {"stage": {"const": "ACTION"}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "user_visible": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "minItems": 1, "maxItems": 5}
+                }
+              },
+              "audit": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "minItems": 1, "maxItems": 5}
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "required": ["stage"],
+            "properties": {"stage": {"const": "CLARIFY"}}
+          },
+          "then": {
+            "type": "object",
+            "properties": {
+              "user_visible": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "maxItems": 0}
+                }
+              },
+              "audit": {
+                "type": "object",
+                "properties": {
+                  "actions": {"type": "array", "maxItems": 0}
+                }
+              }
             }
           }
         }
-      }
+      ]
     },
     "MemoryItem": {
       "type": "object",
@@ -336,6 +388,12 @@
         "outcome_backed": {"const": true},
         "intent": {"$ref": "#/$defs/ConcreteIntent"},
         "covered_keys": {"type": "array", "items": {"type": "string"}},
+        "covered_values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "integer", "array", "object"]
+          }
+        },
         "action_keys": {"type": "array", "items": {"type": "string"}},
         "importance": {"type": "integer", "minimum": 1, "maximum": 5},
         "confidence": {"const": "OUTCOME_BACKED"},
@@ -439,6 +497,12 @@
         "partner_response_user_reported": {"type": ["string", "null"]},
         "reusable_next_time": {"type": ["boolean", "null"]},
         "covered_keys": {"type": "array", "items": {"type": "string"}},
+        "covered_values": {
+          "type": "object",
+          "additionalProperties": {
+            "type": ["string", "integer", "array", "object"]
+          }
+        },
         "free_note": {"type": ["string", "null"]}
       }
     }

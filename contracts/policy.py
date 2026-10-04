@@ -25,6 +25,8 @@ PROFILE_KEYS = set(VOCAB["profile_keys"])
 REUSABLE_MEMORY_KEYS = PROFILE_KEYS
 FORBIDDEN_STORED = set(VOCAB["forbidden_stored_keys"])
 LOAD_LABELS = VOCAB["load_outcome_labels"]
+EVIDENCE_PREDICATES = VOCAB["evidence_predicates"]
+CROSS_INTENT_MEMORY_TYPES = set(VOCAB["cross_intent_memory_types"])
 
 
 class ContractError(ValueError):
@@ -43,9 +45,7 @@ def consult(payload):
             payload.get("rejected_memory_ids") or [],
         )
         for item in retrieved:
-            for key in item.get("covered_keys") or []:
-                if key in REUSABLE_MEMORY_KEYS and not _present(known.get(key)):
-                    known[key] = {"from_memory": item["memory_id"]}
+            _apply_stable_memory_values(known, item)
     if payload.get("reported_facts"):
         known["observed_facts"] = payload["reported_facts"]
 
@@ -80,9 +80,9 @@ def consult(payload):
             "memory_note": None,
         }
     else:
-        stage = "ACTION"
         blocked_action_keys = _blocked_action_keys(
             payload.get("memory") or [],
+            resolution["primary_intent"],
             payload.get("rejected_memory_ids") or [],
             payload.get("override_action_keys") or [],
         )
@@ -91,21 +91,51 @@ def consult(payload):
         )
         actions = built["actions"]
         draft = built["communication_draft"]
-        context = {
-            "mode": resolution["context_mode"],
-            "verified_facts": facts,
-            "unknowns": unknowns,
-            "relevant_tasks": [],
-            "load_changes": _load_names(actions),
-            "capacity_state": "LOW" if resolution["primary_intent"] == "TIRED" else None,
-            "priority_state": "NOW_THEN_LATER" if resolution["primary_intent"] == "WHAT_SHOULD_I_DO" else None,
-        }
-        trace = ["HOME", "CLARIFY", "CONTEXT", "ACTION"]
-        user_visible = built["user_visible"]
-        user_visible["questions"] = [item["prompt"] for item in questions]
-        user_visible["choices"] = []
+        if not actions:
+            stage = "CLARIFY"
+            evidence_question = dict(VOCAB["missing_evidence_question"])
+            questions = [evidence_question]
+            draft = None
+            context = {
+                "mode": resolution["context_mode"],
+                "verified_facts": facts,
+                "unknowns": unknowns,
+                "relevant_tasks": [],
+                "load_changes": [],
+                "capacity_state": "LOW" if resolution["primary_intent"] == "TIRED" else None,
+                "priority_state": (
+                    "NOW_THEN_LATER" if resolution["primary_intent"] == "WHAT_SHOULD_I_DO" else None
+                ),
+            }
+            trace = ["HOME", "CLARIFY", "CONTEXT"]
+            user_visible = {
+                "headline": "行動を出すには、家庭の担当情報が必要です。",
+                "body": "いつも担当していることを一つ教えてください。",
+                "questions": [evidence_question["prompt"]],
+                "choices": [],
+                "actions": [],
+                "memory_note": _memory_note(retrieved),
+            }
+        else:
+            stage = "ACTION"
+            context = {
+                "mode": resolution["context_mode"],
+                "verified_facts": facts,
+                "unknowns": unknowns,
+                "relevant_tasks": [],
+                "load_changes": _load_names(actions),
+                "capacity_state": "LOW" if resolution["primary_intent"] == "TIRED" else None,
+                "priority_state": (
+                    "NOW_THEN_LATER" if resolution["primary_intent"] == "WHAT_SHOULD_I_DO" else None
+                ),
+            }
+            trace = ["HOME", "CLARIFY", "CONTEXT", "ACTION"]
+            user_visible = built["user_visible"]
+            user_visible["questions"] = [item["prompt"] for item in questions]
+            user_visible["choices"] = []
 
     _enforce_visible_limits(user_visible)
+    _enforce_stage_action_invariant(stage, actions, user_visible)
     if draft is not None:
         draft_errors = validate(draft, {"$ref": "#/$defs/CommunicationDraft", **SCHEMA})
         if draft_errors:
@@ -221,20 +251,11 @@ def collect_unknowns(resolution, known):
 
 
 def retrieve_memory(memories, intent, rejected_ids):
-    rejected = set(rejected_ids or [])
-    selected = []
-    for item in memories:
-        if item.get("memory_id") in rejected:
-            continue
-        if item.get("superseded_by"):
-            continue
-        if not item.get("outcome_backed"):
-            continue
-        memory_intent = item.get("intent")
-        memory_type = item.get("memory_type")
-        if memory_intent and memory_intent != intent and memory_type not in VOCAB["cross_intent_memory_types"]:
-            continue
-        selected.append(item)
+    selected = [
+        item
+        for item in memories
+        if _memory_eligible(item, intent, rejected_ids, include_rejected=False)
+    ]
     selected.sort(
         key=lambda item: (int(item.get("importance") or 0), item.get("last_confirmed_at") or ""),
         reverse=True,
@@ -341,13 +362,12 @@ def visible_violations(user_visible):
 def build_recommendation(intent, known, facts, retrieved, blocked_action_keys=None):
     template = TEMPLATES[intent]
     blocked = set(blocked_action_keys or [])
-    has_household_context = any(_present(known.get(key)) for key in PROFILE_KEYS)
     actions = []
     for source in template["actions"]:
         if source["action_key"] in blocked:
             continue
-        required_context = source.get("requires_context_any") or []
-        if required_context and not any(_present(known.get(key)) for key in required_context):
+        required_evidence = source.get("requires_evidence_any") or []
+        if required_evidence and not _has_evidence_any(known, required_evidence):
             continue
         actions.append(
             {
@@ -362,20 +382,11 @@ def build_recommendation(intent, known, facts, retrieved, blocked_action_keys=No
                 "status": "PROPOSED",
             }
         )
-    body = template["body"]
-    if intent == "PARTNER_UNHAPPY_OR_CONFLICT" and facts:
-        fact = facts[0]["text"]
-        rendered = template["body_with_fact"].replace("{fact}", fact)
-        if len(rendered) <= LIMITS["body_max"] and not _contains_forbidden(fact):
-            body = rendered
-    elif _missing_askable(intent, known) and template.get("body_when_unknown"):
-        body = template["body_when_unknown"]
-    elif not has_household_context and template.get("body_without_household_context"):
-        body = template["body_without_household_context"]
-
+    action_keys = {item["action_key"] for item in actions}
+    headline, body = _visible_copy(intent, template, known, facts, action_keys)
     memory_note = _memory_note(retrieved)
     user_visible = {
-        "headline": template["headline"],
+        "headline": headline,
         "body": body,
         "questions": [],
         "choices": [],
@@ -383,8 +394,8 @@ def build_recommendation(intent, known, facts, retrieved, blocked_action_keys=No
         "memory_note": memory_note,
     }
     draft = template.get("communication_draft")
-    draft_context = template.get("communication_draft_requires_context_any") or []
-    if draft_context and not any(_present(known.get(key)) for key in draft_context):
+    draft_required = template.get("communication_draft_requires_evidence_all") or []
+    if draft_required and not _has_evidence_all(known, draft_required):
         draft = None
     return {
         "actions": actions,
@@ -475,23 +486,29 @@ def _memory_from_outcome(consultation, outcome):
         memory_type = "FAILURE_PATTERN"
     if _contains_forbidden(statement):
         raise ContractError("memory statement failed the visible-language contract")
-    return [
-        {
-            "memory_type": memory_type,
-            "subject": label,
-            "statement": statement,
-            "source_consultation_id": consultation["consultation_id"],
-            "outcome_backed": True,
-            "intent": intent,
-            "covered_keys": [
-                key for key in (outcome.get("covered_keys") or []) if key in REUSABLE_MEMORY_KEYS
-            ],
-            "action_keys": action_keys,
-            "importance": 4 if reusable is True else 3,
-            "confidence": "OUTCOME_BACKED",
-            "superseded_by": None,
-        }
+    covered_keys = [
+        key for key in (outcome.get("covered_keys") or []) if key in REUSABLE_MEMORY_KEYS
     ]
+    covered_values = {}
+    for key, value in (outcome.get("covered_values") or {}).items():
+        if key in covered_keys and _authorizing_value(value):
+            covered_values[key] = value
+    memory = {
+        "memory_type": memory_type,
+        "subject": label,
+        "statement": statement,
+        "source_consultation_id": consultation["consultation_id"],
+        "outcome_backed": True,
+        "intent": intent,
+        "covered_keys": covered_keys,
+        "action_keys": action_keys,
+        "importance": 4 if reusable is True else 3,
+        "confidence": "OUTCOME_BACKED",
+        "superseded_by": None,
+    }
+    if covered_values:
+        memory["covered_values"] = covered_values
+    return [memory]
 
 
 def _memory_note(retrieved):
@@ -503,16 +520,47 @@ def _memory_note(retrieved):
     return None
 
 
-def _blocked_action_keys(memories, rejected_ids, override_action_keys):
-    rejected = set(rejected_ids or [])
+def _blocked_action_keys(memories, intent, rejected_ids, override_action_keys):
     overrides = set(override_action_keys or [])
+    valid_keys = _intent_action_keys(intent)
     blocked = set()
     for item in memories:
-        is_rejected = item.get("memory_id") in rejected
-        is_failure = item.get("memory_type") == "FAILURE_PATTERN" and item.get("outcome_backed")
+        if not _memory_eligible(item, intent, rejected_ids, include_rejected=True):
+            continue
+        is_rejected = item.get("memory_id") in set(rejected_ids or [])
+        is_failure = item.get("memory_type") == "FAILURE_PATTERN"
         if is_rejected or is_failure:
             blocked.update(item.get("action_keys") or [])
-    return blocked - overrides
+    return (blocked & valid_keys) - overrides
+
+
+def _memory_eligible(item, intent, rejected_ids, include_rejected):
+    rejected = set(rejected_ids or [])
+    if not include_rejected and item.get("memory_id") in rejected:
+        return False
+    if item.get("superseded_by"):
+        return False
+    if not item.get("outcome_backed"):
+        return False
+    memory_intent = item.get("intent")
+    memory_type = item.get("memory_type")
+    if memory_intent and memory_intent != intent and memory_type not in CROSS_INTENT_MEMORY_TYPES:
+        return False
+    return True
+
+
+def _intent_action_keys(intent):
+    return {item["action_key"] for item in TEMPLATES[intent]["actions"]}
+
+
+def _apply_stable_memory_values(known, item):
+    values = item.get("covered_values") or {}
+    for key in item.get("covered_keys") or []:
+        if key not in REUSABLE_MEMORY_KEYS or _present(known.get(key)):
+            continue
+        value = values.get(key)
+        if _authorizing_value(value):
+            known[key] = value
 
 
 def _missing_askable(intent, known):
@@ -542,6 +590,104 @@ def _present(value):
     return True
 
 
+def _is_provenance_placeholder(value):
+    return isinstance(value, dict) and "from_memory" in value and not any(
+        key != "from_memory" and _present(part) for key, part in value.items()
+    )
+
+
+def _authorizing_value(value):
+    return _present(value) and not _is_provenance_placeholder(value)
+
+
+def _evidence_text(value):
+    if not _authorizing_value(value):
+        return ""
+    if isinstance(value, list):
+        parts = [_evidence_text(item) for item in value]
+        return " ".join(part for part in parts if part)
+    if isinstance(value, dict):
+        parts = []
+        for key, part in value.items():
+            if key == "from_memory":
+                continue
+            text = _evidence_text(part)
+            if text:
+                parts.append(text)
+        return " ".join(parts)
+    return str(value)
+
+
+def _predicate_matches(known, predicate_id):
+    predicate = EVIDENCE_PREDICATES[predicate_id]
+    fields = predicate["fields"]
+    if predicate.get("any_value"):
+        return any(_authorizing_value(known.get(field)) for field in fields)
+    tokens = predicate.get("tokens") or []
+    for field in fields:
+        text = _evidence_text(known.get(field))
+        if text and any(token in text for token in tokens):
+            return True
+    return False
+
+
+def _has_evidence_any(known, predicate_ids):
+    return any(_predicate_matches(known, predicate_id) for predicate_id in predicate_ids)
+
+
+def _has_evidence_all(known, predicate_ids):
+    return all(_predicate_matches(known, predicate_id) for predicate_id in predicate_ids)
+
+
+def _visible_copy(intent, template, known, facts, action_keys):
+    if intent == "WANT_TO_DRINK":
+        return _drink_visible_copy(template, known, action_keys)
+
+    body = template["body"]
+    if intent == "PARTNER_UNHAPPY_OR_CONFLICT" and facts:
+        fact = facts[0]["text"]
+        rendered = template["body_with_fact"].replace("{fact}", fact)
+        if len(rendered) <= LIMITS["body_max"] and not _contains_forbidden(fact):
+            body = rendered
+    elif _missing_askable(intent, known) and template.get("body_when_unknown"):
+        body = template["body_when_unknown"]
+    elif _coordination_only(intent, action_keys) and template.get("body_without_household_context"):
+        body = template["body_without_household_context"]
+    return template["headline"], body
+
+
+def _drink_visible_copy(template, known, action_keys):
+    has_dinner = "prepare_main_dish" in action_keys
+    has_transport = "take_morning_transport" in action_keys
+    if not has_dinner and not has_transport:
+        headline = template["headline_coordination_only"]
+        if _missing_askable("WANT_TO_DRINK", known):
+            body = template["body_when_unknown"]
+        else:
+            body = template["body_coordination_only"]
+        return headline, body
+
+    headline = template["headline"] if has_dinner else template["headline_coordination_only"]
+    if has_dinner and has_transport:
+        body = template["body"]
+    elif has_dinner:
+        body = "増えるのは夕食の準備です。"
+    else:
+        body = "増えるのは翌朝の準備です。"
+    if _missing_askable("WANT_TO_DRINK", known) and not has_dinner and not has_transport:
+        body = template["body_when_unknown"]
+    return headline, body
+
+
+def _coordination_only(intent, action_keys):
+    gated = {
+        source["action_key"]
+        for source in TEMPLATES[intent]["actions"]
+        if source.get("requires_evidence_any")
+    }
+    return not (action_keys & gated)
+
+
 def _load_names(actions):
     names = []
     for action in actions:
@@ -558,6 +704,25 @@ def _reject_inferred_forbidden(unknowns, facts):
     for fact in facts:
         if fact["source"] != "USER_INPUT":
             raise ContractError("fact was not user reported")
+
+
+def _enforce_stage_action_invariant(stage, actions, user_visible):
+    audit_count = len(actions)
+    visible_count = len(user_visible.get("actions") or [])
+    if stage == "ACTION":
+        if not (
+            LIMITS["min_actions_when_resolved"] <= audit_count <= LIMITS["max_actions"]
+        ):
+            raise ContractError("ACTION requires 1 to 5 audit actions")
+        if not (
+            LIMITS["min_actions_when_resolved"] <= visible_count <= LIMITS["max_actions"]
+        ):
+            raise ContractError("ACTION requires 1 to 5 visible actions")
+    elif stage == "CLARIFY":
+        if audit_count != 0:
+            raise ContractError("CLARIFY requires zero audit actions")
+        if visible_count != 0:
+            raise ContractError("CLARIFY requires zero visible actions")
 
 
 def _enforce_visible_limits(user_visible):

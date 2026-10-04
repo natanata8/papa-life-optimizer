@@ -270,6 +270,7 @@
       "ConsultationTurn": {
         "type": "object",
         "required": ["stage", "user_visible", "audit"],
+        "description": "ACTION requires 1 to 5 audit and visible actions. CLARIFY requires zero actions.",
         "properties": {
           "stage": {"type": "string", "enum": ["CLARIFY", "ACTION"]},
           "user_visible": {"type": "object"},
@@ -297,6 +298,11 @@
           "household_atmosphere_user_reported": {"type": ["string", "null"]},
           "reusable_next_time": {"type": ["boolean", "null"]},
           "covered_keys": {"type": "array", "items": {"type": "string"}},
+          "covered_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Reusable household field values paired with covered_keys. Provenance placeholders alone are not authorizing values."
+          },
           "free_note": {"type": ["string", "null"]}
         }
       },
@@ -328,6 +334,12 @@
           },
           "statement": {"type": "string"},
           "outcome_backed": {"type": "boolean"},
+          "covered_keys": {"type": "array", "items": {"type": "string"}},
+          "covered_values": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Actual reusable household values. A from_memory placeholder alone must not authorize actions or claims."
+          },
           "action_keys": {"type": "array", "items": {"type": "string"}}
         }
       },

@@ -2,7 +2,7 @@
 
 Supported: $ref to #/$defs, type (including null unions), required,
 properties, additionalProperties false, enum, const, items, minItems,
-maxItems, minLength, maxLength, minimum, maximum.
+maxItems, minLength, maxLength, minimum, maximum, allOf, if/then/else.
 """
 
 from __future__ import annotations
@@ -24,6 +24,17 @@ def _validate(instance, schema, defs, path, errors):
             return
         _validate(instance, defs[name], defs, path, errors)
         return
+
+    if "allOf" in schema:
+        for index, subschema in enumerate(schema["allOf"]):
+            _validate(instance, subschema, defs, f"{path}.allOf[{index}]", errors)
+
+    if "if" in schema:
+        if_errors = []
+        _validate(instance, schema["if"], defs, path, if_errors)
+        branch = schema.get("then") if not if_errors else schema.get("else")
+        if branch is not None:
+            _validate(instance, branch, defs, path, errors)
 
     if "const" in schema and instance != schema["const"]:
         errors.append(f"{path}: expected const {schema['const']!r}")
@@ -48,13 +59,14 @@ def _validate(instance, schema, defs, path, errors):
         if "maximum" in schema and instance > schema["maximum"]:
             errors.append(f"{path}: above maximum")
 
-    if isinstance(instance, list) and "items" in schema:
+    if isinstance(instance, list):
         if "minItems" in schema and len(instance) < schema["minItems"]:
             errors.append(f"{path}: fewer than {schema['minItems']} items")
         if "maxItems" in schema and len(instance) > schema["maxItems"]:
             errors.append(f"{path}: more than {schema['maxItems']} items")
-        for index, item in enumerate(instance):
-            _validate(item, schema["items"], defs, f"{path}[{index}]", errors)
+        if "items" in schema:
+            for index, item in enumerate(instance):
+                _validate(item, schema["items"], defs, f"{path}[{index}]", errors)
 
     if isinstance(instance, dict) and (
         "properties" in schema or "required" in schema or "additionalProperties" in schema

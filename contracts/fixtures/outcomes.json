@@ -14,6 +14,7 @@
       "household_load_outcome": "LIGHTER",
       "reusable_next_time": true,
       "covered_keys": ["usual_responsibilities"],
+      "covered_values": {"usual_responsibilities": "夕食準備"},
       "partner_response_user_reported": "少し嬉しそうだった"
     },
     "expect": {

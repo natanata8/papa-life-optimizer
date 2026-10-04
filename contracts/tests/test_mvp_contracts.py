@@ -93,9 +93,74 @@ class ConsultationFixtures(unittest.TestCase):
         action_keys = {item["action_key"] for item in result["audit"]["actions"]}
         self.assertEqual(action_keys, {"share_return_time"})
         self.assertIsNone(result["audit"]["communication_draft"])
+        self.assertEqual(result["user_visible"]["headline"], "まず、帰り時刻の共有から始めます。")
+        self.assertEqual(
+            result["user_visible"]["body"],
+            "開始時刻は未定のまま、今できる共有だけ出します。",
+        )
         text = prose(result["user_visible"])
-        for unsupported in ("夕食の主菜", "寝かしつけ", "翌朝の送迎"):
+        for unsupported in ("夕食の主菜", "寝かしつけ", "翌朝の送迎", "夕食まわり"):
             self.assertNotIn(unsupported, text)
+
+    def test_irrelevant_responsibility_and_placeholder_do_not_enable_meal_transport(self):
+        for case_id in (
+            "irrelevant-responsibility-no-meal-transport",
+            "memory-placeholder-no-action-evidence",
+            "child-count-alone-no-task-claims",
+        ):
+            with self.subTest(case=case_id):
+                result = consult(self._case(case_id)["input"])
+                action_keys = {item["action_key"] for item in result["audit"]["actions"]}
+                self.assertEqual(action_keys, {"share_return_time"})
+                self.assertIsNone(result["audit"]["communication_draft"])
+                text = prose(result["user_visible"])
+                for unsupported in ("夕食の主菜", "翌朝の送迎", "寝かしつけ"):
+                    self.assertNotIn(unsupported, text)
+
+    def test_dinner_responsibility_enables_only_matching_action(self):
+        result = consult(self._case("dinner-responsibility-enables-meal-only")["input"])
+        action_keys = {item["action_key"] for item in result["audit"]["actions"]}
+        self.assertEqual(action_keys, {"prepare_main_dish", "share_return_time"})
+        self.assertIsNone(result["audit"]["communication_draft"])
+
+    def test_blocked_only_eligible_action_returns_clarify_not_empty_action(self):
+        result = consult(self._case("blocked-only-action-clarifies")["input"])
+        self.assertEqual(result["stage"], "CLARIFY")
+        self.assertEqual(result["audit"]["actions"], [])
+        self.assertEqual(result["user_visible"]["actions"], [])
+        self.assertTrue(result["audit"]["resolution"]["resolved"])
+        self.assertEqual(
+            [item["key"] for item in result["audit"]["questions"]],
+            ["observed_facts"],
+        )
+        self.assertNotIn("ACTION", result["audit"]["stage_trace"])
+
+    def test_memory_blockers_respect_supersession_and_intent(self):
+        superseded = consult(self._case("superseded-failure-does-not-block")["input"])
+        cross = consult(self._case("cross-intent-failure-does-not-block")["input"])
+        active = consult(self._case("memory-failure-changes-actions")["input"])
+        rejected = consult(self._case("memory-rejected")["input"])
+        rejected_override = consult(self._case("memory-rejected-user-override")["input"])
+        self.assertIn(
+            "share_return_time",
+            {item["action_key"] for item in superseded["audit"]["actions"]},
+        )
+        self.assertIn(
+            "share_return_time",
+            {item["action_key"] for item in cross["audit"]["actions"]},
+        )
+        self.assertNotIn(
+            "prepare_main_dish",
+            {item["action_key"] for item in active["audit"]["actions"]},
+        )
+        self.assertNotIn(
+            "prepare_main_dish",
+            {item["action_key"] for item in rejected["audit"]["actions"]},
+        )
+        self.assertIn(
+            "prepare_main_dish",
+            {item["action_key"] for item in rejected_override["audit"]["actions"]},
+        )
 
     def test_home_choice_beats_free_text(self):
         result = consult(
@@ -136,7 +201,8 @@ class ConsultationFixtures(unittest.TestCase):
                 self.assertEqual(unknown["status"], "UNKNOWN")
                 self.assertIs(unknown.get("infer"), False)
         resolution = result["audit"]["resolution"]
-        if resolution["resolved"]:
+        if result["stage"] == "ACTION":
+            self.assertTrue(resolution["resolved"])
             self.assertGreaterEqual(resolution["confidence"], VOCAB["confidence_threshold"])
             self.assertIn(resolution["primary_intent"], VOCAB["intent_context_mode"])
             self.assertEqual(
@@ -149,12 +215,26 @@ class ConsultationFixtures(unittest.TestCase):
             )
             self.assertGreaterEqual(len(result["audit"]["actions"]), 1)
             self.assertLessEqual(len(result["audit"]["actions"]), 5)
+            self.assertGreaterEqual(len(result["user_visible"]["actions"]), 1)
+            self.assertLessEqual(len(result["user_visible"]["actions"]), 5)
         else:
-            self.assertLess(resolution["confidence"], VOCAB["confidence_threshold"])
-            self.assertIsNone(resolution["primary_intent"])
-            self.assertIsNone(resolution["context_mode"])
+            self.assertEqual(result["stage"], "CLARIFY")
             self.assertEqual(result["audit"]["actions"], [])
             self.assertEqual(result["user_visible"]["actions"], [])
+            self.assertNotIn("ACTION", result["audit"]["stage_trace"])
+            if resolution["resolved"]:
+                self.assertGreaterEqual(resolution["confidence"], VOCAB["confidence_threshold"])
+                self.assertIn(resolution["primary_intent"], VOCAB["intent_context_mode"])
+                self.assertEqual(
+                    resolution["context_mode"],
+                    VOCAB["intent_context_mode"][resolution["primary_intent"]],
+                )
+                self.assertEqual(result["audit"]["stage_trace"], ["HOME", "CLARIFY", "CONTEXT"])
+            else:
+                self.assertLess(resolution["confidence"], VOCAB["confidence_threshold"])
+                self.assertIsNone(resolution["primary_intent"])
+                self.assertIsNone(resolution["context_mode"])
+                self.assertEqual(result["audit"]["stage_trace"], ["HOME", "CLARIFY"])
 
     def _assert_expect(self, result, expect):
         resolution = result["audit"]["resolution"]
@@ -188,6 +268,8 @@ class ConsultationFixtures(unittest.TestCase):
         if "min_actions" in expect:
             self.assertGreaterEqual(len(result["audit"]["actions"]), expect["min_actions"])
         text = prose(visible)
+        for token in expect.get("headline_includes", []):
+            self.assertIn(token, visible["headline"])
         for token in expect.get("body_includes", []):
             self.assertIn(token, visible["body"])
         for token in expect.get("body_excludes", []):
@@ -202,7 +284,7 @@ class ConsultationFixtures(unittest.TestCase):
             stored = [item["text"] for item in result["audit"]["context"]["verified_facts"]]
             self.assertIn(expect["fact_stored"], stored)
             self.assertNotIn(expect["fact_stored"], text)
-        if result["stage"] == "CLARIFY":
+        if result["stage"] == "CLARIFY" and not resolution["resolved"]:
             labels = [label for label, intent in VOCAB["entry_choices"].items() if intent != "FREE_CONSULT"]
             self.assertEqual(visible["choices"], labels)
 
@@ -231,6 +313,10 @@ class OutcomeFixtures(unittest.TestCase):
                     self.assertTrue(memory["outcome_backed"])
                     self.assertEqual(memory["confidence"], "OUTCOME_BACKED")
                     self.assertEqual(memory["action_keys"], case["outcome"].get("action_keys", []))
+                    self.assertEqual(
+                        memory.get("covered_values", {}),
+                        case["outcome"].get("covered_values", {}),
+                    )
                     self.assertNotIn(memory["intent"], memory["statement"])
                 if "memory_type" in expect:
                     self.assertEqual(result["memories"][0]["memory_type"], expect["memory_type"])
