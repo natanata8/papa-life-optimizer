@@ -15,7 +15,7 @@ Issue #17 reconciliation and independent review packet:
 `docs/ISSUE17_PR14_REVIEW_DELTA_20261003.md`
 
 Current review verdict:
-> NOT_READY — final re-review at PR #14 head `1f3f1018eb878fa021ad45d25503b2c6c874e434` found evidence-polarity, copy/action parity, fallback-question, cross-intent blocker, and OpenAPI parity gaps. Return only the packet's fixed contract corrections to Cursor before re-review.
+> NOT_READY — latest independent re-review at PR #14 head `91eddda5e46d391626ab4237f0967fc7e904cbb7` confirms copy/action parity, fallback-question, cross-intent blocker, and OpenAPI parity repairs, but polite negative evidence such as `送迎はありません` still authorizes positive task actions. Return only the packet's bounded polarity correction to Cursor before re-review.
 
 Do not start the first vertical slice or merge PR #14 until independent re-review passes.
 

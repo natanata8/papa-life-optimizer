@@ -5,7 +5,8 @@
 - Final re-review date: 2026-10-04
 - Initial review target: PR #14 at `5cd0d362e8c12eccae7521178c2d803d0cafee8d`
 - Follow-up review target: PR #14 at `aa8f26877cf2f2572026b89c3336f22106a5e6ed`
-- Final re-review target: PR #14 at `1f3f1018eb878fa021ad45d25503b2c6c874e434`
+- Prior final re-review target: PR #14 at `1f3f1018eb878fa021ad45d25503b2c6c874e434`
+- Latest independent re-review target: PR #14 at `91eddda5e46d391626ab4237f0967fc7e904cbb7`
 - Current main: `f151e101a6a4db683369724251c6b70ea19f914d`
 
 ## Current objective
@@ -406,6 +407,45 @@ Keep work limited to the contract layer:
 
 No Human decision is required for these corrections. Do not start the vertical slice, merge, add UI, or change Product, KPI, naming, privacy, pricing, or production state.
 
+## Latest independent re-review — `91eddda`
+
+Verdict: `NOT_READY`.
+
+PR #14 now descends directly from current main `f151e101` and repairs four of the five findings from the `1f3f101` review:
+
+- visible copy and communication drafts track the exact eligible action set across the gated intents exercised;
+- blocked-only fallbacks use intent-specific, current-consultation questions and stay bounded to one question;
+- only same-intent memory contributes action blockers, while cross-intent household memory can still supply stable covered values;
+- JSON Schema, OpenAPI, and runtime mechanically enforce `ACTION` with 1–5 actions and `CLARIFY` with zero actions.
+
+One release-blocking polarity defect remains. The evidence matcher recognizes several negative forms, but not the common polite Japanese suffix `ありません`. Because matching then falls through to positive task tokens, explicit negative evidence authorizes the opposite action and matching affirmative copy/draft. Reproduced at exact head `91eddda`:
+
+- `weekday_routine: ["送迎はありません"]` enables `take_morning_transport`;
+- `weekday_routine: ["送迎は担当ではありません"]` enables `take_morning_transport`;
+- `usual_responsibilities: ["夕食の準備はありません"]` enables `prepare_main_dish`;
+- `usual_responsibilities: ["洗濯はありません"]` enables `defer_laundry_to_morning`.
+
+This is the same safety boundary as the prior polarity finding, not a new product decision. Explicit negative evidence must never become a positive household-task claim.
+
+### Bounded follow-up correction
+
+Keep the correction in the contract layer:
+
+1. normalize or recognize `ありません` and its ordinary inflections before positive-token matching; do not patch only one task token;
+2. add negative regression fixtures for transport, dinner, laundry, and one additional gated task using `ありません` / `担当ではありません` / `必要ありません`;
+3. assert that the action, visible task copy, and communication draft are all absent;
+4. retain positive controls proving explicit affirmative evidence still enables only the matching action;
+5. rerun the full contract suite, validator, and CI, then return the exact head for another independent review.
+
+### Latest verification evidence
+
+- `python3 -m unittest contracts.tests.test_mvp_contracts` — 25 tests passed at exact head `91eddda`;
+- `python3 contracts/validate.py` — validated 43 consultation turns against schema and OpenAPI;
+- independent positive, zero, boolean/count, copy/action, memory-blocker, bounded-CLARIFY, and schema/OpenAPI mutation probes — passed;
+- independent polite-negation probes above — failed and reproduced task-specific actions plus affirmative visible copy/drafts.
+
+No new feature, UI slice, merge, production action, or Human-owned Product, KPI, naming, privacy, pricing, household-inference, or model-policy decision is authorized by this follow-up.
+
 ## Initial Cursor repair task — superseded by follow-up
 
 This task produced `aa8f268`; the follow-up section above now contains the current exact repair task.
@@ -430,6 +470,6 @@ Acceptance:
 
 ## Issue #17 Exit / next gate
 
-This packet completes the safe reconciliation and independent-review preparation slice for Issue #17. PR #14 is `NOT_READY`, not ready to merge, and the first Builder vertical slice remains gated on the fixed contract corrections above plus independent re-review.
+This packet completes the safe reconciliation and independent-review preparation slice for Issue #17. PR #14 at `91eddda` is `NOT_READY`, not ready to merge, and the first Builder vertical slice remains gated on the polite-negation contract correction above plus independent re-review.
 
 No Human decision is needed to make the listed contract fixes. The unresolved items above remain explicitly HUMAN_REQUIRED.
