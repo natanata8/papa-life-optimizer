@@ -15,9 +15,9 @@ Issue #17 reconciliation and independent review packet:
 `docs/ISSUE17_PR14_REVIEW_DELTA_20261003.md`
 
 Current review verdict:
-> READY_WITH_CHANGES — return the bounded contract findings to Cursor before any new vertical slice.
+> NOT_READY — final re-review at PR #14 head `1f3f1018eb878fa021ad45d25503b2c6c874e434` found evidence-polarity, copy/action parity, fallback-question, cross-intent blocker, and OpenAPI parity gaps. Return only the packet's fixed contract corrections to Cursor before re-review.
 
-Follow-up at PR #14 head `aa8f26877cf2f2572026b89c3336f22106a5e6ed` confirmed four remaining contract edge cases; use the packet's follow-up section for the exact repair task and regression tests.
+Do not start the first vertical slice or merge PR #14 until independent re-review passes.
 
 
 ## Pre-Cursor review gate — Issue #13

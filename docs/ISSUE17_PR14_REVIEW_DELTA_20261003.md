@@ -1,9 +1,11 @@
 # Issue #17 — Upstream / PR #14 Independent Review Delta
 
-- Status: `READY_WITH_CHANGES`
-- Review date: 2026-10-03
+- Status: `NOT_READY`
+- Initial review date: 2026-10-03
+- Final re-review date: 2026-10-04
 - Initial review target: PR #14 at `5cd0d362e8c12eccae7521178c2d803d0cafee8d`
 - Follow-up review target: PR #14 at `aa8f26877cf2f2572026b89c3336f22106a5e6ed`
+- Final re-review target: PR #14 at `1f3f1018eb878fa021ad45d25503b2c6c874e434`
 - Current main: `f151e101a6a4db683369724251c6b70ea19f914d`
 
 ## Current objective
@@ -277,6 +279,133 @@ Keep the fix inside PR #14 contracts, fixtures, and tests:
 
 Do not expand the product, add UI, choose naming/KPI/privacy policy, or start the vertical slice in this repair.
 
+## Final re-review — `1f3f101`
+
+Verdict: `NOT_READY`.
+
+The final Cursor repair closes the four literal reproductions from `aa8f268`:
+
+- zero-context and unrelated-context drink responses now use coordination-only copy and actions;
+- provenance-only memory placeholders no longer authorize household actions;
+- all-filtered results return bounded `CLARIFY`, not an empty `ACTION`;
+- active failure blockers now respect supersession and ordinary wrong-intent memory;
+- JSON Schema and runtime enforce 1–5 actions for `ACTION` and zero actions for `CLARIFY`.
+
+Independent execution at the exact head passed 21 tests and the validator. Boundary variants still expose four general contract defects.
+
+### IMPORTANT — evidence matching treats zero and negated values as positive evidence
+
+The new evidence predicates are more specific than field-presence checks, but they still use truthiness and substring matching:
+
+- `child_count: 0` satisfies `child_present`, enabling `serve_child_meal` and child-meal copy.
+- `usual_responsibilities: ["夕食は担当していない"]` contains the token `夕食`, enabling `prepare_main_dish` and affirmative dinner-preparation copy.
+
+This converts explicit negative evidence into the opposite recommendation.
+
+Required correction:
+
+- typed predicates must respect value semantics: `child_count` authorizes child-present behavior only when it is an integer greater than zero; false, zero, empty, and Unknown do not;
+- free-text evidence must not authorize a positive action when the matching task is negated, absent, not owned, unnecessary, or rejected;
+- prefer normalized positive evidence facts/tags over substring presence in unrestricted prose;
+- if normalization cannot confidently establish the positive fact, keep it Unknown and do not enable the action.
+
+Required tests:
+
+- `child_count: 0` does not enable `serve_child_meal` or child-meal copy;
+- `夕食は担当していない`, `夕食準備は不要`, and `送迎なし` do not enable their positive actions;
+- explicit positive dinner/transport evidence enables only the matching actions.
+
+### IMPORTANT — non-drink copy is not derived from the eligible action set
+
+The drink-specific copy now follows eligible actions, but other intents still select broad template bodies whenever any gated action is present:
+
+- `TIRED` with `child_count: 1` enables rest and child meal only, while the body also says laundry will move to tomorrow.
+- zero-context `OVERTIME` returns only `share_expected_delay`, while headline/body promise a return-home responsibility.
+- dinner-only `OVERTIME` copy also asserts return-home cleanup; cleanup-only copy also asserts dinner impact.
+
+Required correction:
+
+- derive headline, body, and communication draft from the exact eligible `action_keys` and verified facts for every intent, not only `WANT_TO_DRINK`;
+- a task may appear in visible copy only when the matching evidence predicate passed and its action is present;
+- add single-action and mixed-action copy tests for `TIRED`, `OVERTIME`, and the remaining intents with gated actions.
+
+### IMPORTANT — fallback CLARIFY silently becomes a generic profile question
+
+When all eligible actions are blocked, the runtime correctly returns `CLARIFY`, but the shared fallback asks:
+
+> 今日、夕食や送迎で影響しそうなことはありますか？
+
+and displays:
+
+> いつも担当していることを一つ教えてください。
+
+The visible prompt asks for usual household-profile information even though it is stored under `observed_facts`. It is also reused for unrelated intents; a blocked `TIRED` consultation asks about dinner and transport.
+
+Required correction:
+
+- keep the fallback question scoped to the current consultation, not the user's general profile;
+- route the question by intent and by the evidence missing from the remaining non-blocked candidates;
+- ask at most one bounded question and do not re-ask known information.
+
+Examples:
+
+- drink: `今回の時間帯に、対応が必要な家事や送迎はありますか？`
+- tired: `今、今日中に対応が必要なことはありますか？`
+
+Required tests must assert visible prompt semantics, not only the internal question key.
+
+### IMPORTANT — cross-intent household memory can still block unrelated actions
+
+Ordinary wrong-intent `FAILURE_PATTERN` is now ignored correctly. However, a rejected cross-intent memory type such as `TASK_OWNERSHIP` remains eligible for cross-intent retrieval and can block any current action key carried in its `action_keys`. A rejected `OVERTIME` task-ownership memory containing `share_return_time` therefore blocks that action in `WANT_TO_DRINK` and forces `CLARIFY`.
+
+Cross-intent fact reuse does not imply cross-intent action rejection.
+
+Required correction:
+
+- use cross-intent household memory only to supply eligible stable facts;
+- action blocking from failure/rejection must require the current intent, unless an explicit action-scoped portability contract independently proves reuse;
+- simplest MVP rule: only same-intent memories may contribute `action_keys` to blockers.
+
+Required tests:
+
+- cross-intent `TASK_OWNERSHIP` may supply a covered household value but cannot block a current action;
+- same-intent rejected success and active failure still block;
+- current-consultation override still restores the explicitly selected same-intent action.
+
+### MINOR — OpenAPI states but does not encode stage/action parity
+
+Runtime enforcement and `mvp.schema.json` conditional validation pass. OpenAPI's `ConsultationTurn` only describes the invariant in prose while `user_visible` and `audit` remain unconstrained objects. An HTTP client generated from OpenAPI cannot mechanically reject an empty-action `ACTION` or an action-bearing `CLARIFY`.
+
+Required correction:
+
+- encode `ACTION` versus `CLARIFY` action cardinality in OpenAPI 3.1 using reusable schemas plus `oneOf`/conditional constraints;
+- add parity tests using representative valid and invalid turns so JSON Schema, OpenAPI, and runtime cannot drift.
+
+### Final re-review evidence
+
+- `python3 -m unittest contracts.tests.test_mvp_contracts` — 21 tests passed at exact head `1f3f101`
+- `python3 contracts/validate.py` — exited successfully
+- original zero/irrelevant/placeholder drink cases — passed
+- blocked-only result — bounded `CLARIFY` with zero actions; JSON Schema accepted
+- mutated empty-action `ACTION` — JSON Schema rejected both audit and visible arrays
+- mutated action-bearing `CLARIFY` — JSON Schema rejected both audit and visible arrays
+- superseded and ordinary wrong-intent failures — did not block
+- negative dinner statement, `child_count: 0`, cross-intent rejected household memory, and non-drink copy variants — failed as described above
+
+### Exact fixed correction for Cursor
+
+Keep work limited to the contract layer:
+
+1. make evidence predicates typed and polarity-aware;
+2. generate all visible copy/drafts from eligible actions and verified facts;
+3. replace the shared profile-like fallback with intent-specific current-case questions;
+4. restrict action blockers to same-intent memory for MVP;
+5. encode stage/action cardinality in OpenAPI, matching JSON Schema/runtime;
+6. add every positive and negative boundary case listed above;
+7. rerun tests, validator, and CI, then return the exact head for independent re-review.
+
+No Human decision is required for these corrections. Do not start the vertical slice, merge, add UI, or change Product, KPI, naming, privacy, pricing, or production state.
+
 ## Initial Cursor repair task — superseded by follow-up
 
 This task produced `aa8f268`; the follow-up section above now contains the current exact repair task.
@@ -301,6 +430,6 @@ Acceptance:
 
 ## Issue #17 Exit / next gate
 
-This packet completes the safe reconciliation and independent-review preparation slice for Issue #17. PR #14 is `READY_WITH_CHANGES`, not ready to merge, and the first Builder vertical slice remains gated on a focused Cursor fix plus independent re-review.
+This packet completes the safe reconciliation and independent-review preparation slice for Issue #17. PR #14 is `NOT_READY`, not ready to merge, and the first Builder vertical slice remains gated on the fixed contract corrections above plus independent re-review.
 
 No Human decision is needed to make the listed contract fixes. The unresolved items above remain explicitly HUMAN_REQUIRED.
