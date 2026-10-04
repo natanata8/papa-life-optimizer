@@ -795,6 +795,213 @@
     }
   },
   {
+    "id": "polite-negated-transport-absent",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "金曜20時",
+        "usual_responsibilities": ["送迎はありません"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["share_return_time"],
+      "action_keys_exclude": ["take_morning_transport", "prepare_main_dish"],
+      "body_excludes": ["翌朝の準備", "夕食"],
+      "prose_excludes": ["翌朝の送迎", "翌朝の支度", "夕食の主菜"],
+      "communication_draft_null": true,
+      "draft_message_excludes": ["翌朝の支度", "夕食は出る前に"]
+    }
+  },
+  {
+    "id": "polite-negated-transport-not-owned",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "金曜20時",
+        "usual_responsibilities": ["送迎は担当ではありません"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["share_return_time"],
+      "action_keys_exclude": ["take_morning_transport", "prepare_main_dish"],
+      "body_excludes": ["翌朝の準備", "夕食"],
+      "prose_excludes": ["翌朝の送迎", "翌朝の支度", "夕食の主菜"],
+      "communication_draft_null": true,
+      "draft_message_excludes": ["翌朝の支度", "夕食は出る前に"]
+    }
+  },
+  {
+    "id": "polite-negated-dinner-absent",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "金曜20時",
+        "usual_responsibilities": ["夕食の準備はありません"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["share_return_time"],
+      "action_keys_exclude": ["prepare_main_dish", "take_morning_transport"],
+      "body_excludes": ["夕食の準備", "翌朝の準備"],
+      "prose_excludes": ["夕食の主菜", "夕食まわり", "翌朝の送迎"],
+      "communication_draft_null": true,
+      "draft_message_excludes": ["夕食は出る前に", "翌朝の支度"]
+    }
+  },
+  {
+    "id": "polite-negated-laundry-absent",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "疲れた",
+      "raw_user_input": "",
+      "known_context": {
+        "usual_responsibilities": ["洗濯はありません"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["rest_twenty_minutes"],
+      "action_keys_exclude": ["defer_laundry_to_morning", "serve_child_meal"],
+      "body_excludes": ["洗濯"],
+      "prose_excludes": ["洗濯"],
+      "communication_draft_null": true,
+      "draft_message_excludes": ["洗濯"]
+    }
+  },
+  {
+    "id": "polite-negated-bath-absent",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "自分の時間がほしい",
+      "raw_user_input": "",
+      "known_context": {
+        "desired_window": "土曜の午後90分",
+        "usual_responsibilities": ["入浴はありません"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["schedule_ninety_minutes", "share_return_deadline"],
+      "action_keys_exclude": ["finish_bath_first"],
+      "body_excludes": ["入浴"],
+      "prose_excludes": ["入浴"],
+      "communication_draft_null": true,
+      "draft_message_excludes": ["入浴"]
+    }
+  },
+  {
+    "id": "affirmative-transport-enables-action-copy-draft",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "金曜20時",
+        "usual_responsibilities": ["朝の送迎"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["share_return_time", "take_morning_transport"],
+      "action_keys_exclude": ["prepare_main_dish"],
+      "body_includes": ["翌朝の準備"],
+      "prose_excludes": ["夕食の主菜"],
+      "draft_message_includes": ["翌朝の支度"]
+    }
+  },
+  {
+    "id": "affirmative-dinner-enables-action-copy-draft",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "飲みに行きたい",
+      "raw_user_input": "",
+      "known_context": {
+        "event_window": "金曜20時",
+        "usual_responsibilities": ["夕食準備"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["prepare_main_dish", "share_return_time"],
+      "action_keys_exclude": ["take_morning_transport"],
+      "body_includes": ["夕食"],
+      "prose_excludes": ["翌朝の送迎"],
+      "draft_message_includes": ["夕食は出る前に"]
+    }
+  },
+  {
+    "id": "affirmative-laundry-enables-action-copy",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "疲れた",
+      "raw_user_input": "",
+      "known_context": {
+        "usual_responsibilities": ["洗濯"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["rest_twenty_minutes", "defer_laundry_to_morning"],
+      "action_keys_exclude": ["serve_child_meal"],
+      "body_includes": ["洗濯"],
+      "communication_draft_null": true
+    }
+  },
+  {
+    "id": "affirmative-bath-enables-action-copy",
+    "input": {
+      "source": "HOME_CHOICE",
+      "entry_choice": "自分の時間がほしい",
+      "raw_user_input": "",
+      "known_context": {
+        "desired_window": "土曜の午後90分",
+        "usual_responsibilities": ["入浴"]
+      },
+      "reported_facts": [],
+      "memory": [],
+      "rejected_memory_ids": []
+    },
+    "expect": {
+      "stage": "ACTION",
+      "action_keys_include": ["finish_bath_first", "schedule_ninety_minutes", "share_return_deadline"],
+      "body_includes": ["入浴"],
+      "communication_draft_null": true
+    }
+  },
+  {
     "id": "tired-child-only-no-laundry-copy",
     "input": {
       "source": "HOME_CHOICE",

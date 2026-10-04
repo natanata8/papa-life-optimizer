@@ -149,6 +149,11 @@ class ConsultationFixtures(unittest.TestCase):
             "negated-dinner-not-owned",
             "negated-dinner-unnecessary",
             "negated-transport-absent",
+            "polite-negated-transport-absent",
+            "polite-negated-transport-not-owned",
+            "polite-negated-dinner-absent",
+            "polite-negated-laundry-absent",
+            "polite-negated-bath-absent",
         ):
             with self.subTest(case=case_id):
                 result = consult(self._case(case_id)["input"])
@@ -169,6 +174,21 @@ class ConsultationFixtures(unittest.TestCase):
             "serve_child_meal",
             {item["action_key"] for item in boolean_count["audit"]["actions"]},
         )
+
+    def test_affirmative_evidence_still_enables_gated_actions_copy_and_draft(self):
+        for case_id in (
+            "affirmative-transport-enables-action-copy-draft",
+            "affirmative-dinner-enables-action-copy-draft",
+            "affirmative-laundry-enables-action-copy",
+            "affirmative-bath-enables-action-copy",
+            "dinner-responsibility-enables-meal-only",
+            "tired-laundry-only-no-meal-copy",
+            "want-to-drink",
+            "want-personal-time",
+        ):
+            with self.subTest(case=case_id):
+                result = consult(self._case(case_id)["input"])
+                self._assert_expect(result, self._case(case_id)["expect"])
 
     def test_copy_tracks_exact_eligible_actions_for_gated_intents(self):
         for case_id in (
@@ -364,6 +384,18 @@ class ConsultationFixtures(unittest.TestCase):
             self.assertNotIn(token, visible["body"])
         for token in expect.get("prose_excludes", []):
             self.assertNotIn(token, text)
+        draft = result["audit"].get("communication_draft")
+        if expect.get("communication_draft_null"):
+            self.assertIsNone(draft)
+        if "draft_message_includes" in expect:
+            self.assertIsNotNone(draft)
+            message = draft.get("message") or ""
+            for token in expect["draft_message_includes"]:
+                self.assertIn(token, message)
+        if "draft_message_excludes" in expect:
+            message = (draft or {}).get("message") or ""
+            for token in expect["draft_message_excludes"]:
+                self.assertNotIn(token, message)
         if "memory_note" in expect:
             self.assertEqual(visible["memory_note"], expect["memory_note"])
         if "retrieved_memory_ids" in expect:

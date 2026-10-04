@@ -643,18 +643,29 @@ def _iter_evidence_items(value):
         yield text
 
 
+def _normalize_evidence_text(text):
+    return str(text).replace(" ", "").replace("　", "").strip()
+
+
 def _has_negation(text):
-    return any(marker in text for marker in VOCAB["evidence_negation_markers"])
+    normalized = _normalize_evidence_text(text)
+    if not normalized:
+        return False
+    return any(marker in normalized for marker in VOCAB["evidence_negation_markers"])
 
 
 def _text_authorizes_positive(text, positive_tags, tokens):
-    if not text or _has_negation(text):
+    if not text:
         return False
-    normalized = text.replace(" ", "").replace("　", "")
+    normalized = _normalize_evidence_text(text)
+    # Polite negatives (ありません / ません) and ordinary inflections must be
+    # recognized on normalized text before any positive-token match.
+    if not normalized or _has_negation(normalized):
+        return False
     for tag in positive_tags:
         if normalized == tag or tag in normalized:
             return True
-    return any(token in text for token in tokens)
+    return any(token in normalized for token in tokens)
 
 
 def _predicate_matches(known, predicate_id):
