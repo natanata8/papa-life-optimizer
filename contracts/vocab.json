@@ -228,41 +228,157 @@
     "key": "intent",
     "prompt": "今いちばん近いのはどれですか？"
   },
-  "missing_evidence_question": {
-    "key": "observed_facts",
-    "prompt": "今日、夕食や送迎で影響しそうなことはありますか？"
+  "evidence_negation_markers": [
+    "担当していない",
+    "担当しない",
+    "やっていない",
+    "やらなくてよい",
+    "やらなくていい",
+    "しなくてよい",
+    "しなくていい",
+    "必要ない",
+    "していない",
+    "しない",
+    "不要",
+    "なし",
+    "無い",
+    "拒否",
+    "却下",
+    "ない"
+  ],
+  "missing_evidence_questions": {
+    "WHAT_SHOULD_I_DO": {
+      "key": "observed_facts",
+      "prompt": "今、今日中に進めたい用事はありますか？"
+    },
+    "TIRED": {
+      "key": "observed_facts",
+      "prompt": "今、今日中に対応が必要なことはありますか？"
+    },
+    "WANT_TO_DRINK": {
+      "key": "observed_facts",
+      "prompt": "今回の時間帯に、対応が必要な家事や送迎はありますか？"
+    },
+    "WANT_PERSONAL_TIME": {
+      "key": "observed_facts",
+      "prompt": "空ける前に、対応が必要な家事はありますか？"
+    },
+    "PARTNER_UNHAPPY_OR_CONFLICT": {
+      "key": "observed_facts",
+      "prompt": "今夜、対応が必要なことはありますか？"
+    },
+    "OVERTIME": {
+      "key": "observed_facts",
+      "prompt": "今回の遅れで、対応が必要な家事はありますか？"
+    }
+  },
+  "missing_evidence_clarify_copy": {
+    "WHAT_SHOULD_I_DO": {
+      "headline": "今日の用事を確認します。",
+      "body": "今の相談で必要なことだけ、一つ教えてください。"
+    },
+    "TIRED": {
+      "headline": "今日中の必要なことを確認します。",
+      "body": "休む前に必要なことだけ、一つ教えてください。"
+    },
+    "WANT_TO_DRINK": {
+      "headline": "今回の家事の影響を確認します。",
+      "body": "今の相談に必要なことだけ、一つ教えてください。"
+    },
+    "WANT_PERSONAL_TIME": {
+      "headline": "空ける前の必要なことを確認します。",
+      "body": "今の相談に必要なことだけ、一つ教えてください。"
+    },
+    "PARTNER_UNHAPPY_OR_CONFLICT": {
+      "headline": "今夜必要な対応を確認します。",
+      "body": "今の相談に必要なことだけ、一つ教えてください。"
+    },
+    "OVERTIME": {
+      "headline": "遅れに伴う家事を確認します。",
+      "body": "今の相談に必要なことだけ、一つ教えてください。"
+    }
+  },
+  "missing_evidence_by_predicate": {
+    "cleaning_task": {
+      "key": "observed_facts",
+      "prompt": "今回、掃除で対応が必要なことはありますか？"
+    },
+    "laundry_task": {
+      "key": "observed_facts",
+      "prompt": "今回、洗濯で対応が必要なことはありますか？"
+    },
+    "dinner_prep": {
+      "key": "observed_facts",
+      "prompt": "今回、夕食の準備は対応が必要ですか？"
+    },
+    "morning_transport": {
+      "key": "observed_facts",
+      "prompt": "今回、送迎の対応は必要ですか？"
+    },
+    "bath_task": {
+      "key": "observed_facts",
+      "prompt": "今回、入浴の対応は必要ですか？"
+    },
+    "bedtime_task": {
+      "key": "observed_facts",
+      "prompt": "今回、寝かしつけの対応は必要ですか？"
+    },
+    "cleanup_task": {
+      "key": "observed_facts",
+      "prompt": "今回、片付けの対応は必要ですか？"
+    },
+    "child_present": {
+      "key": "observed_facts",
+      "prompt": "今、子どもの対応が必要なことはありますか？"
+    }
   },
   "evidence_predicates": {
     "child_present": {
-      "fields": ["child_count", "child_ages"],
-      "any_value": true
+      "match": "child_presence",
+      "integer_fields": ["child_count"],
+      "integer_minimum": 1,
+      "nonempty_fields": ["child_ages"]
     },
     "cleaning_task": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine"],
+      "positive_tags": ["掃除", "床拭き", "床掃除"],
       "tokens": ["掃除", "床", "片付け"]
     },
     "laundry_task": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine"],
+      "positive_tags": ["洗濯", "洗濯担当"],
       "tokens": ["洗濯"]
     },
     "dinner_prep": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine"],
+      "positive_tags": ["夕食準備", "夕飯準備", "夕食作り", "作り置き", "料理担当", "主菜"],
       "tokens": ["夕食", "夕飯", "食事", "料理", "主菜", "作り置き"]
     },
     "morning_transport": {
+      "match": "positive_task",
       "fields": ["weekday_routine", "usual_responsibilities", "daycare_school_constraints"],
+      "positive_tags": ["朝の送迎", "保育園送迎", "送迎担当", "送り"],
       "tokens": ["送迎", "保育園", "幼稚園", "登園", "通学", "送り"]
     },
     "bath_task": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine", "child_ages"],
+      "positive_tags": ["入浴", "お風呂", "風呂担当"],
       "tokens": ["入浴", "風呂", "お風呂"]
     },
     "bedtime_task": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine", "child_bedtime"],
+      "positive_tags": ["寝かしつけ", "就寝担当"],
       "tokens": ["寝かしつけ", "就寝", "寝る"]
     },
     "cleanup_task": {
+      "match": "positive_task",
       "fields": ["usual_responsibilities", "weekday_routine"],
+      "positive_tags": ["片付け", "食器洗い", "食器"],
       "tokens": ["片付け", "食器", "掃除"]
     }
   }

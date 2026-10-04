@@ -121,7 +121,10 @@ class ConsultationFixtures(unittest.TestCase):
         result = consult(self._case("dinner-responsibility-enables-meal-only")["input"])
         action_keys = {item["action_key"] for item in result["audit"]["actions"]}
         self.assertEqual(action_keys, {"prepare_main_dish", "share_return_time"})
-        self.assertIsNone(result["audit"]["communication_draft"])
+        draft = result["audit"]["communication_draft"]
+        self.assertIsNotNone(draft)
+        self.assertIn("夕食", draft["message"])
+        self.assertNotIn("翌朝", draft["message"])
 
     def test_blocked_only_eligible_action_returns_clarify_not_empty_action(self):
         result = consult(self._case("blocked-only-action-clarifies")["input"])
@@ -133,7 +136,71 @@ class ConsultationFixtures(unittest.TestCase):
             [item["key"] for item in result["audit"]["questions"]],
             ["observed_facts"],
         )
+        self.assertEqual(
+            result["user_visible"]["questions"],
+            ["今回の時間帯に、対応が必要な家事や送迎はありますか？"],
+        )
+        self.assertNotIn("いつも", result["user_visible"]["body"])
         self.assertNotIn("ACTION", result["audit"]["stage_trace"])
+
+    def test_negated_and_zero_evidence_do_not_authorize_positive_actions(self):
+        for case_id in (
+            "child-count-zero-no-child-meal",
+            "negated-dinner-not-owned",
+            "negated-dinner-unnecessary",
+            "negated-transport-absent",
+        ):
+            with self.subTest(case=case_id):
+                result = consult(self._case(case_id)["input"])
+                self._assert_expect(result, self._case(case_id)["expect"])
+
+        boolean_count = consult(
+            {
+                "source": "HOME_CHOICE",
+                "entry_choice": "疲れた",
+                "raw_user_input": "",
+                "known_context": {"child_count": True},
+                "reported_facts": [],
+                "memory": [],
+                "rejected_memory_ids": [],
+            }
+        )
+        self.assertNotIn(
+            "serve_child_meal",
+            {item["action_key"] for item in boolean_count["audit"]["actions"]},
+        )
+
+    def test_copy_tracks_exact_eligible_actions_for_gated_intents(self):
+        for case_id in (
+            "tired-child-only-no-laundry-copy",
+            "tired-laundry-only-no-meal-copy",
+            "tired-rest-only-no-task-copy",
+            "overtime-zero-context-coordination-only",
+            "overtime-dinner-only-no-cleanup-copy",
+            "overtime-cleanup-only-no-dinner-copy",
+            "personal-time-no-bath-copy",
+            "what-should-i-do-no-cleaning-copy",
+            "partner-conflict-no-bedtime-copy",
+        ):
+            with self.subTest(case=case_id):
+                result = consult(self._case(case_id)["input"])
+                self._assert_expect(result, self._case(case_id)["expect"])
+
+    def test_clarify_prompt_is_intent_specific_and_current_consultation(self):
+        drink = consult(self._case("blocked-only-action-clarifies")["input"])
+        tired = consult(self._case("tired-blocked-asks-current-needs")["input"])
+        self.assertEqual(
+            drink["user_visible"]["questions"],
+            ["今回の時間帯に、対応が必要な家事や送迎はありますか？"],
+        )
+        self.assertEqual(
+            tired["user_visible"]["questions"],
+            ["今、今日中に対応が必要なことはありますか？"],
+        )
+        for result in (drink, tired):
+            text = prose(result["user_visible"])
+            self.assertNotIn("いつも担当", text)
+            self.assertLessEqual(len(result["user_visible"]["questions"]), 1)
 
     def test_memory_blockers_respect_supersession_and_intent(self):
         superseded = consult(self._case("superseded-failure-does-not-block")["input"])
@@ -141,6 +208,12 @@ class ConsultationFixtures(unittest.TestCase):
         active = consult(self._case("memory-failure-changes-actions")["input"])
         rejected = consult(self._case("memory-rejected")["input"])
         rejected_override = consult(self._case("memory-rejected-user-override")["input"])
+        cross_ownership = consult(
+            self._case("cross-intent-rejected-ownership-does-not-block")["input"]
+        )
+        cross_ownership_values = consult(
+            self._case("cross-intent-ownership-supplies-values-not-blockers")["input"]
+        )
         self.assertIn(
             "share_return_time",
             {item["action_key"] for item in superseded["audit"]["actions"]},
@@ -160,6 +233,19 @@ class ConsultationFixtures(unittest.TestCase):
         self.assertIn(
             "prepare_main_dish",
             {item["action_key"] for item in rejected_override["audit"]["actions"]},
+        )
+        self.assertEqual(cross_ownership["stage"], "ACTION")
+        self.assertIn(
+            "share_return_time",
+            {item["action_key"] for item in cross_ownership["audit"]["actions"]},
+        )
+        self.assertIn(
+            "prepare_main_dish",
+            {item["action_key"] for item in cross_ownership_values["audit"]["actions"]},
+        )
+        self.assertIn(
+            "share_return_time",
+            {item["action_key"] for item in cross_ownership_values["audit"]["actions"]},
         )
 
     def test_home_choice_beats_free_text(self):
@@ -246,6 +332,8 @@ class ConsultationFixtures(unittest.TestCase):
                 self.assertEqual(resolution[key], expect[key])
         if "question_keys" in expect:
             self.assertEqual([item["key"] for item in result["audit"]["questions"]], expect["question_keys"])
+        if "question_prompts" in expect:
+            self.assertEqual(visible["questions"], expect["question_prompts"])
         if "must_not_ask_keys" in expect:
             asked = {item["key"] for item in result["audit"]["questions"]}
             self.assertTrue(asked.isdisjoint(expect["must_not_ask_keys"]))
@@ -426,6 +514,62 @@ class SchemaParity(unittest.TestCase):
         errors = validate(payload, {"$ref": "#/$defs/MemoryItem", **SCHEMA})
         self.assertTrue(any("partner_mood_score" in error for error in errors))
 
+    def test_stage_action_cardinality_parity_across_schema_openapi_runtime(self):
+        openapi_defs = OPENAPI["components"]["schemas"]
+        action_turn = consult(self._case("want-to-drink")["input"])
+        clarify_turn = consult(self._case("blocked-only-action-clarifies")["input"])
+
+        self.assertEqual(
+            validate(action_turn, {"$ref": "#/$defs/ConsultationTurn", **SCHEMA}),
+            [],
+        )
+        self.assertEqual(
+            validate(action_turn, openapi_defs["ConsultationTurn"], defs=openapi_defs),
+            [],
+        )
+        self.assertEqual(
+            validate(clarify_turn, {"$ref": "#/$defs/ConsultationTurn", **SCHEMA}),
+            [],
+        )
+        self.assertEqual(
+            validate(clarify_turn, openapi_defs["ConsultationTurn"], defs=openapi_defs),
+            [],
+        )
+
+        empty_action = json.loads(json.dumps(action_turn))
+        empty_action["audit"]["actions"] = []
+        empty_action["user_visible"]["actions"] = []
+        self.assertTrue(
+            validate(empty_action, {"$ref": "#/$defs/ConsultationTurn", **SCHEMA})
+        )
+        self.assertTrue(
+            validate(empty_action, openapi_defs["ConsultationTurn"], defs=openapi_defs)
+        )
+
+        clarify_with_actions = json.loads(json.dumps(clarify_turn))
+        clarify_with_actions["audit"]["actions"] = action_turn["audit"]["actions"][:1]
+        clarify_with_actions["user_visible"]["actions"] = action_turn["user_visible"][
+            "actions"
+        ][:1]
+        self.assertTrue(
+            validate(
+                clarify_with_actions, {"$ref": "#/$defs/ConsultationTurn", **SCHEMA}
+            )
+        )
+        self.assertTrue(
+            validate(
+                clarify_with_actions,
+                openapi_defs["ConsultationTurn"],
+                defs=openapi_defs,
+            )
+        )
+
+    def _case(self, case_id):
+        for case in CONSULTATIONS:
+            if case["id"] == case_id:
+                return case
+        raise AssertionError(case_id)
+
 
 class PersistenceAndPrompts(unittest.TestCase):
     def test_sql_has_mvp_tables_and_blocks_inferred_emotion(self):
@@ -460,6 +604,8 @@ class PersistenceAndPrompts(unittest.TestCase):
         self.assertIn("primary_intent null", router)
         self.assertIn("1〜5", recommend)
         self.assertIn("partner_feeling", recommend)
+        self.assertIn("極性", recommend)
+        self.assertIn("同一 intent", recommend)
         self.assertIn("CHAT_ONLY", memory)
         self.assertIn("reusable_next_time", memory)
 

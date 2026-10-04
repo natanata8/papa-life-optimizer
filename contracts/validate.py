@@ -1,33 +1,61 @@
 """Subset JSON Schema validator used by the MVP contract tests.
 
-Supported: $ref to #/$defs, type (including null unions), required,
-properties, additionalProperties false, enum, const, items, minItems,
-maxItems, minLength, maxLength, minimum, maximum, allOf, if/then/else.
+Supported: $ref to #/$defs or #/components/schemas, type (including null
+unions), required, properties, additionalProperties false, enum, const,
+items, minItems, maxItems, minLength, maxLength, minimum, maximum, allOf,
+oneOf, if/then/else.
 """
 
 from __future__ import annotations
 
+import json
+import sys
+from pathlib import Path
+
 
 def validate(instance, schema, defs=None):
     if defs is None:
-        defs = schema.get("$defs", {})
+        defs = schema.get("$defs") or schema.get("components", {}).get("schemas") or {}
+        if "$defs" not in schema and "components" not in schema:
+            # Allow passing a root schema object that already is the target, with
+            # defs supplied separately by callers.
+            pass
     errors = []
-    _validate(instance, schema, defs, "$", errors)
+    _validate(instance, schema, defs or {}, "$", errors)
     return errors
+
+
+def _resolve_ref(ref, defs):
+    if ref.startswith("#/$defs/") or ref.startswith("#/components/schemas/"):
+        name = ref.rsplit("/", 1)[-1]
+        if name not in defs:
+            return None, f"unresolved $ref {ref}"
+        return defs[name], None
+    return None, f"unsupported $ref {ref}"
 
 
 def _validate(instance, schema, defs, path, errors):
     if "$ref" in schema:
-        name = schema["$ref"].rsplit("/", 1)[-1]
-        if name not in defs:
-            errors.append(f"{path}: unresolved $ref {schema['$ref']}")
+        target, error = _resolve_ref(schema["$ref"], defs)
+        if error:
+            errors.append(f"{path}: {error}")
             return
-        _validate(instance, defs[name], defs, path, errors)
+        _validate(instance, target, defs, path, errors)
         return
 
     if "allOf" in schema:
         for index, subschema in enumerate(schema["allOf"]):
             _validate(instance, subschema, defs, f"{path}.allOf[{index}]", errors)
+
+    if "oneOf" in schema:
+        matches = 0
+        for index, subschema in enumerate(schema["oneOf"]):
+            sub_errors = []
+            _validate(instance, subschema, defs, f"{path}.oneOf[{index}]", sub_errors)
+            if not sub_errors:
+                matches += 1
+        if matches != 1:
+            errors.append(f"{path}: expected exactly one oneOf match, got {matches}")
 
     if "if" in schema:
         if_errors = []
@@ -120,3 +148,37 @@ def _type_name(instance):
     if isinstance(instance, dict):
         return "object"
     return type(instance).__name__
+
+
+def main(argv=None):
+    root = Path(__file__).resolve().parent
+    repo = root.parent
+    if str(repo) not in sys.path:
+        sys.path.insert(0, str(repo))
+    schema = json.loads((root / "schemas" / "mvp.schema.json").read_text(encoding="utf-8"))
+    openapi = json.loads((root / "openapi" / "mvp.openapi.json").read_text(encoding="utf-8"))
+    openapi_defs = openapi["components"]["schemas"]
+    from contracts.policy import consult
+
+    consultations = json.loads((root / "fixtures" / "consultations.json").read_text(encoding="utf-8"))
+    failures = []
+    for case in consultations:
+        result = consult(case["input"])
+        schema_errors = validate(result, {"$ref": "#/$defs/ConsultationTurn", **schema})
+        openapi_errors = validate(
+            result, openapi_defs["ConsultationTurn"], defs=openapi_defs
+        )
+        if schema_errors:
+            failures.append(f"{case['id']} schema: {schema_errors}")
+        if openapi_errors:
+            failures.append(f"{case['id']} openapi: {openapi_errors}")
+    if failures:
+        for item in failures:
+            print(item, file=sys.stderr)
+        return 1
+    print(f"validated {len(consultations)} consultation turns against schema and OpenAPI")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

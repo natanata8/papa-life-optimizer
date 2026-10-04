@@ -2,6 +2,28 @@
   "WHAT_SHOULD_I_DO": {
     "headline": "今やることは1つに絞ります。",
     "body": "残りは明日に回すものと、今日やらないものに分けます。",
+    "copy_variants": [
+      {
+        "gated_actions": ["defer_cleaning", "skip_floor_wiping"],
+        "headline": "今やることは1つに絞ります。",
+        "body": "残りは明日に回すものと、今日やらないものに分けます。"
+      },
+      {
+        "gated_actions": ["defer_cleaning"],
+        "headline": "今やることは1つに絞ります。",
+        "body": "掃除は明日に回して、今やることは1つに絞ります。"
+      },
+      {
+        "gated_actions": ["skip_floor_wiping"],
+        "headline": "今やることは1つに絞ります。",
+        "body": "今日はやらないものを外して、今やることは1つに絞ります。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "今やることは1つに絞ります。",
+        "body": "今わかっている範囲で、次にやることを1つに絞ります。"
+      }
+    ],
     "actions": [
       {
         "action_key": "choose_one_known_task",
@@ -37,7 +59,28 @@
   "TIRED": {
     "headline": "今日は最低限にして、先に休みます。",
     "body": "食事だけ出して、洗濯は明日の朝に回します。",
-    "body_without_household_context": "今わかっている範囲で、先に休む時間を1つ確保します。",
+    "copy_variants": [
+      {
+        "gated_actions": ["serve_child_meal", "defer_laundry_to_morning"],
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "食事だけ出して、洗濯は明日の朝に回します。"
+      },
+      {
+        "gated_actions": ["serve_child_meal"],
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "子どもの食事だけ出して、先に休みます。"
+      },
+      {
+        "gated_actions": ["defer_laundry_to_morning"],
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "洗濯は明日の朝に回して、先に休みます。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "今日は最低限にして、先に休みます。",
+        "body": "今わかっている範囲で、先に休む時間を1つ確保します。"
+      }
+    ],
     "actions": [
       {
         "action_key": "rest_twenty_minutes",
@@ -72,10 +115,35 @@
   },
   "WANT_TO_DRINK": {
     "headline": "行けるように、先に夕食まわりを整えます。",
-    "headline_coordination_only": "まず、帰り時刻の共有から始めます。",
     "body": "増えるのは夕食と翌朝の準備です。",
-    "body_when_unknown": "開始時刻は未定のまま、今できる共有だけ出します。",
-    "body_coordination_only": "今わかっている範囲では、帰り時刻の共有を先にします。",
+    "copy_variants": [
+      {
+        "gated_actions": ["prepare_main_dish", "take_morning_transport"],
+        "headline": "行けるように、先に夕食まわりを整えます。",
+        "body": "増えるのは夕食と翌朝の準備です。"
+      },
+      {
+        "gated_actions": ["prepare_main_dish"],
+        "headline": "行けるように、先に夕食まわりを整えます。",
+        "body": "増えるのは夕食の準備です。"
+      },
+      {
+        "gated_actions": ["take_morning_transport"],
+        "headline": "まず、帰り時刻の共有から始めます。",
+        "body": "増えるのは翌朝の準備です。"
+      },
+      {
+        "gated_actions": [],
+        "when_askable_missing": true,
+        "headline": "まず、帰り時刻の共有から始めます。",
+        "body": "開始時刻は未定のまま、今できる共有だけ出します。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "まず、帰り時刻の共有から始めます。",
+        "body": "今わかっている範囲では、帰り時刻の共有を先にします。"
+      }
+    ],
     "actions": [
       {
         "action_key": "prepare_main_dish",
@@ -107,21 +175,63 @@
         "expected_load_reduction": ["recovery_load", "personal_time_loss"]
       }
     ],
-    "communication_draft_requires_evidence_all": ["dinner_prep", "morning_transport"],
-    "communication_draft": {
-      "purpose": "share the plan before leaving",
-      "message": "飲みに行きます。夕食は出る前に用意します。翌朝の支度はこちらで見ます。",
-      "includes_load_acknowledgement": false,
-      "includes_preparation": true,
-      "includes_alternative": false,
-      "includes_recovery": true
-    }
+    "draft_variants": [
+      {
+        "requires_actions_all": ["prepare_main_dish", "take_morning_transport"],
+        "draft": {
+          "purpose": "share the plan before leaving",
+          "message": "飲みに行きます。夕食は出る前に用意します。翌朝の支度はこちらで見ます。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": true,
+          "includes_alternative": false,
+          "includes_recovery": true
+        }
+      },
+      {
+        "requires_actions_all": ["prepare_main_dish"],
+        "draft": {
+          "purpose": "share the plan before leaving",
+          "message": "飲みに行きます。夕食は出る前に用意します。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": true,
+          "includes_alternative": false,
+          "includes_recovery": false
+        }
+      },
+      {
+        "requires_actions_all": ["take_morning_transport"],
+        "draft": {
+          "purpose": "share the plan before leaving",
+          "message": "飲みに行きます。翌朝の支度はこちらで見ます。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": false,
+          "includes_alternative": false,
+          "includes_recovery": true
+        }
+      }
+    ]
   },
   "WANT_PERSONAL_TIME": {
     "headline": "戻る時刻を決めて、その前だけ整えます。",
     "body": "入浴を先に終えて、90分だけ空ける形にします。",
-    "body_when_unknown": "時間帯は未定のまま、戻る時刻の決め方だけ出します。",
-    "body_without_household_context": "時間帯を決めて、今わかっている範囲だけで予定を整えます。",
+    "copy_variants": [
+      {
+        "gated_actions": ["finish_bath_first"],
+        "headline": "戻る時刻を決めて、その前だけ整えます。",
+        "body": "入浴を先に終えて、90分だけ空ける形にします。"
+      },
+      {
+        "gated_actions": [],
+        "when_askable_missing": true,
+        "headline": "戻る時刻を決めて、その前だけ整えます。",
+        "body": "時間帯は未定のまま、戻る時刻の決め方だけ出します。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "戻る時刻を決めて、その前だけ整えます。",
+        "body": "時間帯を決めて、今わかっている範囲だけで予定を整えます。"
+      }
+    ],
     "actions": [
       {
         "action_key": "finish_bath_first",
@@ -157,6 +267,18 @@
     "headline": "確認できたことだけで、今夜の対応を決めます。",
     "body": "気持ちの評価はせず、今できる家事と確認だけにします。",
     "body_with_fact": "{fact}。今夜できる対応だけ出します。",
+    "copy_variants": [
+      {
+        "gated_actions": ["take_bedtime_duty"],
+        "headline": "確認できたことだけで、今夜の対応を決めます。",
+        "body": "気持ちの評価はせず、今夜の寝かしつけと確認だけにします。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "確認できたことだけで、今夜の対応を決めます。",
+        "body": "気持ちの評価はせず、今できる確認だけにします。"
+      }
+    ],
     "actions": [
       {
         "action_key": "ask_observed_problem",
@@ -191,8 +313,34 @@
   "OVERTIME": {
     "headline": "遅れを先に伝えて、帰宅後の担当を決めます。",
     "body": "今夜増えるのは夕食の時間と、帰宅後の片付けです。",
-    "body_when_unknown": "遅れ幅は未定のまま、今送る一文と帰宅後の担当を出します。",
-    "body_without_household_context": "遅れを先に伝えて、必要な対応は確認できた範囲だけにします。",
+    "copy_variants": [
+      {
+        "gated_actions": ["use_prepared_meal", "take_cleanup_after_return"],
+        "headline": "遅れを先に伝えて、帰宅後の担当を決めます。",
+        "body": "今夜増えるのは夕食の時間と、帰宅後の片付けです。"
+      },
+      {
+        "gated_actions": ["use_prepared_meal"],
+        "headline": "遅れを先に伝えて、夕食の備えを決めます。",
+        "body": "今夜増えるのは夕食の時間です。"
+      },
+      {
+        "gated_actions": ["take_cleanup_after_return"],
+        "headline": "遅れを先に伝えて、帰宅後の担当を決めます。",
+        "body": "今夜増えるのは、帰宅後の片付けです。"
+      },
+      {
+        "gated_actions": [],
+        "when_askable_missing": true,
+        "headline": "遅れを先に伝えます。",
+        "body": "遅れ幅は未定のまま、今送る一文だけ出します。"
+      },
+      {
+        "gated_actions": [],
+        "headline": "遅れを先に伝えます。",
+        "body": "遅れを先に伝えて、必要な対応は確認できた範囲だけにします。"
+      }
+    ],
     "actions": [
       {
         "action_key": "share_expected_delay",
@@ -224,14 +372,40 @@
         "expected_load_reduction": ["recovery_load"]
       }
     ],
-    "communication_draft_requires_evidence_all": ["cleanup_task"],
-    "communication_draft": {
-      "purpose": "share a late return early",
-      "message": "帰りが遅れそうです。到着が分かったらすぐ送ります。帰宅後の片付けはこちらでやります。",
-      "includes_load_acknowledgement": false,
-      "includes_preparation": false,
-      "includes_alternative": true,
-      "includes_recovery": true
-    }
+    "draft_variants": [
+      {
+        "requires_actions_all": ["take_cleanup_after_return", "use_prepared_meal"],
+        "draft": {
+          "purpose": "share a late return early",
+          "message": "帰りが遅れそうです。到着が分かったらすぐ送ります。夕食は作り置きで、帰宅後の片付けはこちらでやります。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": false,
+          "includes_alternative": true,
+          "includes_recovery": true
+        }
+      },
+      {
+        "requires_actions_all": ["take_cleanup_after_return"],
+        "draft": {
+          "purpose": "share a late return early",
+          "message": "帰りが遅れそうです。到着が分かったらすぐ送ります。帰宅後の片付けはこちらでやります。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": false,
+          "includes_alternative": true,
+          "includes_recovery": true
+        }
+      },
+      {
+        "requires_actions_all": ["use_prepared_meal"],
+        "draft": {
+          "purpose": "share a late return early",
+          "message": "帰りが遅れそうです。到着が分かったらすぐ送ります。夕食は作り置きで済ませます。",
+          "includes_load_acknowledgement": false,
+          "includes_preparation": false,
+          "includes_alternative": true,
+          "includes_recovery": false
+        }
+      }
+    ]
   }
 }

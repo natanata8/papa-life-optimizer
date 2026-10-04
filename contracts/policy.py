@@ -93,25 +93,29 @@ def consult(payload):
         draft = built["communication_draft"]
         if not actions:
             stage = "CLARIFY"
-            evidence_question = dict(VOCAB["missing_evidence_question"])
-            questions = [evidence_question]
+            intent = resolution["primary_intent"]
+            evidence_question = _missing_evidence_question(
+                intent, known, blocked_action_keys
+            )
+            questions = [evidence_question] if evidence_question else []
             draft = None
+            clarify_copy = VOCAB["missing_evidence_clarify_copy"][intent]
             context = {
                 "mode": resolution["context_mode"],
                 "verified_facts": facts,
                 "unknowns": unknowns,
                 "relevant_tasks": [],
                 "load_changes": [],
-                "capacity_state": "LOW" if resolution["primary_intent"] == "TIRED" else None,
+                "capacity_state": "LOW" if intent == "TIRED" else None,
                 "priority_state": (
-                    "NOW_THEN_LATER" if resolution["primary_intent"] == "WHAT_SHOULD_I_DO" else None
+                    "NOW_THEN_LATER" if intent == "WHAT_SHOULD_I_DO" else None
                 ),
             }
             trace = ["HOME", "CLARIFY", "CONTEXT"]
             user_visible = {
-                "headline": "行動を出すには、家庭の担当情報が必要です。",
-                "body": "いつも担当していることを一つ教えてください。",
-                "questions": [evidence_question["prompt"]],
+                "headline": clarify_copy["headline"],
+                "body": clarify_copy["body"],
+                "questions": [evidence_question["prompt"]] if evidence_question else [],
                 "choices": [],
                 "actions": [],
                 "memory_note": _memory_note(retrieved),
@@ -393,10 +397,7 @@ def build_recommendation(intent, known, facts, retrieved, blocked_action_keys=No
         "actions": [{"title": item["title"], "detail": item["description"]} for item in actions],
         "memory_note": memory_note,
     }
-    draft = template.get("communication_draft")
-    draft_required = template.get("communication_draft_requires_evidence_all") or []
-    if draft_required and not _has_evidence_all(known, draft_required):
-        draft = None
+    draft = _select_draft(template, action_keys)
     return {
         "actions": actions,
         "user_visible": user_visible,
@@ -521,13 +522,23 @@ def _memory_note(retrieved):
 
 
 def _blocked_action_keys(memories, intent, rejected_ids, override_action_keys):
+    """Block actions only from same-intent failure/rejection memory.
+
+    Cross-intent household memory may still supply stable covered_values through
+    retrieval, but must not contribute action_keys to blockers in MVP.
+    """
     overrides = set(override_action_keys or [])
     valid_keys = _intent_action_keys(intent)
     blocked = set()
+    rejected = set(rejected_ids or [])
     for item in memories:
-        if not _memory_eligible(item, intent, rejected_ids, include_rejected=True):
+        if item.get("intent") != intent:
             continue
-        is_rejected = item.get("memory_id") in set(rejected_ids or [])
+        if item.get("superseded_by"):
+            continue
+        if not item.get("outcome_backed"):
+            continue
+        is_rejected = item.get("memory_id") in rejected
         is_failure = item.get("memory_type") == "FAILURE_PATTERN"
         if is_rejected or is_failure:
             blocked.update(item.get("action_keys") or [])
@@ -597,37 +608,96 @@ def _is_provenance_placeholder(value):
 
 
 def _authorizing_value(value):
+    if isinstance(value, bool):
+        return value is True
+    if isinstance(value, int) and not isinstance(value, bool):
+        return value > 0
     return _present(value) and not _is_provenance_placeholder(value)
 
 
-def _evidence_text(value):
-    if not _authorizing_value(value):
-        return ""
+def _iter_evidence_items(value):
+    if value is None or value == "" or value == [] or value == {}:
+        return
+    if _is_provenance_placeholder(value):
+        return
+    if isinstance(value, bool):
+        if value is True:
+            yield "true"
+        return
+    if isinstance(value, int) and not isinstance(value, bool):
+        if value > 0:
+            yield str(value)
+        return
     if isinstance(value, list):
-        parts = [_evidence_text(item) for item in value]
-        return " ".join(part for part in parts if part)
+        for item in value:
+            yield from _iter_evidence_items(item)
+        return
     if isinstance(value, dict):
-        parts = []
         for key, part in value.items():
             if key == "from_memory":
                 continue
-            text = _evidence_text(part)
-            if text:
-                parts.append(text)
-        return " ".join(parts)
-    return str(value)
+            yield from _iter_evidence_items(part)
+        return
+    text = str(value).strip()
+    if text:
+        yield text
+
+
+def _has_negation(text):
+    return any(marker in text for marker in VOCAB["evidence_negation_markers"])
+
+
+def _text_authorizes_positive(text, positive_tags, tokens):
+    if not text or _has_negation(text):
+        return False
+    normalized = text.replace(" ", "").replace("　", "")
+    for tag in positive_tags:
+        if normalized == tag or tag in normalized:
+            return True
+    return any(token in text for token in tokens)
 
 
 def _predicate_matches(known, predicate_id):
     predicate = EVIDENCE_PREDICATES[predicate_id]
-    fields = predicate["fields"]
-    if predicate.get("any_value"):
-        return any(_authorizing_value(known.get(field)) for field in fields)
-    tokens = predicate.get("tokens") or []
-    for field in fields:
-        text = _evidence_text(known.get(field))
-        if text and any(token in text for token in tokens):
+    match = predicate.get("match", "positive_task")
+    if match == "child_presence":
+        return _match_child_presence(known, predicate)
+    if match == "positive_task":
+        return _match_positive_task(known, predicate)
+    return False
+
+
+def _match_child_presence(known, predicate):
+    minimum = predicate.get("integer_minimum", 1)
+    for field in predicate.get("integer_fields") or []:
+        if field not in known:
+            continue
+        value = known[field]
+        if isinstance(value, bool):
+            # JSON booleans are not valid child counts, even though bool is an
+            # int subclass in Python. Only an explicit positive integer may
+            # authorize child-specific actions.
+            return False
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value >= minimum
+        # Non-integer / empty / Unknown child_count does not authorize.
+        return False
+    for field in predicate.get("nonempty_fields") or []:
+        value = known.get(field)
+        if isinstance(value, list) and any(_authorizing_value(item) for item in value):
             return True
+        if isinstance(value, str) and value.strip() and _authorizing_value(value):
+            return True
+    return False
+
+
+def _match_positive_task(known, predicate):
+    positive_tags = predicate.get("positive_tags") or []
+    tokens = predicate.get("tokens") or []
+    for field in predicate.get("fields") or []:
+        for text in _iter_evidence_items(known.get(field)):
+            if _text_authorizes_positive(text, positive_tags, tokens):
+                return True
     return False
 
 
@@ -639,53 +709,86 @@ def _has_evidence_all(known, predicate_ids):
     return all(_predicate_matches(known, predicate_id) for predicate_id in predicate_ids)
 
 
-def _visible_copy(intent, template, known, facts, action_keys):
-    if intent == "WANT_TO_DRINK":
-        return _drink_visible_copy(template, known, action_keys)
-
-    body = template["body"]
-    if intent == "PARTNER_UNHAPPY_OR_CONFLICT" and facts:
-        fact = facts[0]["text"]
-        rendered = template["body_with_fact"].replace("{fact}", fact)
-        if len(rendered) <= LIMITS["body_max"] and not _contains_forbidden(fact):
-            body = rendered
-    elif _missing_askable(intent, known) and template.get("body_when_unknown"):
-        body = template["body_when_unknown"]
-    elif _coordination_only(intent, action_keys) and template.get("body_without_household_context"):
-        body = template["body_without_household_context"]
-    return template["headline"], body
-
-
-def _drink_visible_copy(template, known, action_keys):
-    has_dinner = "prepare_main_dish" in action_keys
-    has_transport = "take_morning_transport" in action_keys
-    if not has_dinner and not has_transport:
-        headline = template["headline_coordination_only"]
-        if _missing_askable("WANT_TO_DRINK", known):
-            body = template["body_when_unknown"]
-        else:
-            body = template["body_coordination_only"]
-        return headline, body
-
-    headline = template["headline"] if has_dinner else template["headline_coordination_only"]
-    if has_dinner and has_transport:
-        body = template["body"]
-    elif has_dinner:
-        body = "増えるのは夕食の準備です。"
-    else:
-        body = "増えるのは翌朝の準備です。"
-    if _missing_askable("WANT_TO_DRINK", known) and not has_dinner and not has_transport:
-        body = template["body_when_unknown"]
-    return headline, body
-
-
-def _coordination_only(intent, action_keys):
-    gated = {
+def _gated_action_keys(intent):
+    return {
         source["action_key"]
         for source in TEMPLATES[intent]["actions"]
         if source.get("requires_evidence_any")
     }
-    return not (action_keys & gated)
+
+
+def _visible_copy(intent, template, known, facts, action_keys):
+    if intent == "PARTNER_UNHAPPY_OR_CONFLICT" and facts:
+        fact = facts[0]["text"]
+        rendered = template["body_with_fact"].replace("{fact}", fact)
+        if len(rendered) <= LIMITS["body_max"] and not _contains_forbidden(fact):
+            return template["headline"], rendered
+
+    present_gated = frozenset(action_keys & _gated_action_keys(intent))
+    askable_missing = _missing_askable(intent, known)
+    for variant in template.get("copy_variants") or []:
+        if frozenset(variant.get("gated_actions") or []) != present_gated:
+            continue
+        if "when_askable_missing" in variant:
+            if bool(variant["when_askable_missing"]) != askable_missing:
+                continue
+        return variant["headline"], variant["body"]
+
+    if askable_missing and template.get("body_when_unknown"):
+        return template["headline"], template["body_when_unknown"]
+    if not present_gated and template.get("body_without_household_context"):
+        return template["headline"], template["body_without_household_context"]
+    return template["headline"], template["body"]
+
+
+def _select_draft(template, action_keys):
+    variants = template.get("draft_variants") or []
+    if not variants and template.get("communication_draft"):
+        return template["communication_draft"]
+    # Prefer the most specific matching variant (most required actions).
+    ranked = sorted(
+        variants,
+        key=lambda item: len(item.get("requires_actions_all") or []),
+        reverse=True,
+    )
+    for variant in ranked:
+        required = set(variant.get("requires_actions_all") or [])
+        if required and required.issubset(action_keys):
+            return dict(variant["draft"])
+    return None
+
+
+def _missing_evidence_question(intent, known, blocked_action_keys):
+    blocked = set(blocked_action_keys or [])
+    missing_predicates = []
+    seen = set()
+    for source in TEMPLATES[intent]["actions"]:
+        if source["action_key"] in blocked:
+            continue
+        required = source.get("requires_evidence_any") or []
+        if not required:
+            continue
+        if _has_evidence_any(known, required):
+            continue
+        for predicate_id in required:
+            if predicate_id in seen:
+                continue
+            if _predicate_matches(known, predicate_id):
+                continue
+            seen.add(predicate_id)
+            missing_predicates.append(predicate_id)
+
+    question = None
+    if len(missing_predicates) == 1:
+        question = VOCAB["missing_evidence_by_predicate"].get(missing_predicates[0])
+    if question is None:
+        question = VOCAB["missing_evidence_questions"][intent]
+    question = dict(question)
+    if _present(known.get(question["key"])):
+        return None
+    if question["key"] in PROFILE_KEYS:
+        return None
+    return question
 
 
 def _load_names(actions):
