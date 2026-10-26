@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
+    Meiryo, sans-serif;
+  --color-sand: #efe9e1;
+  --color-paper: #faf7f2;
+  --color-ink: #2c2a28;
+  --color-muted: #8a827a;
+  --color-faint: #a59c92;
+  --color-line: #e0d6cc;
+  --color-accent: #d9825b;
+  --color-accent-deep: #b5633f;
+  --color-accent-soft: #fbeee6;
+  --color-inv: #fffbf0;
+  --color-inv-ink: #6b5a2a;
+  --color-inv-line: #c9a227;
+  --color-event: #e8eefb;
+  --color-event-ink: #25407f;
+  --color-step: #fdeee4;
+  --color-step-ink: #8a3f1d;
+  --color-good: #e3efe3;
+  --color-good-ink: #3d6b3d;
+  --color-meh: #f0ebe5;
+  --color-lazy: #f1f6f1;
+  --color-lazy-ink: #3d6b3d;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-sand);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  details > summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@keyframes tone-sheet {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.tone-sheet {
+  animation: tone-sheet 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tone-sheet {
+    animation: none;
+  }
+}

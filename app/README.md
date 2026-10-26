@@ -1,0 +1,85 @@
+# tONE（仮）
+
+分かれ道で開く、パパ向けの相談アプリの叩き台です。個人の予定から家に残る負荷を見て、次の一手と声かけ例を出します。採点も、パートナーとの比べっこもしません。
+
+画面は日本語です。幅 390px のスマホを先に見てください。PWA の manifest を同梱しています。
+
+## スタック
+
+Vite + React + TypeScript + Tailwind の静的アプリです。GitHub Pages にそのまま置けて、サーバ代がかかりません。データベース、ログイン、Edge Function は Supabase に寄せています。OpenAI の鍵はブラウザに置きません。
+
+環境変数が無いときは、このブラウザの localStorage と、4場面のサンプル回答で動きます。
+
+## 起動
+
+```bash
+cd app
+npm i
+npm run dev
+```
+
+http://localhost:5173 を開きます。メールアドレスは要りません。
+
+デモ用の帯で、朝・昼・帰宅前・夜・金曜夜を切り替えられます。「最初から」でサンプルの家族に戻ります。本番に近い表示にするときは `VITE_DEMO_MODE=false` です。そのときは東京の時刻から時間帯を決めます。
+
+## いまモックのもの
+
+- 相談の答えは、決まった4場面のサンプルです。画面に「サンプル回答」と出ます。
+- 通知は画面の中の予告だけです。端末へのプッシュは送りません。
+- カレンダーの書き出しは、Google カレンダーのリンク、.ics、LINE の共有リンクです。自動では送りません。
+- 家族のデータは、Supabase を選ぶまでこのブラウザだけに残ります。
+
+暴力・脅しなどの語を含む相談は AI を呼ばず、110 / #8008 / 189 を出します。
+
+## Supabase と OpenAI
+
+`.env.example` を `.env` にコピーします。
+
+1. Supabase でプロジェクトを作る。
+2. `supabase link` のあと `supabase db push` で `supabase/migrations` を入れる。新規ユーザー用の trigger が、家族の行を作ります。
+3. タスク 408 件を入れる。
+
+```bash
+npm run seed:tasks
+# リモートへ入れるときだけ、鍵はシェルに渡す（ファイルに書かない）
+SUPABASE_URL=https://xxxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npm run seed:tasks
+```
+
+`seed:tasks` は `supabase/seed.sql` を作り直します。`raw` 列は保存しません。
+
+4. Edge Function を置く。
+
+```bash
+supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-4.1-mini CONSULT_DAILY_CAP=20
+supabase functions deploy consult
+```
+
+既定のモデルは `gpt-4.1-mini` です。静的なシステムプロンプトを先頭に固定し、家庭の事実は次のメッセージに載せます。1ユーザーあたり、東京の日付で1日20回までです。安全の案内は回数に入れません。
+
+5. クライアントを切り替える。
+
+```
+VITE_DATA=supabase
+VITE_AI=supabase
+VITE_SUPABASE_URL=https://xxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=公開してよい anon key
+```
+
+anon key はブラウザに載ります。service role と OpenAI の鍵はサーバ側だけです。
+
+## GitHub Pages
+
+`.github/workflows/app-pages.yml` が `app/` をビルドします。main への push で Pages に出します。PR ではビルドと lint だけです。
+
+リポジトリの Settings → Pages → Source を **GitHub Actions** にしてください。ベースパスは `/リポジトリ名/` です。
+
+## コマンド
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm run dev` | 開発サーバ |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc -b` |
+| `npm run build` | 型チェックと本番ビルド |
+| `npm run seed:tasks` | タスク SQL の再生成（鍵があれば投入） |
+| `npm run shoot` | 390×844 の画面キャプチャ |

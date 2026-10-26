@@ -1,0 +1,4 @@
+project_id = "tone"
+
+[functions.consult]
+verify_jwt = true
