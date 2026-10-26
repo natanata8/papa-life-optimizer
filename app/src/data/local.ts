@@ -1,4 +1,5 @@
-import { createSeed } from '@/domain/seed.ts'
+import { demoMode } from '@/domain/demo.ts'
+import { createEmpty, createSeed } from '@/domain/seed.ts'
 import { todayInTokyo } from '@/domain/dates.ts'
 import type { Persisted } from '@/domain/types.ts'
 import type { FamilyRepository, LoadResult } from '@/data/repository.ts'
@@ -34,7 +35,7 @@ export function createLocalRepository(): FamilyRepository {
     async load(): Promise<LoadResult> {
       const existing = read()
       if (existing) return { kind: 'ready', state: existing }
-      const state = createSeed(todayInTokyo())
+      const state = demoMode ? createSeed(todayInTokyo()) : createEmpty(todayInTokyo())
       localStorage.setItem(KEY, JSON.stringify(state))
       return { kind: 'ready', state }
     },
@@ -42,9 +43,10 @@ export function createLocalRepository(): FamilyRepository {
       localStorage.setItem(KEY, JSON.stringify(state))
     },
     async reset() {
-      const state = createSeed(todayInTokyo())
+      const state = demoMode ? createSeed(todayInTokyo()) : createEmpty(todayInTokyo())
       localStorage.setItem(KEY, JSON.stringify(state))
       localStorage.removeItem('tone-app:mode')
+      if (demoMode) localStorage.removeItem('tone-app:own-home')
       return state
     },
   }

@@ -74,7 +74,7 @@ export function Review() {
           ))}
         </div>
       )}
-      <p className="mt-3 text-[11px] text-faint">点数や回数の比べっこはしません</p>
+      <p className="mt-3 text-[11px] text-muted">点数や回数の比べっこはしません</p>
     </div>
   )
 }

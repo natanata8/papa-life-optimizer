@@ -20,7 +20,6 @@ import {
   toggleGomi,
 } from '@/domain/profile.ts'
 import { DAY_ORDER } from '@/domain/dates.ts'
-import { SCENE_LIST } from '@/domain/scenes.ts'
 import { MODE_META, type FamEvent, type Profile, type School, type Step } from '@/domain/types.ts'
 import { lineShareUrl } from '@/domain/export.ts'
 import { addMinutes } from '@/domain/dates.ts'
@@ -83,8 +82,9 @@ export function Home() {
   const line = cards.find((card) => card.line)?.line
 
   return (
-    <div className="px-3.5 pt-3.5 pb-72">
+    <div className="px-3.5 pt-3.5 pb-28">
       <DemoBar />
+      <SampleBanner />
       <Notice notice={notice} />
       <p className="mt-1 text-xs text-muted">
         {formatMd(store.today)} {clock}・{where}
@@ -113,7 +113,18 @@ export function Home() {
       {line ? (
         <p className="mt-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">送る文の例：「{line}」</p>
       ) : null}
-      {cards.length === 0 ? <p className="mt-2 text-[13px] text-muted">今日の一手はまだありません。</p> : null}
+      {cards.length === 0 ? (
+        <div className="mt-2 rounded-[14px] bg-white p-3" data-testid="home-empty">
+          <p className="text-[13px] leading-relaxed">まだ予定がありません。迷ったら「すぐ相談」から1つ選んでください。</p>
+          <button
+            type="button"
+            className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-3 text-sm font-bold text-white"
+            onClick={() => store.openSheet({ type: 'quick' })}
+          >
+            💬 すぐ相談
+          </button>
+        </div>
+      ) : null}
       <ChildToday />
       <h2 className="mt-5 text-sm font-bold">あったらいいこと</h2>
       <NiceEvents />
@@ -121,23 +132,16 @@ export function Home() {
       <WeekendCard />
       <LazyQuestion />
       {store.sheet ? null : (
-      <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-gradient-to-t from-paper via-paper to-transparent px-3 pt-3 pb-2">
-        <p className="mb-1 text-[11px] text-muted">すぐ相談（片手で・タップだけ）</p>
-        <div className="grid grid-cols-2 gap-1.5" data-testid="quick-list">
-          {SCENE_LIST.map((scene) => (
-            <button
-              key={scene.id}
-              type="button"
-              data-testid={`quick-${scene.id}`}
-              className="rounded-[14px] bg-accent px-2 py-2 text-left text-[12px] leading-snug font-bold text-white"
-              onClick={() => store.beginScene(scene.id, true)}
-            >
-              <span className="mr-1">{scene.icon}</span>
-              {scene.title}
-            </button>
-          ))}
+        <div className="pointer-events-none fixed bottom-[calc(53px+12px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2">
+          <button
+            type="button"
+            data-testid="quick-open"
+            className="pointer-events-auto absolute right-3 bottom-0 inline-flex min-h-12 items-center rounded-full bg-accent-deep px-4 text-sm font-bold text-white shadow-md"
+            onClick={() => store.openSheet({ type: 'quick' })}
+          >
+            💬 すぐ相談
+          </button>
         </div>
-      </div>
       )}
     </div>
   )
@@ -195,10 +199,10 @@ function buildCards(
     return compact([
       {
         key: 'invite',
-        kicker: '誘われた？',
+        kicker: '飲み会に行きたい？',
         title: '返事をする前に、30秒で整理しましょう',
         meta: '行く・行かないより、抜ける時間に何が誰に移るかを先に',
-        actions: <SceneButton scene="nomi" label="🍻 飲み会に誘われた" />,
+        actions: <SceneButton scene="nomi" label="🍻 飲み会に行きたい" />,
       },
       stepsCard,
       reviewCard,
@@ -295,9 +299,27 @@ function compact(cards: (CardModel | null)[]): CardModel[] {
   return cards.filter((card): card is CardModel => Boolean(card))
 }
 
+function SampleBanner() {
+  const store = useStore()
+  if (!store.demo || store.ownHome) return null
+  return (
+    <div className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-accent-soft px-3 py-2" data-testid="sample-banner">
+      <p className="text-[13px] leading-snug font-bold text-accent-deep">サンプルの家族で表示しています</p>
+      <button
+        type="button"
+        data-testid="start-own"
+        className="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-accent-deep px-3 text-[13px] font-bold text-white"
+        onClick={store.startOwnHome}
+      >
+        自分の家で始める
+      </button>
+    </div>
+  )
+}
+
 function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
   const store = useStore()
-  if (notice.kind === 'off') return <p className="mb-2 text-center text-[11px] text-faint">🔕 {notice.text}</p>
+  if (notice.kind === 'off') return <p className="mb-2 text-center text-[11px] text-muted">🔕 {notice.text}</p>
   return (
     <button
       type="button"
@@ -314,7 +336,7 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-extrabold text-white">t</span>
       <span className="text-[13px] leading-snug">
-        <span className="block text-[10.5px] text-muted">tONE（仮）・{notice.time} 〈通知の見え方〉</span>
+        <span className="block text-[10.5px] text-muted">tONE（仮）・{notice.time} 〈通知の見本・準備中〉</span>
         {notice.body}
       </span>
     </button>

@@ -2,20 +2,23 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { createConsult } from '@/ai/client.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
 import { createRepository } from '@/data/index.ts'
+import { demoMode } from '@/domain/demo.ts'
 import { behindFor, gomiAround } from '@/domain/behind.ts'
 import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts'
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
 import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
+import { createEmpty } from '@/domain/seed.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
-import { HOTLINE_MESSAGE, isSafetyConcern } from '@/domain/safety.ts'
+import { HOTLINE_MESSAGE, isSelfHarm, safetyLevel } from '@/domain/safety.ts'
 import type {
   AgeLabel,
   Behind,
   ChatMessage,
   ChildEvent,
+  ConsultRetry,
   FamEvent,
   Mode,
   NiceEvent,
@@ -29,8 +32,6 @@ import type {
 } from '@/domain/types.ts'
 import { uid } from '@/lib/utils.ts'
 
-export const demoMode = import.meta.env.VITE_DEMO_MODE !== 'false'
-
 export type ObDraft = {
   step: number
   count: number
@@ -41,7 +42,7 @@ export type ObDraft = {
   home: string | null
 }
 
-export type Flow = { scene: SceneId; answers: string[]; lazy: string | null }
+export type Flow = { scene: SceneId; answers: string[]; lazy: string | null; care?: boolean }
 
 export type Sheet =
   | { type: 'add'; suggestionId: string }
@@ -51,7 +52,8 @@ export type Sheet =
   | { type: 'event'; id: string }
   | { type: 'addEvent' }
   | { type: 'addNice' }
-  | { type: 'children'; editId?: string }
+  | { type: 'children'; editId?: string; image?: boolean }
+  | { type: 'quick' }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -72,6 +74,7 @@ type StoreValue = {
   authRequired: boolean
   authMessage?: string
   demo: boolean
+  ownHome: boolean
   sampleAi: boolean
   realToday: string
   today: string
@@ -97,6 +100,8 @@ type StoreValue = {
   answerFlow: (option: string) => void
   skipLazy: () => void
   sendText: (text: string) => void
+  retryConsult: (retry: ConsultRetry) => void
+  startOwnHome: () => void
   newChat: () => void
   openSheet: (sheet: Sheet) => void
   closeSheet: () => void
@@ -188,6 +193,8 @@ function attachAnswer(
     used: string[]
     consultationId: string
     sample: boolean
+    care?: boolean
+    selfHarm?: boolean
     placements?: { date: string; time: string }[]
     invisibleKey?: string | null
     taskId?: string | null
@@ -222,6 +229,8 @@ function attachAnswer(
     behind: input.behind,
     used: input.used,
     sample: input.sample,
+    care: input.care,
+    selfHarm: input.selfHarm,
   }
   return {
     ...state,
@@ -346,6 +355,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [day, setDay] = useState(today)
   const [filters, setFilters] = useState({ ev: true, step: true, inv: true, child: true, wife: true })
   const [lazyLock, setLazyLock] = useState<string | null>(null)
+  const [ownHome, setOwnHome] = useState(() => localStorage.getItem('tone-app:own-home') === '1')
   const hydrated = useRef(false)
   const dataRef = useRef<Persisted | null>(null)
   const flowRef = useRef<Flow | null>(null)
@@ -413,6 +423,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       taskId?: string | null
       source?: string
       sceneTitle?: string
+      care?: boolean
     },
   ) => {
     setPending(true)
@@ -438,6 +449,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           used,
           consultationId,
           sample: consult.sample,
+          care: extra?.care,
+          selfHarm: isSelfHarm(`${entry}\n${userText}\n${answers.join('\n')}`),
           placements: extra?.placements,
           invisibleKey: extra?.invisibleKey,
           taskId: extra?.taskId,
@@ -447,7 +460,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       const message = error instanceof Error ? error.message : '相談を送れませんでした。'
       const base = dataRef.current ?? snapshot
-      commit({ ...base, chat: [...base.chat, { id: uid(), role: 'bot', text: message }] })
+      const retry: ConsultRetry = {
+        scene,
+        answers,
+        entry,
+        userText,
+        sceneTitle: extra?.sceneTitle,
+        care: extra?.care,
+      }
+      commit({ ...base, chat: [...base.chat, { id: uid(), role: 'bot', text: message, retry }] })
     } finally {
       setPending(false)
     }
@@ -458,6 +479,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     authRequired,
     authMessage,
     demo: demoMode,
+    ownHome,
     sampleAi: consult.sample,
     realToday,
     today,
@@ -495,6 +517,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setSheet(null)
         setTab('home')
         setLazyLock(null)
+        setOwnHome(localStorage.getItem('tone-app:own-home') === '1')
         setDay(realToday)
         setWeekStart(mondayOf(realToday))
         setCalState('week')
@@ -594,7 +617,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const next = { ...current, chat: [...current.chat, { id: uid(), role: 'me' as const, text: option }] }
       commit(next)
       setFlow(null)
-      void runConsult(next, currentFlow.scene, answers, scene.title, option)
+      void runConsult(next, currentFlow.scene, answers, scene.title, option, { care: currentFlow.care })
     },
     skipLazy: () => {
       const current = dataRef.current
@@ -608,13 +631,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const trimmed = text.trim()
       const current = dataRef.current
       if (!trimmed || !current || pending) return
-      if (isSafetyConcern(trimmed)) {
+      const level = safetyLevel(trimmed)
+      if (level === 'stop') {
         commit({
           ...current,
           chat: [
             ...current.chat,
             { id: uid(), role: 'me', text: trimmed },
-            { id: uid(), role: 'bot', text: HOTLINE_MESSAGE },
+            { id: uid(), role: 'bot', text: HOTLINE_MESSAGE, safety: 'stop', selfHarm: isSelfHarm(trimmed) },
           ],
           consultations: [
             ...current.consultations,
@@ -625,21 +649,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return
       }
       const scene = sceneFromText(trimmed)
+      const care = level === 'care'
       if (!scene) {
-        commit({
-          ...current,
-          chat: [
-            ...current.chat,
-            { id: uid(), role: 'me', text: trimmed },
-            {
-              id: uid(),
-              role: 'bot',
-              text: '受け取りました。サンプルでは決まった場面に答えます。近いものを選んでください。',
-              scenes: true,
-            },
-          ],
-        })
+        if (consult.sample && !care) {
+          commit({
+            ...current,
+            chat: [
+              ...current.chat,
+              { id: uid(), role: 'me', text: trimmed },
+              {
+                id: uid(),
+                role: 'bot',
+                text: 'サンプルでは決まった場面だけに答えます。本番では、そのまま相談できます。近いものを選んでください。',
+                scenes: true,
+              },
+            ],
+          })
+          setFlow(null)
+          return
+        }
+        const next = { ...current, chat: [...current.chat, { id: uid(), role: 'me' as const, text: trimmed }] }
+        commit(next)
         setFlow(null)
+        void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: '相談', care })
         return
       }
       const lazy = SCENE_LAZY[scene].find((key) => !isSet(current.profile, key)) ?? null
@@ -654,7 +686,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           { id: uid(), role: 'bot', text: prompt },
         ],
       })
-      setFlow({ scene, answers: [], lazy })
+      setFlow({ scene, answers: [], lazy, care })
+    },
+    retryConsult: (retry) => {
+      const current = dataRef.current
+      if (!current || pending) return
+      void runConsult(current, retry.scene, retry.answers, retry.entry, retry.userText, {
+        sceneTitle: retry.sceneTitle,
+        care: retry.care,
+      })
+    },
+    startOwnHome: () => {
+      const empty = createEmpty(todayInTokyo())
+      localStorage.setItem('tone-app:own-home', '1')
+      setOwnHome(true)
+      commit(empty)
+      setObState(initialOb())
+      setFlow(null)
+      setSheet(null)
+      setTab('home')
+      setLazyLock(null)
     },
     newChat: () => {
       const current = dataRef.current

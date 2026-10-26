@@ -31,7 +31,7 @@ export const MESSAGE_TEMPLATES: MessageTemplate[] = [
       { id: 'fatigue', label: '疲労度', defaultOn: true, kind: 'fatigue' },
       { id: 'tasks', label: '帰ってからやること', defaultOn: true, kind: 'tasks' },
       { id: 'ask', label: '帰りに何かいる？', defaultOn: true, kind: 'ask', line: '帰りに何かいる？' },
-      { id: 'thanks', label: 'お迎えの一言', defaultOn: true, kind: 'thanks' },
+      { id: 'thanks', label: 'お迎えの一言', defaultOn: false, kind: 'thanks' },
     ],
   },
   {
@@ -75,14 +75,18 @@ export function renderMessage(
       lines.push(FATIGUE_OPTIONS.find((item) => item.id === input.fatigue)?.line ?? '')
     }
     if (part.kind === 'tasks' && input.tasks.length > 0) {
-      const label = template.id === 'late' ? '今夜お願いしたいこと' : '帰ってからやること'
-      lines.push(`${label}: ${input.tasks.join('、')}`)
+      const mine = input.tasks.map(toMine).join('と')
+      lines.push(template.id === 'late' ? `今夜${mine}をお願いできる？` : `帰ったら${mine}は俺がやるね。`)
     }
     if (part.kind === 'note' && input.note.trim()) {
-      lines.push(`買うもの: ${input.note.trim()}`)
+      lines.push(`${input.note.trim()}買って帰るね。`)
     }
     if ((part.kind === 'ask' || part.kind === 'takeover') && part.line) lines.push(part.line)
     if (part.kind === 'thanks' && input.thanks) lines.push(input.thanks)
   }
   return lines.filter(Boolean).join('\n')
+}
+
+export function toMine(title: string): string {
+  return title.replace(/(?:を自分がやる|を自分が担当|は自分が担当|は自分がやる|を自分が|をやる)$/u, '')
 }

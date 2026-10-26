@@ -22,7 +22,17 @@ export function ChildToday() {
         </Button>
       </div>
       {todayEvents.length === 0 && reminders.length === 0 ? (
-        <p className="mt-1 text-[13px] text-muted">今日の園・学校の予定はまだありません。</p>
+        <div className="mt-2">
+          <p className="text-[13px] text-muted">今日の園・学校の予定はまだありません。</p>
+          <button
+            type="button"
+            data-testid="child-empty-photo"
+            className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-soft px-3 text-[13px] font-bold text-accent-deep"
+            onClick={() => store.openSheet({ type: 'children', image: true })}
+          >
+            📷 お便りを撮って入れる
+          </button>
+        </div>
       ) : null}
       {todayEvents.length > 0 ? (
         <div className="mt-2 space-y-1.5">

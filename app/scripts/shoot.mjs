@@ -201,6 +201,7 @@ try {
 
   await page.click('[data-testid="nav-home"]')
   await page.click('[data-testid="mode-帰宅前"]')
+  await page.click('[data-testid="quick-open"]')
   await page.waitForSelector('[data-testid="quick-clash"]')
   await page.evaluate(() => window.scrollTo(0, 0))
   await new Promise((resolve) => setTimeout(resolve, 200))
@@ -220,11 +221,11 @@ try {
   })
   if (!openedToday) throw new Error('today column missing')
   await page.waitForSelector('[data-testid="wife-lane"]')
-  await page.waitForSelector('[data-testid="wife-block-pickup"]')
-  await page.$eval('[data-testid="wife-block-pickup"]', (el) => el.scrollIntoView({ block: 'center' }))
+  await page.waitForSelector('[data-testid^="wife-block-"]')
+  await page.$eval('[data-testid^="wife-block-"]', (el) => el.scrollIntoView({ block: 'center' }))
   await new Promise((resolve) => setTimeout(resolve, 250))
   await shot('27-wife-lane')
-  await page.click('[data-testid="wife-block-pickup"]')
+  await page.click('[data-testid^="wife-block-"]')
   await page.waitForSelector('[data-testid="sheet-wife"]')
   await shot('28-wife-detail')
   await page.click('[data-testid="wife-close"]')
@@ -264,6 +265,7 @@ async function clickExact(label) {
 
 async function answerQuick(id, options, file) {
   await page.click('[data-testid="nav-home"]')
+  await page.click('[data-testid="quick-open"]')
   await page.waitForSelector(`[data-testid="quick-${id}"]`)
   await page.click(`[data-testid="quick-${id}"]`)
   await page.waitForFunction(() => document.body.innerText.includes('タップで答える'), { timeout: 8000 })

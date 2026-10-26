@@ -66,7 +66,7 @@ export function partnerDay(
   const blocks: PartnerBlock[] = []
   const schools = profile.kids.map((kid) => kid.school).filter((school): school is NonNullable<typeof school> => Boolean(school))
   const preschool = profile.kids.some((kid) => kid.age !== null && kid.age >= 3 && kid.age <= 5 && kid.school !== 'まだ家で' && kid.school !== '小学校')
-  const commute = hasDaycare(profile) || preschool
+  const commute = profile.work !== '両方フルタイム' && (hasDaycare(profile) || preschool)
   const commuteWhy = hasDaycare(profile)
     ? `園に通っている子がいます（${schools.join('・')}）。`
     : '3〜5歳の子がいます。園は未設定なので、通園する時間帯として見ています。'
@@ -162,5 +162,6 @@ export function partnerDay(
 }
 
 export function pickupThanks(day: PartnerDay): string {
-  return day.blocks.find((block) => block.id === 'pickup')?.thanks ?? ''
+  void day
+  return '今日も家のこと、ありがとう。'
 }

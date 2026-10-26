@@ -27,15 +27,16 @@ type Draft = {
 
 type View =
   | { kind: 'list' }
+  | { kind: 'image' }
   | { kind: 'form'; id?: string }
   | { kind: 'preview'; file: File; url: string }
   | { kind: 'confirm'; rows: Draft[]; sample: boolean }
 
 const field = 'mt-1 w-full rounded-lg border border-line bg-white px-2 py-1.5 text-sm text-ink'
 
-export function ChildSheet({ editId }: { editId?: string }) {
+export function ChildSheet({ editId, image = false }: { editId?: string; image?: boolean }) {
   const store = useStore()
-  const [view, setView] = useState<View>(editId ? { kind: 'form', id: editId } : { kind: 'list' })
+  const [view, setView] = useState<View>(editId ? { kind: 'form', id: editId } : image ? { kind: 'image' } : { kind: 'list' })
   const [busy, setBusy] = useState(false)
 
   const pick = (file: File | undefined) => {
@@ -79,6 +80,7 @@ export function ChildSheet({ editId }: { editId?: string }) {
         </button>
       </div>
       {view.kind === 'list' ? <List onAdd={() => setView({ kind: 'form' })} onEdit={(id) => setView({ kind: 'form', id })} onPick={pick} /> : null}
+      {view.kind === 'image' ? <ImageCapture onPick={pick} onBack={() => setView({ kind: 'list' })} /> : null}
       {view.kind === 'form' ? <EventForm key={view.id ?? 'new'} id={view.id} onBack={() => setView({ kind: 'list' })} /> : null}
       {view.kind === 'preview' ? (
         <Preview file={view.file} url={view.url} busy={busy} onBack={() => setView({ kind: 'list' })} onRead={() => void read(view.file)} />
@@ -91,6 +93,47 @@ export function ChildSheet({ editId }: { editId?: string }) {
           onBack={() => setView({ kind: 'list' })}
         />
       ) : null}
+    </div>
+  )
+}
+
+function ImageCapture({ onPick, onBack }: { onPick: (file: File | undefined) => void; onBack: () => void }) {
+  return (
+    <div data-testid="child-image-mode">
+      <p className="mt-1 text-[13px] leading-relaxed text-muted">
+        読み取りのため、画像を外部のAI（OpenAI）に送ります。このアプリには画像を保存しません。お子さんの顔や名前が写らないように撮るのがおすすめです。予定は確認してから入ります。
+      </p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-accent-deep">
+          画像を選ぶ
+          <input
+            className="hidden"
+            data-testid="child-image"
+            type="file"
+            accept="image/*"
+            onChange={(event) => {
+              onPick(event.target.files?.[0])
+              event.target.value = ''
+            }}
+          />
+        </label>
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-accent-deep">
+          写真を撮る
+          <input
+            className="hidden"
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(event) => {
+              onPick(event.target.files?.[0])
+              event.target.value = ''
+            }}
+          />
+        </label>
+      </div>
+      <button type="button" className="mt-3 min-h-11 text-[13px] text-muted" onClick={onBack}>
+        一覧へ
+      </button>
     </div>
   )
 }
@@ -164,7 +207,9 @@ function List({ onAdd, onEdit, onPick }: { onAdd: () => void; onEdit: (id: strin
 function Preview({ file, url, busy, onBack, onRead }: { file: File; url: string; busy: boolean; onBack: () => void; onRead: () => void }) {
   return (
     <div data-testid="child-preview">
-      <p className="mt-1 text-[13px] leading-relaxed text-muted">この画像を読み取ります。画像は保存しません。予定は、確認してから入ります。</p>
+      <p className="mt-1 text-[13px] leading-relaxed text-muted">
+        読み取りのため、画像を外部のAI（OpenAI）に送ります。このアプリには画像を保存しません。お子さんの顔や名前が写らないように撮るのがおすすめです。予定は確認してから入ります。
+      </p>
       <img src={url} alt={file.name} className="mt-2 max-h-48 w-full rounded-xl object-contain bg-white" />
       <div className="mt-3 flex gap-2">
         <Button data-testid="child-read" disabled={busy} onClick={onRead}>

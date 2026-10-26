@@ -7,7 +7,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-accent text-white',
+        default: 'bg-accent-deep text-white',
         ghost: 'bg-accent-soft text-accent-deep',
         quiet: 'bg-[#eee] text-[#666]',
         good: 'bg-good text-good-ink',
@@ -16,7 +16,7 @@ const buttonVariants = cva(
       },
       size: {
         default: 'px-3.5 py-2.5 text-sm',
-        sm: 'rounded-lg px-2.5 py-1.5 text-xs',
+        sm: 'min-h-10 rounded-lg px-2.5 py-1.5 text-xs',
         lg: 'w-full py-3 text-[15px]',
       },
     },

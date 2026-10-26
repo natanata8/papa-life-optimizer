@@ -5,6 +5,7 @@ import { useStore } from '@/app/store.tsx'
 import { FATIGUE_OPTIONS, MESSAGE_TEMPLATES, renderMessage, type FatigueId } from '@/domain/messages.ts'
 import { partnerDay, pickupThanks } from '@/domain/partnerDay.ts'
 import { returnInfo } from '@/domain/profile.ts'
+import { lineShareUrl } from '@/domain/export.ts'
 import { copyText } from '@/lib/utils.ts'
 
 export function MessageComposer() {
@@ -119,17 +120,23 @@ export function MessageComposer() {
       <div className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5" data-testid="message-preview">
         <p className="text-[13px] leading-relaxed whitespace-pre-line">{preview || '入れる部品を選んでください。'}</p>
       </div>
-      <Button
-        className="mt-2"
-        size="sm"
-        data-testid="message-copy"
-        disabled={!preview}
-        onClick={() => {
-          void copyText(preview).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
-        }}
-      >
-        コピー
-      </Button>
+      <div className="mt-2 flex items-center gap-2">
+        <Button
+          size="sm"
+          data-testid="message-copy"
+          disabled={!preview}
+          onClick={() => {
+            void copyText(preview).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
+          }}
+        >
+          コピー
+        </Button>
+        {preview ? (
+          <a className="inline-flex min-h-10 items-center text-[13px] font-bold text-accent-deep" data-testid="message-line" href={lineShareUrl(preview)} target="_blank" rel="noreferrer">
+            💬 LINEで送る
+          </a>
+        ) : null}
+      </div>
     </section>
   )
 }

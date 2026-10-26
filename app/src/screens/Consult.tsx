@@ -5,9 +5,10 @@ import { useStore } from '@/app/store.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { lineShareUrl } from '@/domain/export.ts'
 import { fieldOptions, lazyTitle } from '@/domain/profile.ts'
-import { SCENE_LIST, SCENES } from '@/domain/scenes.ts'
+import { SCENES } from '@/domain/scenes.ts'
+import { SceneGrid } from '@/components/SceneGrid.tsx'
 import type { ChatMessage } from '@/domain/types.ts'
-import { HOTLINE_MESSAGE } from '@/domain/safety.ts'
+import { CARE_CARD, SELF_HARM_LINES } from '@/domain/safety.ts'
 import { cn, copyText } from '@/lib/utils.ts'
 
 export function Consult() {
@@ -36,19 +37,8 @@ export function Consult() {
       {data.chat.length === 0 ? (
         <>
           <p className="mt-1 text-[13px] text-muted">迷った瞬間に開いてください。次の一手と伝え方を出します。</p>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {SCENE_LIST.map((scene) => (
-              <button
-                key={scene.id}
-                type="button"
-                data-testid={`scene-${scene.id}`}
-                className="rounded-[14px] border border-[#eadfd3] bg-white px-3 py-3.5 text-left text-sm font-bold"
-                onClick={() => store.beginScene(scene.id, true)}
-              >
-                <span className="mb-1 block text-2xl">{scene.icon}</span>
-                {scene.title}
-              </button>
-            ))}
+          <div className="mt-3">
+            <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id, true)} />
           </div>
         </>
       ) : (
@@ -71,18 +61,19 @@ function Message({ message, latest = false }: { message: ChatMessage; latest?: b
     return <p className="ml-auto max-w-[88%] rounded-2xl rounded-br-sm bg-accent px-3 py-2 text-sm leading-relaxed text-white">{message.text}</p>
   }
   if (message.role === 'bot') {
-    const hotline = message.text === HOTLINE_MESSAGE
+    const hotline = message.safety === 'stop'
     return (
-      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm ${hotline ? 'border border-[#e7c7c2]' : ''}`}>
-        {hotline ? <Hotline /> : message.text}
+      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm ${hotline ? 'border border-[#e7c7c2]' : ''}`} data-testid={hotline ? 'safety-stop' : undefined}>
+        {hotline ? <Hotline selfHarm={message.selfHarm} /> : message.text}
         {message.scenes ? (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {SCENE_LIST.map((scene) => (
-              <button key={scene.id} type="button" className="rounded-full border border-line bg-white px-2.5 py-1 text-xs" onClick={() => store.beginScene(scene.id)}>
-                {scene.icon} {scene.title}
-              </button>
-            ))}
+          <div className="mt-2">
+            <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id)} />
           </div>
+        ) : null}
+        {message.retry ? (
+          <Button size="sm" className="mt-2" data-testid="consult-retry" onClick={() => store.retryConsult(message.retry!)}>
+            もう一度送る
+          </Button>
         ) : null}
       </div>
     )
@@ -90,17 +81,26 @@ function Message({ message, latest = false }: { message: ChatMessage; latest?: b
   return <AnswerCard message={message} latest={latest} />
 }
 
-function Hotline() {
+function Hotline({ selfHarm = false }: { selfHarm?: boolean }) {
   return (
-    <div>
+    <div data-testid="hotline-card">
       <p className="font-bold">あなたや家族の安全がいちばん大事です。</p>
       <p className="mt-1">危険を感じる時は迷わず連絡してください。ここでは一手の提案はお休みします。</p>
       <ul className="mt-2 space-y-1 text-[13px]">
         <li>警察 110</li>
         <li>DV相談ナビ #8008</li>
         <li>児童相談所 189</li>
+        {selfHarm ? SELF_HARM_LINES.map((line) => <li key={line}>{line}</li>) : null}
       </ul>
     </div>
+  )
+}
+
+function CareCard() {
+  return (
+    <p className="mb-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2 text-[13px] leading-relaxed" data-testid="care-card">
+      {CARE_CARD}
+    </p>
   )
 }
 
@@ -108,13 +108,14 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
   const store = useStore()
   const data = store.data
   if (!data) return null
-  if (message.answer.safety_flag) return <Hotline />
+  if (message.answer.safety_flag) return <Hotline selfHarm={message.selfHarm} />
   const [first, ...rest] = message.answer.一手
   const firstId = message.suggestionIds[0]
   if (!first || !firstId) return null
   const suggestion = data.suggestions[firstId]
   return (
     <div data-testid={latest ? 'latest-answer' : undefined}>
+      {message.care ? <CareCard /> : null}
       {message.sample ? (
         <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent-deep">サンプル回答</p>
       ) : null}
@@ -130,7 +131,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           <AddButton suggestionId={firstId} />
         </div>
         <details className="mt-2">
-          <summary className="text-xs text-muted">手順</summary>
+          <summary className="py-2 text-xs text-muted">手順</summary>
           <ol className="mt-1 list-decimal pl-5 text-sm leading-relaxed">
             {first.タスク分解ステップ.map((step) => (
               <li key={step}>{step}</li>
@@ -155,7 +156,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       ) : null}
       {rest.length > 0 ? (
         <details className="mt-3">
-          <summary className="text-[13px] text-muted">ほかの一手 {rest.length}つ</summary>
+          <summary className="py-2 text-[13px] text-muted">ほかの一手 {rest.length}つ</summary>
           <div className="mt-2 space-y-2">
             {rest.map((item, index) => {
               const id = message.suggestionIds[index + 1]
@@ -180,7 +181,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       ) : null}
       {message.behind.lines.length > 0 ? (
         <details className="mt-3 rounded-xl border-[1.5px] border-dashed border-inv-line bg-inv px-3 py-2">
-          <summary className="text-[13px] font-bold text-inv-ink">
+          <summary className="py-2 text-[13px] font-bold text-inv-ink">
             👀 {message.behind.why}（{message.behind.lines.length}件）
           </summary>
           <div className="mt-1 text-xs leading-relaxed text-inv-ink">
@@ -190,8 +191,8 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           </div>
         </details>
       ) : null}
-      {message.used.length > 0 ? <p className="mt-3 text-left text-[11px] text-faint">使った家庭の情報：{message.used.join(' ／ ')}</p> : null}
-      {message.sample ? <p className="mt-1 text-[11px] text-faint">サンプル回答です。OpenAI には送っていません。</p> : null}
+      {message.used.length > 0 ? <p className="mt-3 text-left text-[11px] text-muted">使った家庭の情報：{message.used.join(' ／ ')}</p> : null}
+      {message.sample ? <p className="mt-1 text-[11px] text-muted">サンプル回答です。OpenAI には送っていません。</p> : null}
     </div>
   )
 }

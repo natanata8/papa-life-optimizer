@@ -79,7 +79,7 @@ export function Calendar() {
           ＋ 子どもの予定
         </Button>
       </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-faint">
+        <p className="mt-2 text-[11px] leading-relaxed text-muted">
         👀 は家庭プロフィールと「家事・育児タスク一覧」から自動で出ます。チェックや採点はしません。妻の1日は推定で、編集もチェックもできません。
       </p>
     </div>
@@ -123,6 +123,8 @@ function Week() {
     <div data-testid="week-view">
       <DateBar
         label={`${formatMd(store.weekStart)} 〜 ${formatMd(addDays(store.weekStart, 6))}`}
+        prevLabel="前の週"
+        nextLabel="次の週"
         onPrev={() => store.shiftWeek(-1)}
         onNext={() => store.shiftWeek(1)}
       />
@@ -212,12 +214,14 @@ function Day() {
     <div data-testid="day-view">
       <DateBar
         label={`${formatMd(store.day)}${store.day === store.today ? ' 今日' : ''}`}
+        prevLabel="前の日"
+        nextLabel="次の日"
         onPrev={() => store.shiftDay(-1)}
         onNext={() => store.shiftDay(1)}
       />
       {store.filters.inv ? (
         <details className="rounded-xl border border-dashed border-inv-line bg-inv px-3 py-2">
-          <summary className="text-[13px] font-bold text-inv-ink">
+          <summary className="py-2 text-[13px] font-bold text-inv-ink">
             👀 毎日まわっている見えない仕事 {DAILY_TASKS.length}件（目安 約{minutes}分）
           </summary>
           <div className="mt-2 space-y-1">
@@ -283,7 +287,7 @@ function Day() {
         )
       })}
       {lane?.workday ? (
-        <p className="mt-2 text-[11px] leading-relaxed text-faint">
+        <p className="mt-2 text-[11px] leading-relaxed text-muted">
           {lane.note}
           {lane.windowLabel}
         </p>
@@ -295,14 +299,26 @@ function Day() {
   )
 }
 
-function DateBar({ label, onPrev, onNext }: { label: string; onPrev: () => void; onNext: () => void }) {
+function DateBar({
+  label,
+  prevLabel,
+  nextLabel,
+  onPrev,
+  onNext,
+}: {
+  label: string
+  prevLabel: string
+  nextLabel: string
+  onPrev: () => void
+  onNext: () => void
+}) {
   return (
     <div className="my-2 flex items-center justify-between">
-      <button type="button" className="rounded-lg px-2 py-1 text-lg" onClick={onPrev} aria-label="前へ">
+      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2 text-lg" onClick={onPrev} aria-label={prevLabel}>
         ‹
       </button>
       <b className="text-sm">{label}</b>
-      <button type="button" className="rounded-lg px-2 py-1 text-lg" onClick={onNext} aria-label="次へ">
+      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2 text-lg" onClick={onNext} aria-label={nextLabel}>
         ›
       </button>
     </div>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
+import { SceneGrid } from '@/components/SceneGrid.tsx'
 import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { downloadIcs, googleCalendarUrl, lineShareUrl } from '@/domain/export.ts'
@@ -31,7 +32,8 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'event') return <EventSheet id={sheet.id} />
   if (sheet.type === 'addEvent') return <AddEventSheet />
   if (sheet.type === 'addNice') return <AddNiceSheet />
-  if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} />
+  if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} image={sheet.image} />
+  if (sheet.type === 'quick') return <QuickSheet />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
@@ -88,7 +90,7 @@ function AddSheet({ id }: { id: string }) {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
-      <p className="mt-2 text-[11px] leading-relaxed text-faint">外部への連携はリンクを開くだけです。自動では送りません。</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-muted">外部への連携はリンクを開くだけです。自動では送りません。</p>
     </div>
   )
 }
@@ -222,7 +224,7 @@ function InvisibleSheet({ date, itemKey }: { date: string; itemKey: string }) {
           閉じる
         </button>
       </div>
-      <p className="mt-3 text-[11px] leading-relaxed text-faint">
+      <p className="mt-3 text-[11px] leading-relaxed text-muted">
         もとのデータ：家事・育児タスク一覧 {def.taskId}
         {snippet ? `「${snippet.title}」（${snippet.category}・${snippet.frequency}・一覧では「${snippet.visibility}」）` : ''}
         。手順と「なぜ大事」は叩き台の例文です。
@@ -251,7 +253,7 @@ function DailySheet({ taskId }: { taskId: string }) {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         閉じる
       </Button>
-      <p className="mt-2 text-[11px] text-faint">もとのデータ：家事・育児タスク一覧 {taskId}</p>
+      <p className="mt-2 text-[11px] text-muted">もとのデータ：家事・育児タスク一覧 {taskId}</p>
     </div>
   )
 }
@@ -431,7 +433,7 @@ function AddEventSheet() {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
-      <p className="mt-2 text-[11px] text-faint">この叩き台では手入力だけです。</p>
+      <p className="mt-2 text-[11px] text-muted">この叩き台では手入力だけです。</p>
     </div>
   )
 }
@@ -508,13 +510,13 @@ function NotifSheet() {
   return (
     <div data-testid="sheet-notif" className="text-center">
       <p className="text-3xl">🔔</p>
-      <p className="mt-1 text-base font-bold">明日の朝、1回だけ「どうだった？」を届けてもいいですか？</p>
-      <p className="mt-1 text-sm leading-relaxed text-muted">通知は1日2回まで。22:30〜7:00と、寝かしつけの時間（20:00〜21:30）には送りません。この叩き台では画面の中の予告だけです。</p>
+      <p className="mt-1 text-base font-bold">明日の朝、「どうだった？」を今日の画面の一番上に出しますね</p>
+      <p className="mt-1 text-sm leading-relaxed text-muted">スマホへの通知は準備中です。</p>
       <Button className="mt-3" size="lg" onClick={() => store.setNotif(true)}>
-        いいよ
+        お願い
       </Button>
       <Button className="mt-2" size="lg" variant="quiet" onClick={() => store.setNotif(false)}>
-        通知なしでいい
+        出さなくていい
       </Button>
     </div>
   )
@@ -525,13 +527,33 @@ function ResetSheet() {
   return (
     <div data-testid="sheet-reset">
       <p className="text-base font-bold">この端末のデータを消しますか？</p>
-      <p className="mt-1 text-sm leading-relaxed text-muted">サンプルの家族に戻します。相談の記録と、入れた一手も消えます。</p>
+      <p className="mt-1 text-sm leading-relaxed text-muted">
+        {store.demo ? 'サンプルの家族に戻します。相談の記録と、入れた一手も消えます。' : '空の状態に戻します。'}
+      </p>
       <Button className="mt-3" size="lg" data-testid="confirm-reset" onClick={store.reset}>
         消して最初から
       </Button>
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
+    </div>
+  )
+}
+
+function QuickSheet() {
+  const store = useStore()
+  return (
+    <div data-testid="sheet-quick">
+      <p className="text-base font-bold">すぐ相談（タップだけ）</p>
+      <div className="mt-3">
+        <SceneGrid
+          testPrefix="quick-"
+          onPick={(id) => {
+            store.closeSheet()
+            store.beginScene(id, true)
+          }}
+        />
+      </div>
     </div>
   )
 }

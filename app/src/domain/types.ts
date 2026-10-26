@@ -168,9 +168,18 @@ export type Behind = {
   lines: string[]
 }
 
+export type ConsultRetry = {
+  scene: SceneId | null
+  answers: string[]
+  entry: string
+  userText: string
+  sceneTitle?: string
+  care?: boolean
+}
+
 export type ChatMessage =
   | { id: string; role: 'me'; text: string }
-  | { id: string; role: 'bot'; text: string; scenes?: boolean }
+  | { id: string; role: 'bot'; text: string; scenes?: boolean; safety?: 'stop'; selfHarm?: boolean; retry?: ConsultRetry }
   | {
       id: string
       role: 'answer'
@@ -179,6 +188,8 @@ export type ChatMessage =
       behind: Behind
       used: string[]
       sample: boolean
+      care?: boolean
+      selfHarm?: boolean
     }
 
 export type ConsultationRecord = {

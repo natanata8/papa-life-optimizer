@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { AGES } from '@/domain/types.ts'
 import { OFF_OPTIONS, RETURN_WINDOWS, WORK_OPTIONS, kidName, returnInfo } from '@/domain/profile.ts'
-import { SCENE_LIST } from '@/domain/scenes.ts'
+import { SceneGrid } from '@/components/SceneGrid.tsx'
 import { useStore } from '@/app/store.tsx'
 
 export function Onboarding() {
@@ -40,7 +40,7 @@ export function Onboarding() {
           <Button size="lg" className="mt-5" data-testid="ob-start" onClick={() => store.setOb({ step: 1 })}>
             はじめる
           </Button>
-          <button type="button" className="mx-auto mt-3 block text-[13px] text-muted" onClick={() => store.setOb({ step: 5 })}>
+          <button type="button" className="mx-auto mt-3 block min-h-11 px-3 py-2 text-[13px] text-muted" onClick={() => store.setOb({ step: 5 })}>
             あとで答える → すぐ相談する
           </button>
         </div>
@@ -142,24 +142,13 @@ export function Onboarding() {
       {ob.step === 5 ? (
         <div className="pt-6">
           <h2 className="text-lg font-bold">ありがとうございます。いま、どれに近いですか？</h2>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            {SCENE_LIST.map((scene) => (
-              <button
-                key={scene.id}
-                type="button"
-                data-testid={`scene-${scene.id}`}
-                className="rounded-[14px] border border-[#eadfd3] bg-white px-3 py-3.5 text-left text-sm font-bold"
-                onClick={() => store.finishOb(scene.id)}
-              >
-                <span className="mb-1 block text-2xl">{scene.icon}</span>
-                {scene.title}
-              </button>
-            ))}
+          <div className="mt-3">
+            <SceneGrid testPrefix="scene-" onPick={(id) => store.finishOb(id)} />
           </div>
           <button type="button" className="mx-auto mt-3 block text-[13px] text-muted" onClick={() => store.finishOb(null)}>
             今はない → 今日の画面へ
           </button>
-          <p className="mt-4 text-center text-[11px] text-faint">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
+          <p className="mt-4 text-center text-[11px] text-muted">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
         </div>
       ) : null}
     </div>
@@ -184,7 +173,7 @@ function ReturnStep() {
       </div>
       {info ? (
         <p className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">
-          帰る前の通知は <b>{info.notify}ごろ</b>（帰宅の約45分前）に、1日1回まで届きます。
+          帰る前（<b>{info.notify}ごろ</b>）に、今日の画面に「帰る前の一手」を出します。
         </p>
       ) : store.ob.home ? (
         <p className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">
@@ -213,7 +202,7 @@ function OptionButton({ selected, children, onClick }: { selected: boolean; chil
 
 function Skip({ onClick }: { onClick: () => void }) {
   return (
-    <button type="button" className="mx-auto mt-3 block text-[13px] text-muted" data-testid="ob-skip" onClick={onClick}>
+    <button type="button" className="mx-auto mt-3 block min-h-11 px-3 py-2 text-[13px] text-muted" data-testid="ob-skip" onClick={onClick}>
       スキップ
     </button>
   )

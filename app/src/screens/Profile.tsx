@@ -2,6 +2,7 @@ import { DemoBar } from '@/components/DemoBar.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
+import { usingSupabase } from '@/data/index.ts'
 import { DAY_ORDER, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import {
   FIELDS,
@@ -18,6 +19,29 @@ import {
 import { AGES, GOMI_KINDS, type GomiKind, type School } from '@/domain/types.ts'
 
 const GROUPS = ['家族', '子ども', 'くらし', '頼れる先', 'パートナー']
+
+function iosSafariHint(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  const ios = /iPhone|iPad|iPod/.test(ua)
+  const safari = /Safari/.test(ua) && !/CriOS|FxiOS|EdgiOS/.test(ua)
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
+  return ios && safari && !standalone
+}
+
+function DataHandling() {
+  return (
+    <section className="mt-6">
+      <h2 className="text-sm font-bold">データの扱い</h2>
+      <div className="mt-2 space-y-2 text-[13px] leading-relaxed text-muted">
+        <p>保存場所：{usingSupabase() ? 'ログインした家族のデータ（Supabase）' : 'このブラウザの中だけ'}</p>
+        <p>相談するときAIに送るもの：子どもの年齢と呼び名、働き方、帰宅時間、予定、相談の文。本名ではなく呼び名（例：上の子）での登録がおすすめです。</p>
+        <p>お便りの画像：読み取りのためだけにAIへ送り、保存しません。</p>
+        <p>消し方：下の「この端末のデータを消す」で全部消えます。</p>
+      </div>
+    </section>
+  )
+}
 
 export function Profile() {
   const store = useStore()
@@ -76,7 +100,7 @@ export function Profile() {
           </Chip>
         </div>
       </div>
-      <p className="mt-1 text-[11px] leading-relaxed text-faint">この叩き台では通知の見え方だけです。端末への送信はしません。</p>
+      <p className="mt-1 text-[11px] leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
 
       <h2 className="mt-4 text-sm font-bold">tONEが覚えていること</h2>
       {data.memories.length === 0 ? (
@@ -90,7 +114,7 @@ export function Profile() {
                 <br />
                 {memory.text}
               </p>
-              <button type="button" className="shrink-0 text-xs text-muted" onClick={() => store.deleteMemory(memory.id)}>
+              <button type="button" className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-xs text-muted" onClick={() => store.deleteMemory(memory.id)}>
                 消す
               </button>
             </div>
@@ -98,12 +122,13 @@ export function Profile() {
         </div>
       )}
 
+      <DataHandling />
+      {iosSafariHint() ? (
+        <p className="mt-4 text-[13px] leading-relaxed text-muted">ホーム画面に追加すると、アプリのように開けます（共有ボタン →「ホーム画面に追加」）。</p>
+      ) : null}
       <Button className="mt-6" size="lg" variant="quiet" data-testid="profile-reset" onClick={() => store.openSheet({ type: 'reset' })}>
         この端末のデータを消す
       </Button>
-      <p className="mt-2 text-[11px] leading-relaxed text-faint">
-        初期状態ではこのブラウザだけに保存します。Supabase に切り替えると、ログインした家族の行に保存します。
-      </p>
     </div>
   )
 }
@@ -132,7 +157,7 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
                   }))
                 }
               />
-              <button type="button" className="ml-auto text-xs text-muted" onClick={() => store.dropKid(index)}>
+              <button type="button" className="ml-auto inline-flex min-h-11 min-w-11 items-center justify-center text-xs text-muted" onClick={() => store.dropKid(index)}>
                 外す
               </button>
             </div>

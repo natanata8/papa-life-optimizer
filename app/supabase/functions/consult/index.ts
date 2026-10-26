@@ -2,8 +2,11 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1'
 import { STATIC_SYSTEM_PROMPT } from '../_shared/system-prompt.ts'
 import { TONE_ANSWER_SCHEMA } from '../_shared/schema.ts'
 
-/** src/domain/safety.ts の SAFETY_PATTERN と同じ語。 */
-const SAFETY_PATTERN = /暴力|殴|叩か|蹴|怖い|脅/
+/** src/domain/safety.ts と揃える（keep in sync）。STOP は AI を呼ばない。CARE は通常の相談。 */
+const STOP_PATTERN = /暴力|殴ら|殴る|殴っ|蹴ら|蹴っ|叩かれ|叩いてしま|手をあげ|手を上げ|脅さ|脅し|死にたい|消えたい|自殺|死のう|殺し/
+const SELF_HARM_PATTERN = /死にたい|消えたい|自殺|死のう/
+const BODY_LIMIT = 32 * 1024
+const TOO_LONG = '内容が長すぎます。短くしてもう一度どうぞ。'
 
 const HOTLINE =
   '話してくれてありがとうございます。あなたや家族の安全がいちばん大事です。危険を感じる時は迷わず110番、DV相談ナビ #8008、子どもの安全は児童相談所 189 に相談してください。ここでは一手の提案はお休みします。'
@@ -39,6 +42,11 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ message: 'POST だけ受けます。' }, 405)
 
+  const contentLength = Number(req.headers.get('content-length') || '0')
+  if (Number.isFinite(contentLength) && contentLength > BODY_LIMIT) return json({ message: TOO_LONG }, 413)
+  const raw = await req.text()
+  if (raw.length > BODY_LIMIT) return json({ message: TOO_LONG }, 413)
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
   const authHeader = req.headers.get('Authorization') ?? ''
@@ -55,12 +63,26 @@ Deno.serve(async (req) => {
   const user = userData.user
   if (userError || !user) return json({ message: 'ログインが必要です。' }, 401)
 
-  const body = (await req.json().catch(() => null)) as ConsultBody | null
+  const body = parseBody(raw)
   if (!body) return json({ message: '本文が読めませんでした。' }, 400)
 
-  const text = `${body.entry ?? ''}\n${body.userText ?? ''}\n${(body.answers ?? []).join('\n')}`
-  if (SAFETY_PATTERN.test(text)) {
-    const answer = safetyAnswer()
+  const entry = clamp(body.entry, 400)
+  const userText = clamp(body.userText, 400)
+  const answers = (Array.isArray(body.answers) ? body.answers : []).slice(0, 6).map((item) => clamp(item, 400))
+  const scheduleText = clamp(body.scheduleText, 1500)
+  const todayText = clamp(body.todayText, 1500)
+  const events = Array.isArray(body.events) ? body.events.slice(0, 20) : []
+  const taskHints = (Array.isArray(body.taskHints) ? body.taskHints : []).slice(0, 8)
+  body.entry = entry
+  body.userText = userText
+  body.answers = answers
+  body.scheduleText = scheduleText
+  body.todayText = todayText
+  body.events = events
+  body.taskHints = taskHints
+  const text = `${entry}\n${userText}\n${answers.join('\n')}`
+  if (STOP_PATTERN.test(text)) {
+    const answer = safetyAnswer(text)
     await record(supabase, user.id, body, answer, true)
     await logUsage(admin, { user_id: user.id, safety: true, status: 'safety' })
     return json({ answer, meta: { ai: false, reason: 'safety' } })
@@ -87,18 +109,18 @@ Deno.serve(async (req) => {
   const { data: member } = await supabase.from('family_members').select('family_id').eq('user_id', user.id).limit(1).maybeSingle()
   const familyId = (member as { family_id?: string } | null)?.family_id ?? null
 
-  const hints = await taskContext(supabase, body.taskHints ?? [])
+  const hints = await taskContext(supabase, taskHints)
   const dynamic = JSON.stringify({
     today: body.today ?? null,
     sceneDate: body.sceneDate ?? null,
     scene: body.scene ?? null,
-    entry: body.entry ?? '',
-    answers: body.answers ?? [],
+    entry,
+    answers,
     family: sanitizeFamily(body.family ?? {}),
-    schedule: body.scheduleText ?? '',
-    todayText: body.todayText ?? '',
+    schedule: scheduleText,
+    todayText,
     memory: (body.memory ?? []).slice(0, 8),
-    events: body.events ?? [],
+    events,
     childEvents: Array.isArray(body.childEvents) ? body.childEvents.slice(0, 12) : [],
     partnerEstimate: Array.isArray(body.partnerEstimate) ? body.partnerEstimate.slice(0, 2) : [],
     flags: body.flags ?? {},
@@ -120,7 +142,7 @@ Deno.serve(async (req) => {
       messages: [
         { role: 'system', content: STATIC_SYSTEM_PROMPT },
         { role: 'system', content: `次のJSONが、この家庭の情報です。estimate が true の項目は推定で、事実ではありません。パートナーがそれを担当した、気持ち、という断定には使わないでください。\n${dynamic}` },
-        { role: 'user', content: body.userText || body.entry || '相談です' },
+        { role: 'user', content: userText || entry || '相談です' },
       ],
     }),
   })
@@ -165,9 +187,25 @@ Deno.serve(async (req) => {
   return json({ answer, meta: { ai: true, model, usage } })
 })
 
-function safetyAnswer() {
+function clamp(value: unknown, max: number): string {
+  return String(value ?? '').slice(0, max)
+}
+
+function parseBody(raw: string): ConsultBody | null {
+  try {
+    return JSON.parse(raw) as ConsultBody
+  } catch {
+    return null
+  }
+}
+
+function safetyAnswer(text: string) {
+  const selfHarm = SELF_HARM_PATTERN.test(text)
+  const lines = selfHarm
+    ? `${HOTLINE}\nこころの健康相談統一ダイヤル 0570-064-556\nよりそいホットライン 0120-279-338（24時間）`
+    : HOTLINE
   return {
-    状況整理: HOTLINE,
+    状況整理: lines,
     気づき: '',
     一手: [
       {
@@ -175,7 +213,9 @@ function safetyAnswer() {
         なぜ今: '危険があるときは、家の段取りより先に安全です',
         種類: '今やる',
         タイミング: 'いま',
-        タスク分解ステップ: ['110', 'DV相談ナビ #8008', '児童相談所 189'],
+        タスク分解ステップ: selfHarm
+          ? ['110', 'DV相談ナビ #8008', '児童相談所 189', '0570-064-556', '0120-279-338']
+          : ['110', 'DV相談ナビ #8008', '児童相談所 189'],
       },
     ],
     声かけ例: '',

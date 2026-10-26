@@ -68,7 +68,7 @@ export function Outings() {
           ))}
         </ul>
       ) : null}
-      <p className="mt-3 text-[11px] leading-relaxed text-faint">いまの中身はサンプルです。あとから web / X / 人の投稿を、出典つきで足せます。</p>
+      <p className="mt-3 text-[11px] leading-relaxed text-muted">いまの中身はサンプルです。あとから web / X / 人の投稿を、出典つきで足せます。</p>
     </div>
   )
 }
@@ -92,7 +92,7 @@ function OutingDetail({ spot, onBack }: { spot: OutingSpot; onBack: () => void }
       <div className="mt-3">
         <p className="text-[12px] font-bold text-muted">持ち物</p>
         <p className="mt-1 text-[13px] leading-relaxed">{pack.join('、')}</p>
-        <p className="mt-0.5 text-[11px] text-faint">子どもの年齢で足しています。</p>
+        <p className="mt-0.5 text-[11px] text-muted">子どもの年齢で足しています。</p>
       </div>
       <p className="mt-3 text-[12px] font-bold text-accent">提案の文</p>
       <p className="mt-1 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-sm leading-relaxed">「{spot.phrase}」</p>
@@ -106,7 +106,7 @@ function OutingDetail({ spot, onBack }: { spot: OutingSpot; onBack: () => void }
       >
         提案をコピー
       </Button>
-      <p className="mt-2 text-[11px] text-faint">出典: {spot.source === 'mock' ? 'サンプル' : spot.source}{spot.fetchedAt ? ` ・ ${spot.fetchedAt}` : ''}</p>
+      <p className="mt-2 text-[11px] text-muted">出典: {spot.source === 'mock' ? 'サンプル' : spot.source}{spot.fetchedAt ? ` ・ ${spot.fetchedAt}` : ''}</p>
     </article>
   )
 }

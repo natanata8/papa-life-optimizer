@@ -58,6 +58,15 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
   if (req.method !== 'POST') return json({ message: 'POST だけ受けます。' }, 405)
 
+  // 相談APIは 32KB で切る。お便りは JPEG の base64 なので、既存の画像上限（200万文字）に合わせる。
+  const IMAGE_BODY_LIMIT = 2_600_000
+  const contentLength = Number(req.headers.get('content-length') || '0')
+  if (Number.isFinite(contentLength) && contentLength > IMAGE_BODY_LIMIT) {
+    return json({ message: '内容が長すぎます。短くしてもう一度どうぞ。' }, 413)
+  }
+  const raw = await req.text()
+  if (raw.length > IMAGE_BODY_LIMIT) return json({ message: '内容が長すぎます。短くしてもう一度どうぞ。' }, 413)
+
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   const anonKey = Deno.env.get('SUPABASE_ANON_KEY')
   const authHeader = req.headers.get('Authorization') ?? ''
@@ -74,7 +83,7 @@ Deno.serve(async (req) => {
   const user = userData.user
   if (userError || !user) return json({ message: 'ログインが必要です。' }, 401)
 
-  const body = (await req.json().catch(() => null)) as Body | null
+  const body = parseExtract(raw)
   const image = body?.image?.replace(/^data:image\/jpeg;base64,/, '') ?? ''
   if (!image) return json({ message: '画像がありません。' }, 400)
   if (image.length > 2_000_000) return json({ message: '画像が大きすぎます。もう一度、小さめに撮り直してください。' }, 400)
@@ -303,6 +312,14 @@ async function logUsage(
 ) {
   const { error } = await admin.from('consult_usage').insert({ safety: false, ...row })
   if (error) console.error('usage log failed', error.message)
+}
+
+function parseExtract(raw: string): Body | null {
+  try {
+    return JSON.parse(raw) as Body
+  } catch {
+    return null
+  }
 }
 
 function json(body: unknown, status = 200) {

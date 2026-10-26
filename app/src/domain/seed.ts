@@ -21,7 +21,7 @@ export function createSeed(today = todayInTokyo()): Persisted {
       },
       {
         id: uid(),
-        date: addDays(today, 2),
+        date: addDays(today, 1),
         time: '',
         title: '上の子 遠足（お弁当の日）',
         who: '子ども',
@@ -85,7 +85,7 @@ export function createSeed(today = todayInTokyo()): Persisted {
         suggestionId: null,
         date: today,
         time: '21:00',
-        title: 'お風呂を自分がやる',
+        title: 'お風呂は自分が担当',
         why: '帰宅後に、手が足りない時間を1つ引き取る',
         scene: '今日',
         source: 'ホーム',

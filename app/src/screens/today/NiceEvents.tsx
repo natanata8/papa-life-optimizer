@@ -19,7 +19,14 @@ export function NiceEvents() {
       </div>
       <p className="mt-1 text-[12px] leading-relaxed text-muted">誕生日や記念日、美容院・ネイルなど、帰ってから一言触れておきたい日。</p>
       {items.length === 0 ? (
-        <p className="mt-2 rounded-xl bg-white px-3 py-3 text-[13px] text-muted">今日から7日以内のものはありません。</p>
+        <button
+          type="button"
+          data-testid="nice-empty"
+          className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-white px-3 text-[13px] font-bold shadow-sm"
+          onClick={() => store.openSheet({ type: 'addNice' })}
+        >
+          🎂 誕生日や記念日を入れる
+        </button>
       ) : (
         <div className="mt-2 space-y-2">
           {items.map((event) => {
@@ -28,7 +35,7 @@ export function NiceEvents() {
               <article key={event.id} className="rounded-[14px] bg-white p-3 shadow-sm">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-[14px] font-bold">{event.title}</p>
-                  <button type="button" className="shrink-0 text-[12px] text-muted" onClick={() => store.removeNice(event.id)}>
+                  <button type="button" className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center px-2 text-[12px] text-muted" onClick={() => store.removeNice(event.id)}>
                     消す
                   </button>
                 </div>

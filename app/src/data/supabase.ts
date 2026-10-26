@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { todayInTokyo } from '@/domain/dates.ts'
 import { emptyProfile } from '@/domain/profile.ts'
-import { createEmpty, createSeed } from '@/domain/seed.ts'
+import { createEmpty } from '@/domain/seed.ts'
 import { isUuid } from '@/domain/childEvents.ts'
 import type { ChatMessage, ChildEvent, FamEvent, GomiKind, Kid, NiceEvent, Persisted, Profile, Step, Suggestion, ToneAnswer } from '@/domain/types.ts'
 import { GOMI_KINDS } from '@/domain/types.ts'
@@ -66,7 +66,7 @@ export function createSupabaseRepository(url: string, anonKey: string): FamilyRe
       await writeFamily(client, familyId, userId, state, false)
     },
     async reset() {
-      const state = createSeed(todayInTokyo())
+      const state = createEmpty(todayInTokyo())
       if (familyId) await writeFamily(client, familyId, userId, state, true)
       return state
     },
