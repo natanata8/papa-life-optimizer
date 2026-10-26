@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { todayInTokyo } from '@/domain/dates.ts'
 import { emptyProfile } from '@/domain/profile.ts'
 import { createEmpty, createSeed } from '@/domain/seed.ts'
-import type { ChatMessage, FamEvent, GomiKind, Kid, Persisted, Profile, Step, Suggestion, ToneAnswer } from '@/domain/types.ts'
+import type { ChatMessage, FamEvent, GomiKind, Kid, NiceEvent, Persisted, Profile, Step, Suggestion, ToneAnswer } from '@/domain/types.ts'
 import { GOMI_KINDS } from '@/domain/types.ts'
 import type { FamilyRepository, LoadResult } from '@/data/repository.ts'
 
@@ -86,11 +86,12 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
   const { data: familyData, error: familyError } = await client.from('families').select('*').eq('id', familyId).single()
   fail(familyError)
   const family = familyData as FamilyRow
-  const [children, gomi, multi, events, steps, memories, notes, hidden, consultations] = await Promise.all([
+  const [children, gomi, multi, events, niceEvents, steps, memories, notes, hidden, consultations] = await Promise.all([
     list(client, 'children', familyId),
     list(client, 'gomi_days', familyId),
     list(client, 'family_multi', familyId),
     list(client, 'events', familyId),
+    list(client, 'nice_events', familyId),
     list(client, 'steps', familyId),
     list(client, 'memories', familyId),
     list(client, 'task_notes', familyId),
@@ -146,6 +147,14 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
       title: row.title,
       who: row.who_label,
       kind: row.kind,
+    })),
+    niceEvents: (niceEvents as NiceRow[]).map((row) => ({
+      id: row.id,
+      kind: row.kind,
+      title: row.title,
+      date: row.event_date.slice(0, 10),
+      recurrence: row.recurrence,
+      note: row.note ?? '',
     })),
     steps: (steps as StepRow[]).map(stepFromRow),
     memories: (memories as { id: string; memo_date: string; body: string }[]).map((row) => ({
@@ -229,6 +238,15 @@ async function writeFamily(
     ...state.profile.support.map((value) => ({ family_id: familyId, kind: 'support', value })),
     ...state.profile.outsource.map((value) => ({ family_id: familyId, kind: 'outsource', value })),
   ])
+  await replace(client, 'nice_events', familyId, state.niceEvents.map((event) => ({
+    id: event.id,
+    family_id: familyId,
+    kind: event.kind,
+    title: event.title,
+    event_date: event.date,
+    recurrence: event.recurrence,
+    note: event.note,
+  })))
   await replace(client, 'events', familyId, state.events.map((event) => ({
     id: event.id,
     family_id: familyId,
@@ -320,6 +338,14 @@ async function replace(client: SupabaseClient, table: string, familyId: string, 
 
 type KidRow = { id: string; sort_order: number; label: string; age_label: string | null; age_years: number | null; school: string | null }
 type EventRow = { id: string; event_date: string; event_time: string | null; title: string; who_label: string; kind: FamEvent['kind'] }
+type NiceRow = {
+  id: string
+  kind: NiceEvent['kind']
+  title: string
+  event_date: string
+  recurrence: NiceEvent['recurrence']
+  note: string | null
+}
 type StepRow = {
   id: string
   step_date: string

@@ -36,6 +36,32 @@ export function createSeed(today = todayInTokyo()): Persisted {
         kind: 'kisei',
       },
     ],
+    niceEvents: [
+      {
+        id: uid(),
+        kind: '美容院',
+        title: '妻のカット',
+        date: today,
+        recurrence: null,
+        note: '',
+      },
+      {
+        id: uid(),
+        kind: 'ネイル',
+        title: 'ネイル',
+        date: addDays(today, 1),
+        recurrence: null,
+        note: '',
+      },
+      {
+        id: uid(),
+        kind: '記念日',
+        title: '結婚記念日',
+        date: addDays(today, 5),
+        recurrence: 'yearly',
+        note: '',
+      },
+    ],
     steps: [
       {
         id: uid(),
@@ -46,6 +72,22 @@ export function createSeed(today = todayInTokyo()): Persisted {
         why: '疲れている夜は、話すより手を動かす方が伝わります',
         scene: '妻がしんどそう',
         source: '相談',
+        status: null,
+        reason: '',
+        taskId: null,
+        invisibleKey: null,
+        breakdown: [],
+        kind: '今やる',
+      },
+      {
+        id: uid(),
+        suggestionId: null,
+        date: today,
+        time: '21:00',
+        title: 'お風呂を自分がやる',
+        why: '帰宅後に、手が足りない時間を1つ引き取る',
+        scene: '今日',
+        source: 'ホーム',
         status: null,
         reason: '',
         taskId: null,
@@ -66,5 +108,5 @@ export function createSeed(today = todayInTokyo()): Persisted {
 
 export function createEmpty(today = todayInTokyo()): Persisted {
   const seed = createSeed(today)
-  return { ...seed, events: [], steps: [] }
+  return { ...seed, events: [], steps: [], niceEvents: [] }
 }

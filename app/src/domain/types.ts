@@ -1,4 +1,4 @@
-export type SceneId = 'nomi' | 'tired' | 'week' | 'me'
+export type SceneId = 'nomi' | 'tired' | 'week' | 'me' | 'late'
 
 export type StepKind =
   | '今やる'
@@ -76,6 +76,21 @@ export type Profile = {
   showInv: boolean
   notif: boolean | null
 }
+
+export type NiceKind = '誕生日' | '記念日' | '美容院' | 'ネイル' | 'その他'
+
+export type NiceRecurrence = 'yearly' | 'monthly' | 'weekly'
+
+export type NiceEvent = {
+  id: string
+  kind: NiceKind
+  title: string
+  date: string
+  recurrence: NiceRecurrence | null
+  note: string
+}
+
+export const NICE_KINDS: NiceKind[] = ['誕生日', '記念日', '美容院', 'ネイル', 'その他']
 
 export type EventKind = 'pickup' | 'nomikai' | 'ensoku' | 'kisei' | 'other'
 
@@ -157,6 +172,7 @@ export type Persisted = {
   onboarded: boolean
   profile: Profile
   events: FamEvent[]
+  niceEvents: NiceEvent[]
   steps: Step[]
   memories: Memory[]
   notes: Record<string, string>

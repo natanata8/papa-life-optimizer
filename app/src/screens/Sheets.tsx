@@ -5,7 +5,8 @@ import { useStore, type Sheet } from '@/app/store.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { downloadIcs, googleCalendarUrl, lineShareUrl } from '@/domain/export.ts'
 import { DAILY_TASKS, INV_DEFS, invisibleOn, taskSnippet } from '@/domain/invisible.ts'
-import { NOTE_OPTIONS, REASONS, type EventKind } from '@/domain/types.ts'
+import { NICE_KINDS, NOTE_OPTIONS, REASONS, type EventKind, type NiceKind, type NiceRecurrence } from '@/domain/types.ts'
+import { nicePlaceholder } from '@/domain/nice.ts'
 
 export function Sheets() {
   const store = useStore()
@@ -25,6 +26,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'daily') return <DailySheet taskId={sheet.taskId} />
   if (sheet.type === 'event') return <EventSheet id={sheet.id} />
   if (sheet.type === 'addEvent') return <AddEventSheet />
+  if (sheet.type === 'addNice') return <AddNiceSheet />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
@@ -269,6 +271,70 @@ function EventSheet({ id }: { id: string }) {
           閉じる
         </button>
       </div>
+    </div>
+  )
+}
+
+function AddNiceSheet() {
+  const store = useStore()
+  const [kind, setKind] = useState<NiceKind>('美容院')
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState(store.today)
+  const [recurrence, setRecurrence] = useState<NiceRecurrence | null>(null)
+  const [note, setNote] = useState('')
+  const options: { id: NiceRecurrence | null; label: string }[] = [
+    { id: null, label: '一度だけ' },
+    { id: 'yearly', label: '毎年' },
+    { id: 'monthly', label: '毎月' },
+    { id: 'weekly', label: '毎週' },
+  ]
+  return (
+    <div data-testid="sheet-add-nice">
+      <p className="text-sm font-bold">気づいておきたい日</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {NICE_KINDS.map((item) => (
+          <Chip key={item} on={kind === item} onClick={() => setKind(item)}>
+            {item}
+          </Chip>
+        ))}
+      </div>
+      <input
+        className="mt-3 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm"
+        placeholder={nicePlaceholder(kind)}
+        value={title}
+        data-testid="nice-title"
+        onChange={(event) => setTitle(event.target.value)}
+      />
+      <input className="mt-2 rounded-lg border border-line bg-white px-2 py-1.5 text-sm" type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {options.map((item) => (
+          <Chip key={item.label} on={recurrence === item.id} onClick={() => setRecurrence(item.id)}>
+            {item.label}
+          </Chip>
+        ))}
+      </div>
+      <input
+        className="mt-2 w-full rounded-lg border border-line bg-white px-3 py-2 text-sm"
+        placeholder="メモ（任意）"
+        value={note}
+        onChange={(event) => setNote(event.target.value)}
+      />
+      <Button
+        className="mt-3"
+        size="lg"
+        onClick={() => {
+          if (!title.trim() || !date) {
+            store.showToast('名前と日付を入れてください')
+            return
+          }
+          store.addNice({ kind, title, date, recurrence, note })
+        }}
+      >
+        入れる
+      </Button>
+      <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
+        やめる
+      </Button>
     </div>
   )
 }

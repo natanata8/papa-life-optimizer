@@ -11,6 +11,7 @@ export function sceneDateFor(scene: SceneId, answers: string[], today: string): 
     return addDays(today, 1)
   }
   if (scene === 'week' || scene === 'me') return nextDow(today, 6)
+  if (scene === 'late') return today
   return today
 }
 

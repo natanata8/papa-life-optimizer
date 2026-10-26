@@ -16,6 +16,12 @@ export function behindFor(
       lines: linesFor([sceneDate, addDays(sceneDate, 1)], today, profile, events, hidden),
     }
   }
+  if (scene === 'late') {
+    return {
+      why: '今夜、家に残る段取り',
+      lines: linesFor([today, addDays(today, 1)], today, profile, events, hidden).slice(0, 4),
+    }
+  }
   if (scene === 'tired') {
     const start = mondayOf(today)
     const dates = Array.from({ length: 7 }, (_, index) => addDays(start, index))

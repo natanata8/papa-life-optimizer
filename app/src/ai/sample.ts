@@ -50,10 +50,11 @@ export function sampleAnswer(request: ConsultRequest): ToneAnswer {
   if (request.scene === 'tired') return noteBlocked(tired(request), blocked)
   if (request.scene === 'week') return noteBlocked(week(request), blocked)
   if (request.scene === 'me') return noteBlocked(mine(request), blocked)
+  if (request.scene === 'late') return noteBlocked(late(request), blocked)
   return {
     状況整理: '受け取りました。近い場面が分かると、残る仕事を1つに絞れます。',
     気づき: '',
-    一手: [step('近い場面を1つ選ぶ', '場面が分かると、一手と声かけを出せます', '今やる', '今夜', ['4つの場面から近いものを選ぶ'])],
+    一手: [step('近い場面を1つ選ぶ', '場面が分かると、一手と声かけを出せます', '今やる', '今夜', ['近い場面を1つ選ぶ'])],
     声かけ例: '',
     明日やること: '近い場面をもう一度選ぶ',
     questions: [],
@@ -217,6 +218,45 @@ function week(request: ConsultRequest): ToneAnswer {
     ],
     声かけ例: say,
     明日やること: '土曜の午前の出方を一言伝える',
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function late(request: ConsultRequest): ToneAnswer {
+  const when = request.answers[0] || '21時'
+  const duty = request.answers[1] || '寝かしつけ'
+  const unknown = when === 'まだわからない'
+  const home = request.family.home
+  const eta = unknown ? '分かった時点' : when
+  const dutyLine = duty === '特になし' ? '夕食のあと片付け' : duty
+  const say = unknown
+    ? `残業で遅くなる。着く時刻は分かったらすぐ送る。今夜の${dutyLine}、お願いできる？帰ってから残りは俺がやる。`
+    : `残業で遅くなる。${when}ごろ着く予定。今夜の${dutyLine}、お願いできる？帰ってから残りと明日の朝の準備は俺がやる。`
+  return {
+    状況整理: `残業で帰りが遅くなります。${unknown ? '着く時刻はまだ未定です。' : `${when}ごろ着く想定です。`}${dutyLine}がその時間、家に残ります。${home ? `ふだんの帰宅目安は${home}です。` : ''}`,
+    気づき: '遅れることより、時刻と、帰ってから自分がやることが先に伝わると、家に残る仕事が減ります。',
+    一手: [
+      unknown
+        ? step('分かった時点で、着く時刻をもう一度送る', '未定のまま夜になると、食事と風呂の段取りが家に残ります', '事前に伝える', 'いま', [
+            'いま「遅くなる」だけ送る',
+            '時刻が分かったら同じスレッドにもう一度送る',
+          ])
+        : step(`${when}ごろ着く、と今送る`, '先に時刻があると、食事と風呂の時間を動かせます', '事前に伝える', 'いま', [
+            '着く時刻を1つ書く',
+            '遅れる分を一文で送る',
+          ]),
+      step(`今夜の${dutyLine}を頼む`, '抜ける時間の仕事を、全部ではなく1つだけ渡します', '事前に伝える', 'いま', [
+        `${dutyLine}を一文で頼む`,
+        'ほかは帰ってから自分がやると書く',
+      ]),
+      step('帰ってから翌朝の準備を自分がやる', `${eta}に着いたあと、翌朝の負荷を引き取ります`, '後でフォロー', '翌朝', [
+        '着替えと連絡帳を見る',
+        '朝食の用意を自分がやる',
+      ]),
+    ],
+    声かけ例: say,
+    明日やること: '朝の準備を自分がやる',
     questions: [],
     safety_flag: false,
   }

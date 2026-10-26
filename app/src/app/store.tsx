@@ -15,6 +15,7 @@ import type {
   ChatMessage,
   FamEvent,
   Mode,
+  NiceEvent,
   Persisted,
   Profile,
   SceneId,
@@ -45,6 +46,7 @@ export type Sheet =
   | { type: 'daily'; taskId: string }
   | { type: 'event'; id: string }
   | { type: 'addEvent' }
+  | { type: 'addNice' }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -105,6 +107,8 @@ type StoreValue = {
   deleteStep: (id: string) => void
   deleteEvent: (id: string) => void
   addEvent: (event: Omit<FamEvent, 'id'>) => void
+  addNice: (event: Omit<NiceEvent, 'id'>) => void
+  removeNice: (id: string) => void
   setCal: (cal: 'week' | 'day', day?: string) => void
   shiftWeek: (delta: number) => void
   shiftDay: (delta: number) => void
@@ -807,6 +811,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       commit({ ...current, events: [...current.events, { ...event, id: uid(), title: event.title.trim() }] })
       setSheet(null)
       showToast('予定を入れました')
+    },
+    addNice: (event) => {
+      const current = dataRef.current
+      if (!current || !event.title.trim() || !event.date) return
+      commit({
+        ...current,
+        niceEvents: [...current.niceEvents, { ...event, id: uid(), title: event.title.trim(), note: event.note.trim() }],
+      })
+      setSheet(null)
+      showToast('入れました')
+    },
+    removeNice: (id) => {
+      const current = dataRef.current
+      if (!current) return
+      commit({ ...current, niceEvents: current.niceEvents.filter((event) => event.id !== id) })
     },
     setCal: (next, nextDay) => {
       setCalState(next)

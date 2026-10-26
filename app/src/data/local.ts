@@ -11,7 +11,7 @@ function read(): Persisted | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Persisted
     if (parsed?.version !== 1 || !parsed.profile) return null
-    return parsed
+    return { ...parsed, niceEvents: parsed.niceEvents ?? [] }
   } catch {
     return null
   }

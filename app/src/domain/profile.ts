@@ -141,6 +141,7 @@ export const SCENE_LAZY: Record<SceneId, string[]> = {
   tired: ['pstate'],
   week: ['car', 'area'],
   me: [],
+  late: ['home'],
 }
 
 export function emptyProfile(): Profile {
@@ -303,6 +304,7 @@ export function usedLabels(profile: Profile, scene: SceneId | null): string[] {
     if (profile.home) labels.push(`帰宅 ${profile.home}`)
     if (profile.support.length > 0) labels.push(`頼れる人：${profile.support.join('・')}`)
   }
+  if (scene === 'late' && profile.home) labels.push(`帰宅 ${profile.home}`)
   if (scene === 'week') {
     if (profile.car) labels.push(`車：${profile.car}`)
     if (profile.offPartner) labels.push(`パートナーの休み：${profile.offPartner}`)
