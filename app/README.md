@@ -50,11 +50,13 @@ SUPABASE_URL=https://xxxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npm run seed
 4. Edge Function を置く。
 
 ```bash
-supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-4.1-mini CONSULT_DAILY_CAP=20
+supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-6-luna CONSULT_DAILY_CAP=20
 supabase functions deploy consult
 ```
 
-既定のモデルは `gpt-4.1-mini` です。静的なシステムプロンプトを先頭に固定し、家庭の事実は次のメッセージに載せます。1ユーザーあたり、東京の日付で1日20回までです。安全の案内は回数に入れません。
+既定のモデルは `gpt-6-luna`（いちばん安い）です。`OPENAI_MODEL` で上書きできます。静的なシステムプロンプトを先頭に固定し、家庭の事実は次のメッセージに載せます。1ユーザーあたり、東京の日付で1日20回までです。回数は `consult_usage` 表（Edge Function だけが書ける）で数えるので、クライアントから消して戻すことはできません。安全の案内は回数に入れません。
+
+OpenAI の鍵は Edge Function の secret `OPENAI_API_KEY` を優先し、無ければ Vault の `openai_api_key` を service role 専用の `public.consult_openai_key()` で読みます。
 
 5. クライアントを切り替える。
 
@@ -62,7 +64,7 @@ supabase functions deploy consult
 VITE_DATA=supabase
 VITE_AI=supabase
 VITE_SUPABASE_URL=https://xxxx.supabase.co
-VITE_SUPABASE_ANON_KEY=公開してよい anon key
+VITE_SUPABASE_ANON_KEY=公開してよい publishable key（sb_publishable_...）
 ```
 
 anon key はブラウザに載ります。service role と OpenAI の鍵はサーバ側だけです。

@@ -47,6 +47,8 @@ Deno.serve(async (req) => {
   const supabase = createClient(supabaseUrl, anonKey, {
     global: { headers: { Authorization: authHeader } },
   })
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  const admin = serviceKey ? createClient(supabaseUrl, serviceKey, { auth: { persistSession: false } }) : null
   const { data: userData, error: userError } = await supabase.auth.getUser()
   const user = userData.user
   if (userError || !user) return json({ message: 'ログインが必要です。' }, 401)
@@ -58,24 +60,27 @@ Deno.serve(async (req) => {
   if (SAFETY_PATTERN.test(text)) {
     const answer = safetyAnswer()
     await record(supabase, user.id, body, answer, true)
-    return json({ answer })
+    await logUsage(admin, { user_id: user.id, safety: true, status: 'safety' })
+    return json({ answer, meta: { ai: false, reason: 'safety' } })
   }
 
   const cap = Number(Deno.env.get('CONSULT_DAILY_CAP') || '20')
   const start = tokyoMidnightIso()
-  const { count, error: countError } = await supabase
-    .from('consultations')
+  if (!admin) return json({ message: 'SUPABASE_SERVICE_ROLE_KEY がありません。' }, 500)
+  const { count, error: countError } = await admin
+    .from('consult_usage')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', user.id)
-    .eq('safety_flag', false)
+    .eq('safety', false)
+    .eq('status', 'ok')
     .gte('created_at', start)
   if (countError) return json({ message: '回数を確認できませんでした。' }, 500)
   if ((count ?? 0) >= cap) {
     return json({ error: 'daily_cap', message: '今日の相談回数の上限に達しました。明日またどうぞ。' }, 429)
   }
 
-  const apiKey = Deno.env.get('OPENAI_API_KEY')
-  if (!apiKey) return json({ message: 'OPENAI_API_KEY が未設定です。' }, 500)
+  const apiKey = await openaiKey(admin)
+  if (!apiKey) return json({ error: 'no_key', message: 'OPENAI_API_KEY が未設定です。' }, 500)
 
   const { data: member } = await supabase.from('family_members').select('family_id').eq('user_id', user.id).limit(1).maybeSingle()
   const familyId = (member as { family_id?: string } | null)?.family_id ?? null
@@ -96,7 +101,8 @@ Deno.serve(async (req) => {
     tasks: hints,
   })
 
-  const model = Deno.env.get('OPENAI_MODEL') || 'gpt-4.1-mini'
+  const model = Deno.env.get('OPENAI_MODEL') || 'gpt-6-luna'
+  const maxTokens = Number(Deno.env.get('OPENAI_MAX_TOKENS') || '1500')
   const ai = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -105,8 +111,7 @@ Deno.serve(async (req) => {
     },
     body: JSON.stringify({
       model,
-      temperature: 0.4,
-      max_completion_tokens: 900,
+      max_completion_tokens: maxTokens,
       response_format: { type: 'json_schema', json_schema: TONE_ANSWER_SCHEMA },
       messages: [
         { role: 'system', content: STATIC_SYSTEM_PROMPT },
@@ -115,14 +120,45 @@ Deno.serve(async (req) => {
       ],
     }),
   })
-  if (!ai.ok) return json({ message: '答えを作れませんでした。しばらくしてからもう一度どうぞ。' }, 502)
+  if (!ai.ok) {
+    const err = (await ai.json().catch(() => null)) as { error?: { code?: string; type?: string } } | null
+    const detail = err?.error?.code || err?.error?.type || `http_${ai.status}`
+    console.error('openai failed', detail)
+    await logUsage(admin, { user_id: user.id, status: `error:${detail}`.slice(0, 80), model })
+    return json(
+      { error: 'ai_failed', detail, message: '答えを作れませんでした。しばらくしてからもう一度どうぞ。' },
+      502,
+    )
+  }
 
-  const payload = (await ai.json()) as { choices?: { message?: { content?: string } }[] }
+  const payload = (await ai.json()) as {
+    choices?: { message?: { content?: string } }[]
+    usage?: {
+      prompt_tokens?: number
+      completion_tokens?: number
+      prompt_tokens_details?: { cached_tokens?: number }
+    }
+  }
+  const usage = {
+    prompt_tokens: payload.usage?.prompt_tokens ?? null,
+    cached_tokens: payload.usage?.prompt_tokens_details?.cached_tokens ?? null,
+    completion_tokens: payload.usage?.completion_tokens ?? null,
+  }
   const content = payload.choices?.[0]?.message?.content
-  if (!content) return json({ message: '答えが空でした。' }, 502)
-  const answer = JSON.parse(content) as { safety_flag?: boolean }
+  if (!content) {
+    await logUsage(admin, { user_id: user.id, status: 'error:empty', model })
+    return json({ error: 'ai_failed', message: '答えが空でした。' }, 502)
+  }
+  let answer: { safety_flag?: boolean }
+  try {
+    answer = JSON.parse(content) as { safety_flag?: boolean }
+  } catch {
+    await logUsage(admin, { user_id: user.id, status: 'error:parse', model })
+    return json({ error: 'ai_failed', message: '答えの形式が読めませんでした。' }, 502)
+  }
+  await logUsage(admin, { user_id: user.id, status: 'ok', model, ...usage })
   await record(supabase, user.id, body, answer, Boolean(answer.safety_flag), familyId)
-  return json({ answer })
+  return json({ answer, meta: { ai: true, model, usage } })
 })
 
 function safetyAnswer() {
@@ -221,6 +257,40 @@ function tokyoMidnightIso(): string {
     day: '2-digit',
   }).format(new Date())
   return new Date(`${day}T00:00:00+09:00`).toISOString()
+}
+
+let cachedKey: string | null = null
+
+/** OPENAI_API_KEY（Edge Function の secret）を優先。無ければ Vault の openai_api_key を service role で読む。 */
+async function openaiKey(admin: ReturnType<typeof createClient> | null): Promise<string | null> {
+  const fromEnv = Deno.env.get('OPENAI_API_KEY')
+  if (fromEnv) return fromEnv
+  if (cachedKey) return cachedKey
+  if (!admin) return null
+  const { data, error } = await admin.rpc('consult_openai_key')
+  if (error) {
+    console.error('vault key lookup failed', error.message)
+    return null
+  }
+  cachedKey = typeof data === 'string' && data.length > 0 ? data : null
+  return cachedKey
+}
+
+async function logUsage(
+  admin: ReturnType<typeof createClient> | null,
+  row: {
+    user_id: string
+    status: string
+    safety?: boolean
+    model?: string
+    prompt_tokens?: number | null
+    cached_tokens?: number | null
+    completion_tokens?: number | null
+  },
+) {
+  if (!admin) return
+  const { error } = await admin.from('consult_usage').insert({ safety: false, ...row })
+  if (error) console.error('usage log failed', error.message)
 }
 
 function json(body: unknown, status = 200) {
