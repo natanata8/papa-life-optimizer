@@ -23,6 +23,15 @@ export type ConsultRequest = {
   todayText: string
   memory: string[]
   events: { date: string; time: string; title: string; kind: string }[]
+  childEvents: {
+    date: string
+    time: string
+    title: string
+    child: string
+    category: string
+    items: string[]
+    deadline: boolean
+  }[]
   taskHints: { id: string; title: string; why?: string; steps?: string[]; frequency?: string }[]
   flags: {
     ensokuNextDay: boolean

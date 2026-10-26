@@ -29,6 +29,7 @@ type ConsultBody = {
   todayText?: string
   memory?: string[]
   events?: unknown[]
+  childEvents?: unknown[]
   taskHints?: TaskHint[]
   flags?: Record<string, unknown>
 }
@@ -97,6 +98,7 @@ Deno.serve(async (req) => {
     todayText: body.todayText ?? '',
     memory: (body.memory ?? []).slice(0, 8),
     events: body.events ?? [],
+    childEvents: Array.isArray(body.childEvents) ? body.childEvents.slice(0, 12) : [],
     flags: body.flags ?? {},
     tasks: hints,
   })

@@ -1,7 +1,7 @@
 import { uid } from '@/lib/utils.ts'
 import { addDays, mondayOf, todayInTokyo } from '@/domain/dates.ts'
 import { emptyProfile } from '@/domain/profile.ts'
-import type { Persisted } from '@/domain/types.ts'
+import type { ChildEvent, Persisted } from '@/domain/types.ts'
 
 export function createSeed(today = todayInTokyo()): Persisted {
   const sunday = addDays(mondayOf(today), 6)
@@ -62,6 +62,7 @@ export function createSeed(today = todayInTokyo()): Persisted {
         note: '',
       },
     ],
+    childEvents: seedChildEvents(today),
     steps: [
       {
         id: uid(),
@@ -108,5 +109,52 @@ export function createSeed(today = todayInTokyo()): Persisted {
 
 export function createEmpty(today = todayInTokyo()): Persisted {
   const seed = createSeed(today)
-  return { ...seed, events: [], steps: [], niceEvents: [] }
+  return { ...seed, events: [], steps: [], niceEvents: [], childEvents: [] }
+}
+
+function seedChildEvents(today: string): ChildEvent[] {
+  return [
+    {
+      id: uid(),
+      childId: 'seed:0',
+      title: '避難訓練',
+      date: today,
+      startTime: '10:00',
+      endTime: '11:00',
+      allDay: false,
+      category: '行事',
+      items: [],
+      deadline: false,
+      notes: '',
+      source: 'manual',
+    },
+    {
+      id: uid(),
+      childId: 'seed:0',
+      title: '遠足',
+      date: addDays(today, 1),
+      startTime: '',
+      endTime: '',
+      allDay: true,
+      category: '行事',
+      items: ['お弁当', '水筒', 'レジャーシート'],
+      deadline: false,
+      notes: '',
+      source: 'manual',
+    },
+    {
+      id: uid(),
+      childId: 'seed:1',
+      title: '1歳健診',
+      date: addDays(today, 4),
+      startTime: '10:30',
+      endTime: '',
+      allDay: false,
+      category: '通院・健診',
+      items: ['母子手帳'],
+      deadline: false,
+      notes: '',
+      source: 'manual',
+    },
+  ]
 }

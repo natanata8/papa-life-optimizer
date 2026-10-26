@@ -53,7 +53,30 @@ export type Kid = {
   ageLabel: AgeLabel | null
   age: number | null
   school: School | null
+  schoolName: string
+  birthday: string | null
 }
+
+export type ChildCategory = '行事' | '持ち物' | '提出物' | '通院・健診' | '習い事' | 'お休み' | 'その他'
+
+export type ChildEventSource = 'manual' | 'image'
+
+export type ChildEvent = {
+  id: string
+  childId: string
+  title: string
+  date: string
+  startTime: string
+  endTime: string
+  allDay: boolean
+  category: ChildCategory
+  items: string[]
+  deadline: boolean
+  notes: string
+  source: ChildEventSource
+}
+
+export const CHILD_CATEGORIES: ChildCategory[] = ['行事', '持ち物', '提出物', '通院・健診', '習い事', 'お休み', 'その他']
 
 export type GomiKind = '可燃' | 'プラ' | '資源'
 
@@ -173,6 +196,7 @@ export type Persisted = {
   profile: Profile
   events: FamEvent[]
   niceEvents: NiceEvent[]
+  childEvents: ChildEvent[]
   steps: Step[]
   memories: Memory[]
   notes: Record<string, string>

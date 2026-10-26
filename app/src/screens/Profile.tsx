@@ -8,7 +8,6 @@ import {
   PRIVACY_LABEL,
   addKid,
   fieldOptions,
-  removeKid,
   setChoice,
   setKidAge,
   setSchool,
@@ -133,10 +132,26 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
                   }))
                 }
               />
-              <button type="button" className="ml-auto text-xs text-muted" onClick={() => store.patchProfile((current) => removeKid(current, index))}>
+              <button type="button" className="ml-auto text-xs text-muted" onClick={() => store.dropKid(index)}>
                 外す
               </button>
             </div>
+            <label className="mt-2 block text-[12px] text-muted">
+              誕生日（任意）
+              <input
+                className="mt-1 w-full rounded-lg border border-line bg-white px-2 py-1 text-sm"
+                type="date"
+                value={kid.birthday ?? ''}
+                onChange={(event) =>
+                  store.patchProfile((current) => ({
+                    ...current,
+                    kids: current.kids.map((item, kidIndex) =>
+                      kidIndex === index ? { ...item, birthday: event.target.value || null } : item,
+                    ),
+                  }))
+                }
+              />
+            </label>
             <div className="mt-2 flex flex-wrap gap-1">
               {AGES.map((age) => (
                 <Chip
@@ -165,6 +180,18 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
         {profile.kids.map((kid, index) => (
           <div key={kid.id}>
             <p className="text-xs text-muted">{kid.name}</p>
+            <input
+              className="mt-1 w-full rounded-lg border border-line bg-white px-2 py-1 text-sm"
+              placeholder="園・学校の名前（任意）"
+              aria-label={`${kid.name}の園・学校`}
+              value={kid.schoolName}
+              onChange={(event) =>
+                store.patchProfile((current) => ({
+                  ...current,
+                  kids: current.kids.map((item, kidIndex) => (kidIndex === index ? { ...item, schoolName: event.target.value } : item)),
+                }))
+              }
+            />
             <div className="mt-1 flex flex-wrap gap-1">
               {fieldOptions('school').map((option) => (
                 <Chip

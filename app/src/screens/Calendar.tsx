@@ -4,7 +4,8 @@ import { useStore } from '@/app/store.tsx'
 import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf } from '@/domain/dates.ts'
 import { DAILY_TASKS, adoptedKeys, invisibleOn, weekStats, type InvItem } from '@/domain/invisible.ts'
 import { isSet } from '@/domain/profile.ts'
-import type { FamEvent, Step } from '@/domain/types.ts'
+import { childName } from '@/domain/childEvents.ts'
+import type { ChildEvent, FamEvent, Step } from '@/domain/types.ts'
 
 const HINTS: Record<string, string> = {
   gomi: 'ゴミの日',
@@ -61,11 +62,19 @@ export function Calendar() {
         <FilterChip on={store.filters.inv} tone="inv" onClick={() => store.toggleFilter('inv')}>
           👀 見えない仕事
         </FilterChip>
+        <FilterChip on={store.filters.child} tone="child" onClick={() => store.toggleFilter('child')}>
+          ■ 子どもの予定
+        </FilterChip>
       </div>
       {store.cal === 'week' ? <Week /> : <Day />}
-      <Button className="mt-3" size="lg" variant="ghost" onClick={() => store.openSheet({ type: 'addEvent' })}>
-        ＋ 家族の予定を入れる
-      </Button>
+      <div className="mt-3 flex gap-2">
+        <Button className="flex-1" size="lg" variant="ghost" onClick={() => store.openSheet({ type: 'addEvent' })}>
+          ＋ 家族の予定
+        </Button>
+        <Button className="flex-1" size="lg" variant="ghost" data-testid="cal-children" onClick={() => store.openSheet({ type: 'children' })}>
+          ＋ 子どもの予定
+        </Button>
+      </div>
       <p className="mt-2 text-[11px] leading-relaxed text-faint">
         👀 は家庭プロフィールと「家事・育児タスク一覧」から自動で出ます。チェックや採点はしません。
       </p>
@@ -80,7 +89,7 @@ function FilterChip({
   onClick,
 }: {
   on: boolean
-  tone: 'event' | 'step' | 'inv'
+  tone: 'event' | 'step' | 'inv' | 'child'
   children: string
   onClick: () => void
 }) {
@@ -88,6 +97,7 @@ function FilterChip({
     event: on ? 'bg-event text-event-ink' : 'bg-white text-faint',
     step: on ? 'bg-step text-step-ink' : 'bg-white text-faint',
     inv: on ? 'bg-inv text-inv-ink' : 'bg-white text-faint',
+    child: on ? 'bg-child text-child-ink' : 'bg-white text-faint',
   }
   return (
     <button type="button" className={`rounded-full border border-line px-2.5 py-1 ${colors[tone]}`} onClick={onClick}>
@@ -119,6 +129,7 @@ function Week() {
         {days.map((date) => {
           const events = data.events.filter((event) => event.date === date).sort(byTime)
           const steps = data.steps.filter((step) => step.date === date).sort(byTime)
+          const childEvents = data.childEvents.filter((event) => event.date === date).sort(byStart)
           const invisible = invisibleOn(date, data.profile, data.events, data.hidden, store.today)
           const dow = dowIndex(date)
           return (
@@ -133,6 +144,9 @@ function Week() {
               </button>
               <div className="min-w-0 flex-1 space-y-1">
                 {store.filters.ev ? events.map((event) => <EventPill key={event.id} event={event} />) : null}
+                {store.filters.child
+                  ? childEvents.map((event) => <ChildPill key={event.id} event={event} name={childName(data.profile.kids, event.childId)} />)
+                  : null}
                 {store.filters.step ? steps.map((step) => <StepPill key={step.id} step={step} />) : null}
                 {store.filters.inv
                   ? invisible.slice(0, 2).map((item) => (
@@ -148,7 +162,7 @@ function Week() {
                     👀 ほか {invisible.length - 2}件（日の表示で見る）
                   </button>
                 ) : null}
-                {emptyDay(store.filters, events, steps, invisible) ? <p className="px-1 py-1 text-xs text-faint">—</p> : null}
+                {emptyDay(store.filters, events, steps, invisible, childEvents) ? <p className="px-1 py-1 text-xs text-faint">—</p> : null}
               </div>
             </div>
           )
@@ -163,6 +177,7 @@ function Day() {
   const data = store.data
   if (!data) return null
   const events = data.events.filter((event) => event.date === store.day).sort(byTime)
+  const childEvents = data.childEvents.filter((event) => event.date === store.day).sort(byStart)
   const steps = data.steps.filter((step) => step.date === store.day).sort(byTime)
   const invisible = invisibleOn(store.day, data.profile, data.events, data.hidden, store.today)
   const adopted = adoptedKeys(data.steps)
@@ -199,9 +214,10 @@ function Day() {
       ) : null}
       {SLOTS.map((slot) => {
         const slotEvents = store.filters.ev ? events.filter((event) => slotOf(event.time) === slot) : []
+        const slotChild = store.filters.child ? childEvents.filter((event) => slotOf(event.allDay ? '' : event.startTime) === slot) : []
         const slotSteps = store.filters.step ? steps.filter((step) => slotOf(step.time) === slot) : []
         const slotInv = store.filters.inv ? invisible.filter((item) => item.slot === slot) : []
-        if (!slotEvents.length && !slotSteps.length && !slotInv.length && slot === '終日') return null
+        if (!slotEvents.length && !slotChild.length && !slotSteps.length && !slotInv.length && slot === '終日') return null
         return (
           <div key={slot} className="mt-2">
             <p className="text-[11px] font-bold text-muted">{slot}</p>
@@ -209,13 +225,16 @@ function Day() {
               {slotEvents.map((event) => (
                 <EventPill key={event.id} event={event} />
               ))}
+              {slotChild.map((event) => (
+                <ChildPill key={event.id} event={event} name={childName(data.profile.kids, event.childId)} />
+              ))}
               {slotSteps.map((step) => (
                 <StepPill key={step.id} step={step} />
               ))}
               {slotInv.map((item) => (
                 <InvisiblePill key={item.key} item={item} adopted={adopted.has(`${item.date}:${item.key}`)} />
               ))}
-              {!slotEvents.length && !slotSteps.length && !slotInv.length ? <p className="px-1 text-xs text-faint">—</p> : null}
+              {!slotEvents.length && !slotChild.length && !slotSteps.length && !slotInv.length ? <p className="px-1 text-xs text-faint">—</p> : null}
             </div>
           </div>
         )
@@ -252,6 +271,26 @@ function EventPill({ event }: { event: FamEvent }) {
       <span>{event.who === '自分' ? '🙋' : '👪'}</span>
       <span className="text-[11px]">{event.time || '終日'}</span>
       <span className="truncate">{event.title}</span>
+    </button>
+  )
+}
+
+function ChildPill({ event, name }: { event: ChildEvent; name: string }) {
+  const store = useStore()
+  const when = event.allDay || !event.startTime ? '終日' : event.startTime
+  return (
+    <button
+      type="button"
+      data-testid={`child-${event.id}`}
+      className="flex w-full items-center gap-1.5 rounded-lg bg-child px-2 py-1.5 text-left text-[13px] text-child-ink"
+      onClick={() => store.openSheet({ type: 'children', editId: event.id })}
+    >
+      <span className="text-[11px]">{when}</span>
+      <span className="truncate">
+        {name ? `${name} ` : ''}
+        {event.title}
+        {event.items.length > 0 ? `（${event.items.join('、')}）` : ''}
+      </span>
     </button>
   )
 }
@@ -293,14 +332,20 @@ function byTime(a: { time: string }, b: { time: string }) {
   return (a.time || '').localeCompare(b.time || '')
 }
 
+function byStart(a: { startTime: string }, b: { startTime: string }) {
+  return (a.startTime || '').localeCompare(b.startTime || '')
+}
+
 function emptyDay(
-  filters: { ev: boolean; step: boolean; inv: boolean },
+  filters: { ev: boolean; step: boolean; inv: boolean; child: boolean },
   events: FamEvent[],
   steps: Step[],
   invisible: { key: string }[],
+  childEvents: ChildEvent[],
 ) {
   const ev = filters.ev && events.length > 0
   const step = filters.step && steps.length > 0
   const inv = filters.inv && invisible.length > 0
-  return !ev && !step && !inv
+  const child = filters.child && childEvents.length > 0
+  return !ev && !step && !inv && !child
 }

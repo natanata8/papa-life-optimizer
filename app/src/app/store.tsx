@@ -3,9 +3,10 @@ import { createConsult } from '@/ai/client.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
 import { createRepository } from '@/data/index.ts'
 import { behindFor, gomiAround } from '@/domain/behind.ts'
+import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts'
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
-import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, usedLabels } from '@/domain/profile.ts'
+import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
 import { HOTLINE_MESSAGE, isSafetyConcern } from '@/domain/safety.ts'
@@ -13,6 +14,7 @@ import type {
   AgeLabel,
   Behind,
   ChatMessage,
+  ChildEvent,
   FamEvent,
   Mode,
   NiceEvent,
@@ -47,6 +49,7 @@ export type Sheet =
   | { type: 'event'; id: string }
   | { type: 'addEvent' }
   | { type: 'addNice' }
+  | { type: 'children'; editId?: string }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -81,7 +84,7 @@ type StoreValue = {
   cal: 'week' | 'day'
   weekStart: string
   day: string
-  filters: { ev: boolean; step: boolean; inv: boolean }
+  filters: { ev: boolean; step: boolean; inv: boolean; child: boolean }
   lazyLock: string | null
   setMode: (mode: Mode) => void
   reset: () => void
@@ -109,10 +112,14 @@ type StoreValue = {
   addEvent: (event: Omit<FamEvent, 'id'>) => void
   addNice: (event: Omit<NiceEvent, 'id'>) => void
   removeNice: (id: string) => void
+  upsertChildEvent: (event: ChildEvent) => void
+  addChildEvents: (events: Omit<ChildEvent, 'id'>[]) => void
+  deleteChildEvent: (id: string) => void
+  dropKid: (index: number) => void
   setCal: (cal: 'week' | 'day', day?: string) => void
   shiftWeek: (delta: number) => void
   shiftDay: (delta: number) => void
-  toggleFilter: (key: 'ev' | 'step' | 'inv') => void
+  toggleFilter: (key: 'ev' | 'step' | 'inv' | 'child') => void
   patchProfile: (fn: (profile: Profile) => Profile) => void
   dismissLazy: () => void
   lockLazy: (key: string) => void
@@ -262,7 +269,20 @@ function buildRequest(
       support: state.profile.support,
       pstate: state.profile.pstate,
     },
-    scheduleText: state.events.map((event) => `${event.date} ${event.time} ${event.title}`).join(' / '),
+    scheduleText: [
+      state.events.map((event) => `${event.date} ${event.time} ${event.title}`).join(' / '),
+      state.childEvents
+        .filter((event) => event.date >= today && event.date <= addDays(today, 14))
+        .map((event) => {
+          const name = state.profile.kids.find((kid) => kid.id === event.childId)?.name ?? ''
+          const items = event.items.length ? ` 持ち物:${event.items.join('・')}` : ''
+          const due = event.deadline ? ' 期限' : ''
+          return `${event.date} ${event.allDay ? '' : event.startTime} ${name} ${event.title}${items}${due}`
+        })
+        .join(' / '),
+    ]
+      .filter(Boolean)
+      .join(' / '),
     todayText: today,
     memory: state.memories.map((memory) => memory.text),
     events: state.events.map((event) => ({
@@ -271,10 +291,25 @@ function buildRequest(
       title: event.title,
       kind: event.kind,
     })),
+    childEvents: state.childEvents
+      .filter((event) => event.date >= today && event.date <= addDays(today, 14))
+      .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
+      .slice(0, 12)
+      .map((event) => ({
+        date: event.date,
+        time: event.allDay ? '' : event.startTime,
+        title: event.title,
+        child: state.profile.kids.find((kid) => kid.id === event.childId)?.name ?? '',
+        category: event.category,
+        items: event.items,
+        deadline: event.deadline,
+      })),
     taskHints,
     flags: {
       ensokuNextDay:
-        scene === 'nomi' && state.events.some((event) => event.kind === 'ensoku' && event.date === addDays(sceneDate, 1)),
+        scene === 'nomi' &&
+        (state.events.some((event) => event.kind === 'ensoku' && event.date === addDays(sceneDate, 1)) ||
+          state.childEvents.some((event) => event.date === addDays(sceneDate, 1) && event.title.includes('遠足'))),
       gomiAround: scene === 'nomi' ? gomiAround(sceneDate, state.profile, state.events, state.hidden, today) : false,
     },
   }
@@ -299,7 +334,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cal, setCalState] = useState<'week' | 'day'>('week')
   const [weekStart, setWeekStart] = useState(mondayOf(today))
   const [day, setDay] = useState(today)
-  const [filters, setFilters] = useState({ ev: true, step: true, inv: true })
+  const [filters, setFilters] = useState({ ev: true, step: true, inv: true, child: true })
   const [lazyLock, setLazyLock] = useState<string | null>(null)
   const hydrated = useRef(false)
   const dataRef = useRef<Persisted | null>(null)
@@ -468,7 +503,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         home: ob.home,
       }
       if (!scene) {
-        commit({ ...current, profile, onboarded: true })
+        commit({
+          ...current,
+          profile,
+          childEvents: attachSeedChildren(current.childEvents, profile.kids),
+          onboarded: true,
+        })
         setTab('home')
         setFlow(null)
         return
@@ -480,6 +520,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       commit({
         ...current,
         profile,
+        childEvents: attachSeedChildren(current.childEvents, profile.kids),
         onboarded: true,
         chat: [
           { id: uid(), role: 'me', text: SCENES[scene].title },
@@ -826,6 +867,58 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const current = dataRef.current
       if (!current) return
       commit({ ...current, niceEvents: current.niceEvents.filter((event) => event.id !== id) })
+    },
+    upsertChildEvent: (event) => {
+      const current = dataRef.current
+      if (!current || !event.title.trim() || !event.date) return
+      const next: ChildEvent = {
+        ...event,
+        title: event.title.trim(),
+        notes: event.notes.trim(),
+        items: event.items.map((item) => item.trim()).filter(Boolean),
+        startTime: event.allDay ? '' : event.startTime,
+        endTime: event.allDay ? '' : event.endTime,
+      }
+      const exists = current.childEvents.some((item) => item.id === next.id)
+      commit({
+        ...current,
+        childEvents: exists ? current.childEvents.map((item) => (item.id === next.id ? next : item)) : [...current.childEvents, next],
+      })
+      showToast(exists ? '保存しました' : '入れました')
+    },
+    addChildEvents: (events) => {
+      const current = dataRef.current
+      if (!current) return
+      const rows: ChildEvent[] = events
+        .filter((event) => event.title.trim() && event.date)
+        .map((event) => ({
+          ...event,
+          id: uid(),
+          title: event.title.trim(),
+          notes: event.notes.trim(),
+          items: event.items.map((item) => item.trim()).filter(Boolean),
+          startTime: event.allDay ? '' : event.startTime,
+          endTime: event.allDay ? '' : event.endTime,
+        }))
+      if (rows.length === 0) return
+      commit({ ...current, childEvents: [...current.childEvents, ...rows] })
+      showToast(`${rows.length}件入れました`)
+    },
+    deleteChildEvent: (id) => {
+      const current = dataRef.current
+      if (!current) return
+      commit({ ...current, childEvents: current.childEvents.filter((event) => event.id !== id) })
+      showToast('消しました')
+    },
+    dropKid: (index) => {
+      const current = dataRef.current
+      if (!current) return
+      const id = current.profile.kids[index]?.id
+      commit({
+        ...current,
+        profile: removeKid(current.profile, index),
+        childEvents: id ? current.childEvents.filter((event) => event.childId !== id) : current.childEvents,
+      })
     },
     setCal: (next, nextDay) => {
       setCalState(next)

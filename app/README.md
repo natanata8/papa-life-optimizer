@@ -25,7 +25,8 @@ http://localhost:5173 を開きます。メールアドレスは要りません�
 ## いまモックのもの
 
 - 相談の答えは、決まった5場面（残業を含む）のサンプルです。画面に「サンプル回答」と出ます。
-- 今日の画面は、やること、気づいておきたい日、送るメッセージ、今週末の提案の順です。登録した日は `nice_events` に残します。Supabase では `supabase db push` でこの表も入ります。
+- 今日の画面は、やること、子どもの予定、気づいておきたい日、送るメッセージ、今週末の提案の順です。登録した日は `nice_events`、子どもの予定は `child_events` に残します。Supabase では `supabase db push` でこの表も入ります。
+- お便りや予約票の読み取りは、モックではサンプルの候補を出します。画像は保存しません。Supabase では `extract-schedule` を呼び、確認してから保存します。
 - 通知は画面の中の予告だけです。端末へのプッシュは送りません。
 - カレンダーの書き出しは、Google カレンダーのリンク、.ics、LINE の共有リンクです。自動では送りません。
 - 家族のデータは、Supabase を選ぶまでこのブラウザだけに残ります。
@@ -51,11 +52,12 @@ SUPABASE_URL=https://xxxx.supabase.co SUPABASE_SERVICE_ROLE_KEY=... npm run seed
 4. Edge Function を置く。
 
 ```bash
-supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-6-luna CONSULT_DAILY_CAP=20
+supabase secrets set OPENAI_API_KEY=... OPENAI_MODEL=gpt-6-luna CONSULT_DAILY_CAP=20 EXTRACT_DAILY_CAP=10
 supabase functions deploy consult
+supabase functions deploy extract-schedule
 ```
 
-既定のモデルは `gpt-6-luna`（いちばん安い）です。`OPENAI_MODEL` で上書きできます。静的なシステムプロンプトを先頭に固定し、家庭の事実は次のメッセージに載せます。1ユーザーあたり、東京の日付で1日20回までです。回数は `consult_usage` 表（Edge Function だけが書ける）で数えるので、クライアントから消して戻すことはできません。安全の案内は回数に入れません。
+既定のモデルは `gpt-6-luna`（いちばん安い）です。`OPENAI_MODEL` で上書きできます。静的なシステムプロンプトを先頭に固定し、家庭の事実は次のメッセージに載せます。相談は1ユーザーあたり、東京の日付で1日20回までです。お便りの読み取りは別に1日10回までです。どちらも `consult_usage` 表（Edge Function だけが書ける）で数えます。読み取りは `status = extract:ok` だけを数えるので、相談の20回には入りません。クライアントから消して戻すことはできません。安全の案内は回数に入れません。画像は保存しません。
 
 OpenAI の鍵は Edge Function の secret `OPENAI_API_KEY` を優先し、無ければ Vault の `openai_api_key` を service role 専用の `public.consult_openai_key()` で読みます。
 

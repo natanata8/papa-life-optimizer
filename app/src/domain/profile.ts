@@ -196,6 +196,8 @@ export function kidsFromAges(labels: AgeLabel[]): Kid[] {
       ageLabel: label,
       age: years,
       school,
+      schoolName: '',
+      birthday: null,
     }
   })
 }
@@ -286,6 +288,8 @@ export function addKid(profile: Profile): Profile {
     ageLabel: '1歳',
     age: 1,
     school: null,
+    schoolName: '',
+    birthday: null,
   })
   return { ...profile, kids }
 }

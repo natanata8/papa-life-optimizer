@@ -2,7 +2,8 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { todayInTokyo } from '@/domain/dates.ts'
 import { emptyProfile } from '@/domain/profile.ts'
 import { createEmpty, createSeed } from '@/domain/seed.ts'
-import type { ChatMessage, FamEvent, GomiKind, Kid, NiceEvent, Persisted, Profile, Step, Suggestion, ToneAnswer } from '@/domain/types.ts'
+import { isUuid } from '@/domain/childEvents.ts'
+import type { ChatMessage, ChildEvent, FamEvent, GomiKind, Kid, NiceEvent, Persisted, Profile, Step, Suggestion, ToneAnswer } from '@/domain/types.ts'
 import { GOMI_KINDS } from '@/domain/types.ts'
 import type { FamilyRepository, LoadResult } from '@/data/repository.ts'
 
@@ -86,12 +87,13 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
   const { data: familyData, error: familyError } = await client.from('families').select('*').eq('id', familyId).single()
   fail(familyError)
   const family = familyData as FamilyRow
-  const [children, gomi, multi, events, niceEvents, steps, memories, notes, hidden, consultations] = await Promise.all([
+  const [children, gomi, multi, events, niceEvents, childEvents, steps, memories, notes, hidden, consultations] = await Promise.all([
     list(client, 'children', familyId),
     list(client, 'gomi_days', familyId),
     list(client, 'family_multi', familyId),
     list(client, 'events', familyId),
     list(client, 'nice_events', familyId),
+    list(client, 'child_events', familyId),
     list(client, 'steps', familyId),
     list(client, 'memories', familyId),
     list(client, 'task_notes', familyId),
@@ -122,6 +124,8 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
         ageLabel: row.age_label as Kid['ageLabel'],
         age: row.age_years,
         school: row.school as Kid['school'],
+        schoolName: row.school_name ?? '',
+        birthday: row.birthday ? String(row.birthday).slice(0, 10) : null,
       })),
     gomi: { 可燃: [], プラ: [], 資源: [] },
     support: [],
@@ -147,6 +151,20 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
       title: row.title,
       who: row.who_label,
       kind: row.kind,
+    })),
+    childEvents: (childEvents as ChildEventRow[]).map((row) => ({
+      id: row.id,
+      childId: row.child_id ?? '',
+      title: row.title,
+      date: row.event_date.slice(0, 10),
+      startTime: row.start_time ?? '',
+      endTime: row.end_time ?? '',
+      allDay: row.all_day,
+      category: row.category,
+      items: row.items ?? [],
+      deadline: row.deadline,
+      notes: row.notes ?? '',
+      source: row.source,
     })),
     niceEvents: (niceEvents as NiceRow[]).map((row) => ({
       id: row.id,
@@ -227,6 +245,8 @@ async function writeFamily(
     age_label: kid.ageLabel,
     age_years: kid.age,
     school: kid.school,
+    school_name: kid.schoolName,
+    birthday: kid.birthday,
   })))
   await replace(
     client,
@@ -247,6 +267,24 @@ async function writeFamily(
     recurrence: event.recurrence,
     note: event.note,
   })))
+  const kidIds = new Set(state.profile.kids.map((kid) => kid.id))
+  await replace(client, 'child_events', familyId, state.childEvents
+    .filter((event) => !event.childId || kidIds.has(event.childId) || !isUuid(event.childId))
+    .map((event) => ({
+      id: event.id,
+      family_id: familyId,
+      child_id: isUuid(event.childId) ? event.childId : null,
+      title: event.title,
+      event_date: event.date,
+      start_time: event.startTime,
+      end_time: event.endTime,
+      all_day: event.allDay,
+      category: event.category,
+      items: event.items,
+      deadline: event.deadline,
+      notes: event.notes,
+      source: event.source,
+    })))
   await replace(client, 'events', familyId, state.events.map((event) => ({
     id: event.id,
     family_id: familyId,
@@ -336,7 +374,30 @@ async function replace(client: SupabaseClient, table: string, familyId: string, 
   fail(error)
 }
 
-type KidRow = { id: string; sort_order: number; label: string; age_label: string | null; age_years: number | null; school: string | null }
+type KidRow = {
+  id: string
+  sort_order: number
+  label: string
+  age_label: string | null
+  age_years: number | null
+  school: string | null
+  school_name: string | null
+  birthday: string | null
+}
+type ChildEventRow = {
+  id: string
+  child_id: string | null
+  title: string
+  event_date: string
+  start_time: string | null
+  end_time: string | null
+  all_day: boolean
+  category: ChildEvent['category']
+  items: string[] | null
+  deadline: boolean
+  notes: string | null
+  source: ChildEvent['source']
+}
 type EventRow = { id: string; event_date: string; event_time: string | null; title: string; who_label: string; kind: FamEvent['kind'] }
 type NiceRow = {
   id: string

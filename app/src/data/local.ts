@@ -11,7 +11,19 @@ function read(): Persisted | null {
     if (!raw) return null
     const parsed = JSON.parse(raw) as Persisted
     if (parsed?.version !== 1 || !parsed.profile) return null
-    return { ...parsed, niceEvents: parsed.niceEvents ?? [] }
+    return {
+      ...parsed,
+      niceEvents: parsed.niceEvents ?? [],
+      childEvents: parsed.childEvents ?? [],
+      profile: {
+        ...parsed.profile,
+        kids: (parsed.profile.kids ?? []).map((kid) => ({
+          ...kid,
+          schoolName: kid.schoolName ?? '',
+          birthday: kid.birthday ?? null,
+        })),
+      },
+    }
   } catch {
     return null
   }

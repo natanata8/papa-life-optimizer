@@ -1,4 +1,5 @@
-import { mkdir } from 'node:fs/promises'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { deflateSync } from 'node:zlib'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import puppeteer from 'puppeteer-core'
@@ -162,6 +163,42 @@ try {
   await new Promise((resolve) => setTimeout(resolve, 200))
   await shot('17-consult-late')
 
+  await page.click('[data-testid="nav-home"]')
+  await page.click('[data-testid="mode-夜"]')
+  await page.waitForSelector('[data-testid="bring-reminder"]')
+  await page.$eval('[data-testid="bring-reminder"]', (el) => {
+    const top = el.getBoundingClientRect().top + window.scrollY
+    window.scrollTo(0, Math.max(0, top - 220))
+  })
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  await shot('18-today-children')
+  await page.click('[data-testid="child-open"]')
+  await page.waitForSelector('[data-testid="child-list"]')
+  await shot('19-child-list')
+  await page.click('[data-testid="child-close"]')
+  await page.waitForFunction(() => !document.querySelector('[data-testid="child-list"]'))
+  await page.click('[data-testid="nav-cal"]')
+  await page.waitForSelector('[data-testid^="child-"]')
+  await page.$eval('[data-testid^="child-"]', (el) => el.scrollIntoView({ block: 'center' }))
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  await shot('20-calendar-children')
+  await page.click('[data-testid="nav-home"]')
+  await page.waitForSelector('[data-testid="child-open"]')
+  await page.$eval('[data-testid="child-open"]', (el) => el.scrollIntoView({ block: 'center' }))
+  await page.$eval('[data-testid="child-open"]', (el) => el.click())
+  await page.waitForSelector('[data-testid="child-list"]')
+  await writePrint('/tmp/tone-print.png')
+  const imageInput = await page.$('[data-testid="child-image"]')
+  if (!imageInput) throw new Error('image input missing')
+  await imageInput.uploadFile('/tmp/tone-print.png')
+  await page.waitForSelector('[data-testid="child-preview"]')
+  await shot('21-child-upload')
+  await page.click('[data-testid="child-read"]')
+  await page.waitForSelector('[data-testid="child-confirm"]')
+  await shot('22-child-confirm')
+  await page.click('[data-testid="child-close"]')
+  await page.waitForFunction(() => !document.querySelector('[data-testid="child-confirm"]'))
+
   await page.click('[data-testid="nav-consult"]')
   const again = await page.$('xpath///button[contains(., "新しい相談")]')
   if (again) await again.click()
@@ -176,4 +213,51 @@ try {
   process.exitCode = 1
 } finally {
   await browser.close()
+}
+
+async function writePrint(path) {
+  const width = 320
+  const height = 180
+  const raw = Buffer.alloc((width * 3 + 1) * height)
+  for (let y = 0; y < height; y += 1) {
+    const row = y * (width * 3 + 1)
+    raw[row] = 0
+    for (let x = 0; x < width; x += 1) {
+      const index = row + 1 + x * 3
+      raw[index] = 248
+      raw[index + 1] = 236
+      raw[index + 2] = 214
+    }
+  }
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(width, 0)
+  ihdr.writeUInt32BE(height, 4)
+  ihdr[8] = 8
+  ihdr[9] = 2
+  const png = Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk('IHDR', ihdr),
+    pngChunk('IDAT', deflateSync(raw)),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ])
+  await writeFile(path, png)
+}
+
+function pngChunk(type, data) {
+  const name = Buffer.from(type)
+  const head = Buffer.alloc(4)
+  head.writeUInt32BE(data.length, 0)
+  const body = Buffer.concat([name, data])
+  const sum = Buffer.alloc(4)
+  sum.writeUInt32BE(pngCrc(body), 0)
+  return Buffer.concat([head, body, sum])
+}
+
+function pngCrc(buf) {
+  let crc = ~0
+  for (const byte of buf) {
+    crc ^= byte
+    for (let i = 0; i < 8; i += 1) crc = (crc >>> 1) ^ (0xedb88320 & -(crc & 1))
+  }
+  return ~crc >>> 0
 }

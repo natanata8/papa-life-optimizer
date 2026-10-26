@@ -24,6 +24,7 @@ import { SCENE_LIST } from '@/domain/scenes.ts'
 import { MODE_META, type FamEvent, type Profile, type School, type Step } from '@/domain/types.ts'
 import { lineShareUrl } from '@/domain/export.ts'
 import { addMinutes } from '@/domain/dates.ts'
+import { ChildToday } from '@/screens/today/ChildToday.tsx'
 import { MessageComposer } from '@/screens/today/MessageComposer.tsx'
 import { NiceEvents } from '@/screens/today/NiceEvents.tsx'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
@@ -113,11 +114,13 @@ export function Home() {
         <p className="mt-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">送る文の例：「{line}」</p>
       ) : null}
       {cards.length === 0 ? <p className="mt-2 text-[13px] text-muted">今日の一手はまだありません。</p> : null}
+      <ChildToday />
       <h2 className="mt-5 text-sm font-bold">あったらいいこと</h2>
       <NiceEvents />
       <MessageComposer />
       <WeekendCard />
       <LazyQuestion />
+      {store.sheet ? null : (
       <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-gradient-to-t from-paper via-paper to-transparent px-3 pt-4 pb-2">
         <p className="mb-1 text-[11px] text-muted">すぐ相談（片手で・タップだけ）</p>
         <div className="grid grid-cols-3 gap-1.5" data-testid="quick-list">
@@ -135,6 +138,7 @@ export function Home() {
           ))}
         </div>
       </div>
+      )}
     </div>
   )
 }

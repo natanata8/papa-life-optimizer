@@ -78,6 +78,21 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
   }
 }
 
+function childFact(request: ConsultRequest, around: string): string {
+  const next = addDays(around, 1)
+  const rows = request.childEvents.filter((event) => event.date === around || event.date === next)
+  if (rows.length === 0) return ''
+  return rows
+    .map((event) => {
+      const when = event.date === around ? 'その日' : '翌日'
+      const who = event.child ? `${event.child}の` : ''
+      const items = event.items.length > 0 ? `、持ち物は${event.items.join('・')}` : ''
+      const due = event.deadline ? '、提出・支払いの期限' : ''
+      return `${when}は${who}${event.title}${items}${due}`
+    })
+    .join('。')
+}
+
 function nomi(request: ConsultRequest): ToneAnswer {
   const date = request.sceneDate
   const when = formatMd(date)
@@ -119,7 +134,7 @@ function nomi(request: ConsultRequest): ToneAnswer {
     ? '今すぐ、今夜の飲み会と帰る時間を伝える'
     : `今夜のうちに${when}の飲み会を伝える`
   return {
-    状況整理: '行きたい気持ちは自然なことです。行くか行かないかの前に、抜ける時間に何が誰に移るかを先に整えましょう。',
+    状況整理: `行きたい気持ちは自然なことです。行くか行かないかの前に、抜ける時間に何が誰に移るかを先に整えましょう。${childFact(request, date)}`,
     気づき: '行くかどうかより、抜ける時間の仕事を先に渡しておくかどうかの方が、家に残りやすいです。',
     一手: [
       step(firstTitle, '直前の相談が一番もめやすいので、先に日時と帰る時間を伝えます', '事前に伝える', firstTiming, [
@@ -234,7 +249,7 @@ function late(request: ConsultRequest): ToneAnswer {
     ? `残業で遅くなる。着く時刻は分かったらすぐ送る。今夜の${dutyLine}、お願いできる？帰ってから残りは俺がやる。`
     : `残業で遅くなる。${when}ごろ着く予定。今夜の${dutyLine}、お願いできる？帰ってから残りと明日の朝の準備は俺がやる。`
   return {
-    状況整理: `残業で帰りが遅くなります。${unknown ? '着く時刻はまだ未定です。' : `${when}ごろ着く想定です。`}${dutyLine}がその時間、家に残ります。${home ? `ふだんの帰宅目安は${home}です。` : ''}`,
+    状況整理: `残業で帰りが遅くなります。${unknown ? '着く時刻はまだ未定です。' : `${when}ごろ着く想定です。`}${dutyLine}がその時間、家に残ります。${home ? `ふだんの帰宅目安は${home}です。` : ''}${childFact(request, request.today)}`,
     気づき: '遅れることより、時刻と、帰ってから自分がやることが先に伝わると、家に残る仕事が減ります。',
     一手: [
       unknown

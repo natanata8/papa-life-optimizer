@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
+import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { downloadIcs, googleCalendarUrl, lineShareUrl } from '@/domain/export.ts'
 import { DAILY_TASKS, INV_DEFS, invisibleOn, taskSnippet } from '@/domain/invisible.ts'
@@ -27,6 +28,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'event') return <EventSheet id={sheet.id} />
   if (sheet.type === 'addEvent') return <AddEventSheet />
   if (sheet.type === 'addNice') return <AddNiceSheet />
+  if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
