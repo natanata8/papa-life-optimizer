@@ -7,6 +7,7 @@ import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts'
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
 import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
+import { partnerDay } from '@/domain/partnerDay.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
 import { HOTLINE_MESSAGE, isSafetyConcern } from '@/domain/safety.ts'
@@ -45,6 +46,7 @@ export type Flow = { scene: SceneId; answers: string[]; lazy: string | null }
 export type Sheet =
   | { type: 'add'; suggestionId: string }
   | { type: 'invisible'; date: string; key: string }
+  | { type: 'wife'; date: string; blockId: string }
   | { type: 'daily'; taskId: string }
   | { type: 'event'; id: string }
   | { type: 'addEvent' }
@@ -84,7 +86,7 @@ type StoreValue = {
   cal: 'week' | 'day'
   weekStart: string
   day: string
-  filters: { ev: boolean; step: boolean; inv: boolean; child: boolean }
+  filters: { ev: boolean; step: boolean; inv: boolean; child: boolean; wife: boolean }
   lazyLock: string | null
   setMode: (mode: Mode) => void
   reset: () => void
@@ -119,7 +121,7 @@ type StoreValue = {
   setCal: (cal: 'week' | 'day', day?: string) => void
   shiftWeek: (delta: number) => void
   shiftDay: (delta: number) => void
-  toggleFilter: (key: 'ev' | 'step' | 'inv' | 'child') => void
+  toggleFilter: (key: 'ev' | 'step' | 'inv' | 'child' | 'wife') => void
   patchProfile: (fn: (profile: Profile) => Profile) => void
   dismissLazy: () => void
   lockLazy: (key: string) => void
@@ -283,6 +285,14 @@ function buildRequest(
     ]
       .filter(Boolean)
       .join(' / '),
+    partnerEstimate: [...new Set([today, sceneDate])].map((date) => {
+      const day = partnerDay(date, state.profile, state.events, state.childEvents, state.hidden, today)
+      return {
+        date,
+        estimate: true as const,
+        blocks: day.blocks.map((block) => ({ time: block.time, title: block.title, line: block.line })),
+      }
+    }),
     todayText: today,
     memory: state.memories.map((memory) => memory.text),
     events: state.events.map((event) => ({
@@ -334,7 +344,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [cal, setCalState] = useState<'week' | 'day'>('week')
   const [weekStart, setWeekStart] = useState(mondayOf(today))
   const [day, setDay] = useState(today)
-  const [filters, setFilters] = useState({ ev: true, step: true, inv: true, child: true })
+  const [filters, setFilters] = useState({ ev: true, step: true, inv: true, child: true, wife: true })
   const [lazyLock, setLazyLock] = useState<string | null>(null)
   const hydrated = useRef(false)
   const dataRef = useRef<Persisted | null>(null)
@@ -414,6 +424,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ? behindFor(scene, request.sceneDate, todayRef.current, snapshot.profile, snapshot.events, snapshot.hidden)
         : { why: '', lines: [] as string[] }
       const used = usedLabels(snapshot.profile, scene)
+      const estimate = request.partnerEstimate.flatMap((day) => day.blocks.map((block) => block.title))
+      if (estimate.length > 0) used.push(`推定（事実ではない）：${[...new Set(estimate)].slice(0, 4).join('、')}`)
       const base = dataRef.current ?? snapshot
       commit(
         attachAnswer(base, {

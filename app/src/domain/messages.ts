@@ -1,6 +1,6 @@
 export type FatigueId = 'genki' | 'little' | 'done'
 
-export type PartKind = 'arrive' | 'fatigue' | 'tasks' | 'ask' | 'takeover' | 'note'
+export type PartKind = 'arrive' | 'fatigue' | 'tasks' | 'ask' | 'takeover' | 'note' | 'thanks'
 
 export type TemplatePart = {
   id: string
@@ -31,6 +31,7 @@ export const MESSAGE_TEMPLATES: MessageTemplate[] = [
       { id: 'fatigue', label: '疲労度', defaultOn: true, kind: 'fatigue' },
       { id: 'tasks', label: '帰ってからやること', defaultOn: true, kind: 'tasks' },
       { id: 'ask', label: '帰りに何かいる？', defaultOn: true, kind: 'ask', line: '帰りに何かいる？' },
+      { id: 'thanks', label: 'お迎えの一言', defaultOn: true, kind: 'thanks' },
     ],
   },
   {
@@ -56,7 +57,7 @@ export const MESSAGE_TEMPLATES: MessageTemplate[] = [
 
 export function renderMessage(
   template: MessageTemplate,
-  input: { on: Record<string, boolean>; time: string; fatigue: FatigueId; tasks: string[]; note: string },
+  input: { on: Record<string, boolean>; time: string; fatigue: FatigueId; tasks: string[]; note: string; thanks?: string },
 ): string {
   const lines: string[] = []
   for (const part of template.parts) {
@@ -81,6 +82,7 @@ export function renderMessage(
       lines.push(`買うもの: ${input.note.trim()}`)
     }
     if ((part.kind === 'ask' || part.kind === 'takeover') && part.line) lines.push(part.line)
+    if (part.kind === 'thanks' && input.thanks) lines.push(input.thanks)
   }
   return lines.filter(Boolean).join('\n')
 }

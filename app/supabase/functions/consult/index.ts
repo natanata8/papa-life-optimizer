@@ -30,6 +30,7 @@ type ConsultBody = {
   memory?: string[]
   events?: unknown[]
   childEvents?: unknown[]
+  partnerEstimate?: unknown[]
   taskHints?: TaskHint[]
   flags?: Record<string, unknown>
 }
@@ -99,6 +100,7 @@ Deno.serve(async (req) => {
     memory: (body.memory ?? []).slice(0, 8),
     events: body.events ?? [],
     childEvents: Array.isArray(body.childEvents) ? body.childEvents.slice(0, 12) : [],
+    partnerEstimate: Array.isArray(body.partnerEstimate) ? body.partnerEstimate.slice(0, 2) : [],
     flags: body.flags ?? {},
     tasks: hints,
   })
@@ -117,7 +119,7 @@ Deno.serve(async (req) => {
       response_format: { type: 'json_schema', json_schema: TONE_ANSWER_SCHEMA },
       messages: [
         { role: 'system', content: STATIC_SYSTEM_PROMPT },
-        { role: 'system', content: `次のJSONが、この家庭の事実です。気持ちは断定しないでください。\n${dynamic}` },
+        { role: 'system', content: `次のJSONが、この家庭の情報です。estimate が true の項目は推定で、事実ではありません。パートナーがそれを担当した、気持ち、という断定には使わないでください。\n${dynamic}` },
         { role: 'user', content: body.userText || body.entry || '相談です' },
       ],
     }),

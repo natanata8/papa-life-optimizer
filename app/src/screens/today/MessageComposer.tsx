@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
 import { FATIGUE_OPTIONS, MESSAGE_TEMPLATES, renderMessage, type FatigueId } from '@/domain/messages.ts'
+import { partnerDay, pickupThanks } from '@/domain/partnerDay.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import { copyText } from '@/lib/utils.ts'
 
@@ -18,10 +19,11 @@ export function MessageComposer() {
   const [on, setOn] = useState<Record<string, boolean>>(() => Object.fromEntries(template.parts.map((part) => [part.id, part.defaultOn])))
   const todayTasks = data?.steps.filter((step) => step.date === store.today).map((step) => step.title) ?? []
   const [picked, setPicked] = useState<string[]>(todayTasks)
+  const thanks = data ? pickupThanks(partnerDay(store.today, data.profile, data.events, data.childEvents, data.hidden, store.today)) : ''
 
   const preview = useMemo(
-    () => renderMessage(template, { on, time, fatigue, tasks: picked, note }),
-    [template, on, time, fatigue, picked, note],
+    () => renderMessage(template, { on, time, fatigue, tasks: picked, note, thanks }),
+    [template, on, time, fatigue, picked, note, thanks],
   )
   if (!data) return null
 
@@ -49,15 +51,18 @@ export function MessageComposer() {
         ))}
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
-        {template.parts.map((part) => (
-          <Chip
-            key={part.id}
-            on={Boolean(on[part.id])}
-            onClick={() => setOn((current) => ({ ...current, [part.id]: !current[part.id] }))}
-          >
-            {part.label}
-          </Chip>
-        ))}
+        {template.parts.map((part) =>
+          part.kind === 'thanks' && !thanks ? null : (
+            <Chip
+              key={part.id}
+              data-testid={`part-${part.id}`}
+              on={Boolean(on[part.id])}
+              onClick={() => setOn((current) => ({ ...current, [part.id]: !current[part.id] }))}
+            >
+              {part.label}
+            </Chip>
+          ),
+        )}
       </div>
       {showTime ? (
         <label className="mt-3 block text-[12px] text-muted">

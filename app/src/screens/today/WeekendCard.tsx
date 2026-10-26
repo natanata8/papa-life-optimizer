@@ -14,7 +14,12 @@ export function WeekendCard() {
 
   return (
     <section className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" data-testid="weekend-card">
-      <h3 className="text-sm font-bold">今週末の提案</h3>
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="text-sm font-bold">今週末の提案</h3>
+        <button type="button" className="text-[12px] font-bold text-accent-deep" data-testid="weekend-more" onClick={() => store.setTab('out')}>
+          お出かけで見る
+        </button>
+      </div>
       <p className="mt-1 text-[12px] leading-relaxed text-muted">
         {wide ? 'パートナーに出す案です。送る前に、自分の言葉へ直してください。' : '月〜水は1件だけ。木曜から中身を開きます。'}
       </p>

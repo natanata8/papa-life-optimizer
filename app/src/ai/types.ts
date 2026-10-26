@@ -33,6 +33,11 @@ export type ConsultRequest = {
     deadline: boolean
   }[]
   taskHints: { id: string; title: string; why?: string; steps?: string[]; frequency?: string }[]
+  partnerEstimate: {
+    date: string
+    estimate: true
+    blocks: { time: string; title: string; line: string }[]
+  }[]
   flags: {
     ensokuNextDay: boolean
     gomiAround: boolean

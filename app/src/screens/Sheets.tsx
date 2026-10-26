@@ -6,8 +6,10 @@ import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { downloadIcs, googleCalendarUrl, lineShareUrl } from '@/domain/export.ts'
 import { DAILY_TASKS, INV_DEFS, invisibleOn, taskSnippet } from '@/domain/invisible.ts'
+import { partnerDay } from '@/domain/partnerDay.ts'
 import { NICE_KINDS, NOTE_OPTIONS, REASONS, type EventKind, type NiceKind, type NiceRecurrence } from '@/domain/types.ts'
 import { nicePlaceholder } from '@/domain/nice.ts'
+import { copyText } from '@/lib/utils.ts'
 
 export function Sheets() {
   const store = useStore()
@@ -24,6 +26,7 @@ export function Sheets() {
 function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'add') return <AddSheet id={sheet.suggestionId} />
   if (sheet.type === 'invisible') return <InvisibleSheet date={sheet.date} itemKey={sheet.key} />
+  if (sheet.type === 'wife') return <WifeSheet date={sheet.date} blockId={sheet.blockId} />
   if (sheet.type === 'daily') return <DailySheet taskId={sheet.taskId} />
   if (sheet.type === 'event') return <EventSheet id={sheet.id} />
   if (sheet.type === 'addEvent') return <AddEventSheet />
@@ -124,6 +127,42 @@ function Option({
     <button type="button" className={className} onClick={onClick}>
       {body}
     </button>
+  )
+}
+
+function WifeSheet({ date, blockId }: { date: string; blockId: string }) {
+  const store = useStore()
+  const data = store.data
+  if (!data) return null
+  const block = partnerDay(date, data.profile, data.events, data.childEvents, data.hidden, store.today).blocks.find((item) => item.id === blockId)
+  if (!block) return <p className="text-sm">この推定は、今は出ていません。</p>
+  return (
+    <div data-testid="sheet-wife">
+      <span className="inline-block rounded-full bg-[#f3f0ea] px-2 py-0.5 text-[11px] font-bold text-muted">推定</span>
+      <p className="mt-1 text-[17px] font-bold">{block.line}</p>
+      <p className="text-xs text-muted">
+        {dayName(date, store.today)} {block.time}
+        {block.minutes ? ` ｜ 目安 約${block.minutes}分` : ''}
+      </p>
+      <p className="mt-3 text-sm leading-relaxed">{block.detail}</p>
+      <p className="mt-2 text-[12px] leading-relaxed text-muted">登録された予定ではありません。編集も、チェックもできません。</p>
+      <h2 className="mt-3 text-sm font-bold">ありがとう、の一例</h2>
+      <p className="mt-1 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-sm leading-relaxed">「{block.thanks}」</p>
+      <div className="mt-3 flex gap-2">
+        <Button
+          size="sm"
+          data-testid="wife-thanks"
+          onClick={() => {
+            void copyText(block.thanks).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
+          }}
+        >
+          コピー
+        </Button>
+        <Button size="sm" variant="ghost" data-testid="wife-close" onClick={store.closeSheet}>
+          閉じる
+        </Button>
+      </div>
+    </div>
   )
 }
 

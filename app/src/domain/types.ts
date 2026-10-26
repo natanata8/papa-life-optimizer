@@ -30,7 +30,7 @@ export type ToneAnswer = {
 
 export type Mode = '朝' | '昼' | '帰宅前' | '夜' | '金曜夜'
 
-export type Tab = 'home' | 'consult' | 'cal' | 'profile' | 'review'
+export type Tab = 'home' | 'out' | 'consult' | 'cal' | 'profile' | 'review'
 
 export type AgeLabel =
   | '妊娠中'

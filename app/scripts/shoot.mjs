@@ -209,6 +209,33 @@ try {
   await answerQuick('nomi', ['明日', 'お風呂'], '25-answer-nomi')
   await answerQuick('clash', ['寝かしつけ'], '26-answer-clash')
 
+  await page.click('[data-testid="nav-cal"]')
+  await page.click('[data-testid="cal-week"]')
+  await page.waitForSelector('[data-testid^="cal-date-"]')
+  const openedToday = await page.evaluate(() => {
+    const el = [...document.querySelectorAll('[data-testid^="cal-date-"]')].find((node) => node.textContent?.includes('今日'))
+    if (!el) return false
+    el.click()
+    return true
+  })
+  if (!openedToday) throw new Error('today column missing')
+  await page.waitForSelector('[data-testid="wife-lane"]')
+  await page.waitForSelector('[data-testid="wife-block-pickup"]')
+  await page.$eval('[data-testid="wife-block-pickup"]', (el) => el.scrollIntoView({ block: 'center' }))
+  await new Promise((resolve) => setTimeout(resolve, 250))
+  await shot('27-wife-lane')
+  await page.click('[data-testid="wife-block-pickup"]')
+  await page.waitForSelector('[data-testid="sheet-wife"]')
+  await shot('28-wife-detail')
+  await page.click('[data-testid="wife-close"]')
+  await page.waitForFunction(() => !document.querySelector('[data-testid="sheet-wife"]'))
+  await page.click('[data-testid="nav-out"]')
+  await page.waitForSelector('[data-testid="outing-park"]')
+  await shot('29-outing-list')
+  await page.click('[data-testid="outing-park"]')
+  await page.waitForSelector('[data-testid="outing-detail"]')
+  await shot('30-outing-detail')
+
   await page.click('[data-testid="nav-consult"]')
   const again = await page.$('xpath///button[contains(., "新しい相談")]')
   if (again) await again.click()
