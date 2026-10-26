@@ -83,7 +83,7 @@ export function Home() {
   const line = cards.find((card) => card.line)?.line
 
   return (
-    <div className="px-3.5 pt-3.5 pb-44">
+    <div className="px-3.5 pt-3.5 pb-72">
       <DemoBar />
       <Notice notice={notice} />
       <p className="mt-1 text-xs text-muted">
@@ -121,19 +121,19 @@ export function Home() {
       <WeekendCard />
       <LazyQuestion />
       {store.sheet ? null : (
-      <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-gradient-to-t from-paper via-paper to-transparent px-3 pt-4 pb-2">
+      <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-gradient-to-t from-paper via-paper to-transparent px-3 pt-3 pb-2">
         <p className="mb-1 text-[11px] text-muted">すぐ相談（片手で・タップだけ）</p>
-        <div className="grid grid-cols-3 gap-1.5" data-testid="quick-list">
+        <div className="grid grid-cols-2 gap-1.5" data-testid="quick-list">
           {SCENE_LIST.map((scene) => (
             <button
               key={scene.id}
               type="button"
               data-testid={`quick-${scene.id}`}
-              className="rounded-[14px] bg-accent px-1 py-2 text-[11px] leading-tight font-bold text-white"
+              className="rounded-[14px] bg-accent px-2 py-2 text-left text-[12px] leading-snug font-bold text-white"
               onClick={() => store.beginScene(scene.id, true)}
             >
-              <span className="mb-0.5 block text-lg">{scene.icon}</span>
-              {scene.short}
+              <span className="mr-1">{scene.icon}</span>
+              {scene.title}
             </button>
           ))}
         </div>

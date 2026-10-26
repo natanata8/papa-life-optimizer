@@ -199,6 +199,16 @@ try {
   await page.click('[data-testid="child-close"]')
   await page.waitForFunction(() => !document.querySelector('[data-testid="child-confirm"]'))
 
+  await page.click('[data-testid="nav-home"]')
+  await page.click('[data-testid="mode-帰宅前"]')
+  await page.waitForSelector('[data-testid="quick-clash"]')
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await new Promise((resolve) => setTimeout(resolve, 200))
+  await shot('23-quick-grid')
+  await answerQuick('late', ['21時', 'お風呂'], '24-answer-late')
+  await answerQuick('nomi', ['明日', 'お風呂'], '25-answer-nomi')
+  await answerQuick('clash', ['寝かしつけ'], '26-answer-clash')
+
   await page.click('[data-testid="nav-consult"]')
   const again = await page.$('xpath///button[contains(., "新しい相談")]')
   if (again) await again.click()
@@ -213,6 +223,46 @@ try {
   process.exitCode = 1
 } finally {
   await browser.close()
+}
+
+async function clickExact(label) {
+  const clicked = await page.evaluate((text) => {
+    const el = [...document.querySelectorAll('button')].find((node) => node.textContent?.trim() === text)
+    if (!el) return false
+    el.click()
+    return true
+  }, label)
+  if (!clicked) throw new Error(`button not found: ${label}`)
+}
+
+async function answerQuick(id, options, file) {
+  await page.click('[data-testid="nav-home"]')
+  await page.waitForSelector(`[data-testid="quick-${id}"]`)
+  await page.click(`[data-testid="quick-${id}"]`)
+  await page.waitForFunction(() => document.body.innerText.includes('タップで答える'), { timeout: 8000 })
+  for (let i = 0; i < 4; i += 1) {
+    const skipped = await page.evaluate(() => {
+      const el = [...document.querySelectorAll('button')].find((node) => node.textContent?.trim() === '答えずに進む')
+      if (!el) return false
+      el.click()
+      return true
+    })
+    if (!skipped) break
+    await new Promise((resolve) => setTimeout(resolve, 200))
+  }
+  for (const option of options) {
+    await page.waitForFunction(
+      (label) => [...document.querySelectorAll('button')].some((node) => node.textContent?.trim() === label),
+      { timeout: 8000 },
+      option,
+    )
+    await clickExact(option)
+    await new Promise((resolve) => setTimeout(resolve, 200))
+  }
+  await page.waitForSelector('[data-testid="latest-answer"]')
+  await page.$eval('[data-testid="latest-answer"]', (el) => el.scrollIntoView({ block: 'start' }))
+  await new Promise((resolve) => setTimeout(resolve, 300))
+  await shot(file)
 }
 
 async function writePrint(path) {

@@ -142,6 +142,7 @@ export const SCENE_LAZY: Record<SceneId, string[]> = {
   week: ['car', 'area'],
   me: [],
   late: ['home'],
+  clash: [],
 }
 
 export function emptyProfile(): Profile {

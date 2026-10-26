@@ -1,4 +1,4 @@
-export type SceneId = 'nomi' | 'tired' | 'week' | 'me' | 'late'
+export type SceneId = 'late' | 'week' | 'nomi' | 'me' | 'tired' | 'clash'
 
 export type StepKind =
   | '今やる'
