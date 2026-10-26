@@ -98,7 +98,9 @@ try {
   await clickText('明日')
   await waitText('ふだん自分がやっていること')
   await clickText('寝かしつけ')
-  await waitText('サンプル回答')
+  await page.waitForSelector('[data-testid="latest-answer"]')
+  await page.$eval('[data-testid="latest-answer"]', (el) => el.scrollIntoView({ block: 'start' }))
+  await new Promise((resolve) => setTimeout(resolve, 250))
   await shot('07-consult-answer')
 
   await page.click('[data-testid="nav-cal"]')

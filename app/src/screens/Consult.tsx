@@ -15,7 +15,9 @@ export function Consult() {
   const data = store.data
   const endRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: 'end' })
+    const card = document.querySelector('[data-testid="latest-answer"]')
+    if (card) card.scrollIntoView({ block: 'start' })
+    else endRef.current?.scrollIntoView({ block: 'end' })
   }, [data?.chat.length, store.flow, store.pending])
   if (!data) return null
   const dock = Boolean(store.flow)
@@ -51,8 +53,8 @@ export function Consult() {
         </>
       ) : (
         <div className="mt-2 space-y-2">
-          {data.chat.map((message) => (
-            <Message key={message.id} message={message} />
+          {data.chat.map((message, index) => (
+            <Message key={message.id} message={message} latest={index === data.chat.length - 1} />
           ))}
           {store.pending ? <p className="text-[13px] text-muted">整理しています…</p> : null}
         </div>
@@ -63,7 +65,7 @@ export function Consult() {
   )
 }
 
-function Message({ message }: { message: ChatMessage }) {
+function Message({ message, latest = false }: { message: ChatMessage; latest?: boolean }) {
   const store = useStore()
   if (message.role === 'me') {
     return <p className="ml-auto max-w-[88%] rounded-2xl rounded-br-sm bg-accent px-3 py-2 text-sm leading-relaxed text-white">{message.text}</p>
@@ -85,7 +87,7 @@ function Message({ message }: { message: ChatMessage }) {
       </div>
     )
   }
-  return <AnswerCard message={message} />
+  return <AnswerCard message={message} latest={latest} />
 }
 
 function Hotline() {
@@ -102,7 +104,7 @@ function Hotline() {
   )
 }
 
-function AnswerCard({ message }: { message: Extract<ChatMessage, { role: 'answer' }> }) {
+function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role: 'answer' }>; latest: boolean }) {
   const store = useStore()
   const data = store.data
   if (!data) return null
@@ -112,7 +114,7 @@ function AnswerCard({ message }: { message: Extract<ChatMessage, { role: 'answer
   if (!first || !firstId) return null
   const suggestion = data.suggestions[firstId]
   return (
-    <div>
+    <div data-testid={latest ? 'latest-answer' : undefined}>
       {message.sample ? (
         <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent-deep">サンプル回答</p>
       ) : null}
