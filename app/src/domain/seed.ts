@@ -104,6 +104,7 @@ export function createSeed(today = todayInTokyo()): Persisted {
     suggestions: {},
     dismiss: {},
     consultations: [],
+    threads: [],
   }
 }
 

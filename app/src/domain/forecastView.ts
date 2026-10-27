@@ -17,6 +17,8 @@ export function forecastInput(data: Persisted, today: string): ForecastInput {
   return {
     today,
     returnAt: back,
+    leaveAt: data.profile.leaveAt,
+    usual: data.profile.usual ?? [],
     dadHome: data.profile.work === '自分が育休中',
     kidCount: data.profile.kids.length,
     events: data.events.map((event) => ({ date: event.date, time: event.time, title: event.title, kind: event.kind })),

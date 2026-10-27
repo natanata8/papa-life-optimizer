@@ -16,8 +16,11 @@ function read(): Persisted | null {
       ...parsed,
       niceEvents: parsed.niceEvents ?? [],
       childEvents: parsed.childEvents ?? [],
+      threads: parsed.threads ?? [],
       profile: {
         ...parsed.profile,
+        usual: parsed.profile.usual ?? [],
+        leaveAt: parsed.profile.leaveAt ?? null,
         kids: (parsed.profile.kids ?? []).map((kid) => ({
           ...kid,
           schoolName: kid.schoolName ?? '',

@@ -11,6 +11,9 @@ type ClientState = {
   chat?: ChatMessage[]
   suggestions?: Record<string, Suggestion>
   dismiss?: Record<string, true>
+  threads?: Persisted['threads']
+  usual?: string[]
+  leaveAt?: string | null
 }
 
 type FamilyRow = {
@@ -116,6 +119,8 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
     shop: family.shop_dow,
     showInv: family.show_invisible,
     notif: family.notifications_enabled,
+    usual: (family.client_state?.usual ?? []).filter((item) => typeof item === 'string'),
+    leaveAt: family.client_state?.leaveAt ?? null,
     kids: (children as KidRow[])
       .sort((a, b) => a.sort_order - b.sort_order)
       .map((row) => ({
@@ -193,6 +198,7 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
       safety: row.safety_flag,
       answer: row.answer,
     })),
+    threads: blob.threads ?? [],
   }
 }
 
@@ -213,6 +219,9 @@ async function writeFamily(
     chat: state.chat,
     suggestions: state.suggestions,
     dismiss: state.dismiss,
+    threads: state.threads,
+    usual: state.profile.usual,
+    leaveAt: state.profile.leaveAt,
   }
   const { error: familyError } = await client
     .from('families')

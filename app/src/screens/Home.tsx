@@ -5,6 +5,7 @@ import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
 import { addDays, dayName, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import { beforeLeaving, invisibleOn, SLOT_TIME, type InvItem } from '@/domain/invisible.ts'
+import { forecastFor } from '@/domain/forecastView.ts'
 import { noticeFor } from '@/domain/notify.ts'
 import {
   FIELDS,
@@ -67,7 +68,9 @@ export function Home() {
   const where = store.mode === '帰宅前' && info ? `${meta.where}（帰宅の目安 ${info.back}）` : meta.where
   const todaySteps = data.steps.filter((step) => step.date === store.today)
   const todayInvisible = invisibleOn(store.today, data.profile, data.events, data.hidden, store.today)
-  const notice = noticeFor(store.mode, store.today, data.profile, data.events, data.steps, data.hidden)
+  const cast = forecastFor(data, store.today)
+  const pendingReview = data.steps.some((step) => step.date < store.today && !step.status)
+  const notice = noticeFor(data.profile, pendingReview, cast.quiet, cast.headline)
   const cards = buildCards(store.mode, {
     todaySteps,
     todayInvisible,
@@ -123,12 +126,15 @@ export function Home() {
           </button>
         </div>
       ) : null}
-      <ChildToday />
-      <h2 className="mt-5 text-sm font-bold">あったらいいこと</h2>
-      <NiceEvents />
-      <MessageComposer />
-      <WeekendCard />
-      <LazyQuestion />
+      <details className="mt-4" data-testid="today-more">
+        <summary className="min-h-11 py-2 text-sm font-bold">ほかの今日</summary>
+        <ChildToday />
+        <h2 className="mt-4 text-sm font-bold">あったらいいこと</h2>
+        <NiceEvents />
+        <MessageComposer />
+        <WeekendCard />
+        <LazyQuestion />
+      </details>
       {store.sheet ? null : (
         <div className="pointer-events-none fixed bottom-[calc(53px+12px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2">
           <button
@@ -302,8 +308,10 @@ function SampleBanner() {
 }
 
 function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
-  const store = useStore()
-  if (notice.kind === 'off') return <p className="mb-2 text-center text-[11px] text-muted">🔕 {notice.text}</p>
+  if (notice.kind === 'off') {
+    if (notice.text === '今日は通知しません') return null
+    return <p className="mb-2 text-center text-[11px] text-muted">🔕 {notice.text}</p>
+  }
   return (
     <button
       type="button"
@@ -311,11 +319,6 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
       onClick={() => {
         if (notice.target === 'review') document.getElementById('forecast-review')?.scrollIntoView({ block: 'center' })
         if (notice.target === 'before') document.getElementById('before')?.scrollIntoView({ block: 'center' })
-        if (notice.target === 'calendar') {
-          store.setCal('day', store.today)
-          store.setTab('cal')
-        }
-        if (notice.target === 'weekend') store.beginScene('week', true)
       }}
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun text-sm text-accent-deep" aria-hidden="true">☀</span>

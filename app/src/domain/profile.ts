@@ -164,6 +164,8 @@ export function emptyProfile(): Profile {
     partner: '妻',
     showInv: true,
     notif: null,
+    usual: [],
+    leaveAt: null,
   }
 }
 

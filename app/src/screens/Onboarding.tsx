@@ -135,6 +135,8 @@ export function Onboarding() {
         <ReturnStep />
       ) : null}
 
+      {ob.step === 6 ? <OptionalStep /> : null}
+
       {ob.step === 5 ? (
         <div className="pt-6">
           <h2 className="text-lg font-bold">ありがとうございます。いま、どれに近いですか？</h2>
@@ -176,10 +178,65 @@ function ReturnStep() {
           日によって違うので、自動では送りません。今日の画面にだけ出します。
         </p>
       ) : null}
-      <Button size="lg" className="mt-4" data-testid="ob-next" disabled={!store.ob.home} onClick={() => store.setOb({ step: 5 })}>
+      <Button size="lg" className="mt-4" data-testid="ob-next" disabled={!store.ob.home} onClick={() => store.setOb({ step: 6 })}>
         次へ
       </Button>
-      <Skip onClick={() => store.setOb({ step: 5 })} />
+      <Skip onClick={() => store.setOb({ step: 6 })} />
+    </div>
+  )
+}
+
+const USUAL_OPTIONS = ['お風呂', '寝かしつけ', '夕食', '登園の送り', '降園の迎え']
+const LEAVE_OPTIONS = [
+  { label: '7時台', value: '7:30' },
+  { label: '8時台', value: '8:30' },
+  { label: '9時以降', value: '9:30' },
+  { label: '日による', value: '日による' },
+]
+
+function OptionalStep() {
+  const store = useStore()
+  const { ob } = store
+  return (
+    <div className="pt-4" data-testid="ob-optional">
+      <p className="text-[11px] font-bold text-muted">任意・答えなくても進めます</p>
+      <h2 className="mt-1 text-lg font-bold">普段自分がやることは？</h2>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {USUAL_OPTIONS.map((option) => (
+          <Chip
+            key={option}
+            on={ob.usual.includes(option)}
+            data-testid={`usual-${option}`}
+            onClick={() => {
+              const usual = ob.usual.includes(option) ? ob.usual.filter((item) => item !== option) : [...ob.usual, option]
+              store.setOb({ usual })
+            }}
+          >
+            {option}
+          </Chip>
+        ))}
+      </div>
+      <h2 className="mt-5 text-lg font-bold">家を出る時刻は？</h2>
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {LEAVE_OPTIONS.map((option) => (
+          <Chip
+            key={option.label}
+            on={ob.leaveAt === option.value}
+            data-testid={`leave-${option.label}`}
+            onClick={() => store.setOb({ leaveAt: option.value })}
+          >
+            {option.label}
+          </Chip>
+        ))}
+      </div>
+      <Button size="lg" className="mt-5" data-testid="ob-next" onClick={() => store.setOb({ step: 5 })}>
+        次へ
+      </Button>
+      <Skip
+        onClick={() => {
+          store.setOb({ usual: [], leaveAt: null, step: 5 })
+        }}
+      />
     </div>
   )
 }

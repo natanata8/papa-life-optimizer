@@ -45,7 +45,7 @@ export const SCENES: Record<SceneId, SceneDef> = {
   },
   tired: {
     id: 'tired',
-    icon: '🌧',
+    icon: '💭',
     title: '妻がしんどそうで気になる',
     short: '妻がしんどそう',
     questions: [{ prompt: 'いちばん気になるのは？', options: ['言葉がきつい', 'ため息が多い', '寝不足っぽい', 'よくわからない'] }],

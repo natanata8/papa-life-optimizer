@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { forecast, type ForecastInput } from './forecast.ts'
+import { forecast, noticeBody, type ForecastInput } from './forecast.ts'
 
 const banned = /妻|雷|機嫌|家は雨|家族は|気分/
 
@@ -10,6 +10,8 @@ function base(patch: Partial<ForecastInput> = {}): ForecastInput {
     returnAt: '17:30',
     dadHome: false,
     kidCount: 2,
+    leaveAt: null,
+    usual: [],
     events: [],
     childEvents: [],
     lane: [],
@@ -72,7 +74,7 @@ test('明日の遠足の持ち物は夜のもよう', () => {
   const night = result.slots.find((slot) => slot.id === '夜')
   assert.equal(night?.sky, 'もよう')
   assert.match(night?.reason ?? '', /遠足の持ち物/)
-  assert.match(night?.umbrella ?? '', /お弁当/)
+  assert.match(night?.reason ?? '', /お弁当/)
 })
 
 test('迎えの推定は負荷の理由で、人の天気にはしない', () => {
@@ -102,6 +104,50 @@ test('明日の飲み会は、夜の負荷と傘になる', () => {
   assert.equal(night?.sky, 'にわか雨')
   assert.match(night?.reason ?? '', /明日の夜は家を空ける/)
   assert.equal(banned.test(JSON.stringify(result)), false)
+})
+
+test('晴れ以外の枠は、入力の事実がなぜに入る', () => {
+  const result = forecast(base({ returnAt: '19:30' }))
+  const busy = result.slots.filter((slot) => slot.sky !== '晴れ')
+  assert.ok(busy.length > 0)
+  for (const slot of busy) {
+    assert.match(slot.reason, /／/)
+    assert.match(slot.reason, /帰宅予定19:30|残業|予定「|持ち物「|迎え|家を出る時刻/)
+  }
+  assert.match(result.headline, /^だいたい晴れ・/)
+})
+
+test('事実の無い予定は、晴れ以外にしない', () => {
+  const result = forecast(base({ events: [{ date: '2026-10-26', time: '12:00', title: '   ' }] }))
+  assert.equal(result.quiet, true)
+})
+
+test('微妙だった風呂は、次の傘を変える', () => {
+  const result = forecast(
+    base({
+      returnAt: '19:30',
+      steps: [{ date: '2026-10-25', time: '21:00', title: 'お風呂は自分が担当', status: 'meh' }],
+    }),
+  )
+  const evening = result.slots.find((slot) => slot.id === '夕方')
+  assert.equal(evening?.umbrella, '風呂の担当を一言送る')
+})
+
+test('うまくいった風呂は、同じ傘を残す', () => {
+  const result = forecast(
+    base({
+      returnAt: '19:30',
+      steps: [{ date: '2026-10-25', time: '21:00', title: 'お風呂は自分が担当', status: 'good' }],
+    }),
+  )
+  const evening = result.slots.find((slot) => slot.id === '夕方')
+  assert.equal(evening?.umbrella, '19時までに帰れたら晴れ間に')
+})
+
+test('通知の見本は、雨の枠かふりかえり待ちだけ', () => {
+  assert.equal(noticeBody(true, false, 'だいたい晴れ'), null)
+  assert.equal(noticeBody(true, true, 'だいたい晴れ'), '昨日の夕方、晴れにできた？')
+  assert.equal(noticeBody(false, false, 'だいたい晴れ・18〜20時にわか雨'), 'だいたい晴れ・18〜20時にわか雨')
 })
 
 test('育休で家にいる日は、遅い帰宅の雨を足さない', () => {

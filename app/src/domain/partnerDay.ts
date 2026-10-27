@@ -151,7 +151,28 @@ export function partnerDay(
     })
   }
 
-  const kept = [...blocks].sort((a, b) => rank(a.id) - rank(b.id) || a.time.localeCompare(b.time)).slice(0, 4)
+  for (const extra of [
+    ['day-nap', '11:30', '昼寝の見守り'],
+    ['day-laundry', '13:30', '洗濯物'],
+    ['day-snack', '15:00', 'おやつ'],
+    ['day-bath', '16:00', '風呂の準備'],
+  ] as const) {
+    if (!hasSmallChild(profile) || !inWindow(extra[1], start, end)) continue
+    const task = daytime(extra[0])
+    blocks.push({
+      id: extra[0],
+      time: extra[1],
+      title: extra[2],
+      line: `たぶんこの時間は、${extra[2]}です。`,
+      detail: `タスク一覧の「${task?.title ?? extra[2]}」（${task?.frequency ?? '日中'}、約${task?.minutes ?? 10}分）からの推定です。誰がやるかは決めていません。`,
+      thanks: '今日も家のこと、ありがとう。',
+      minutes: task?.minutes ?? 10,
+      taskId: extra[0],
+      invisibleKey: null,
+    })
+  }
+
+  const kept = [...blocks].sort((a, b) => rank(a.id) - rank(b.id) || a.time.localeCompare(b.time)).slice(0, 6)
   kept.sort((a, b) => a.time.localeCompare(b.time) || a.id.localeCompare(b.id))
   return {
     workday: true,

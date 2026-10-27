@@ -30,6 +30,7 @@ import type {
   Tab,
   ToneAnswer,
 } from '@/domain/types.ts'
+import { logUsage } from '@/data/usage.ts'
 import { uid } from '@/lib/utils.ts'
 
 export type ObDraft = {
@@ -40,6 +41,8 @@ export type ObDraft = {
   offDad: string | null
   offPartner: string | null
   home: string | null
+  usual: string[]
+  leaveAt: string | null
 }
 
 export type Flow = { scene: SceneId; answers: string[]; lazy: string | null; care?: boolean }
@@ -105,6 +108,7 @@ type StoreValue = {
   retryConsult: (retry: ConsultRetry) => void
   startOwnHome: () => void
   newChat: () => void
+  openThread: (id: string) => void
   openSheet: (sheet: Sheet) => void
   closeSheet: () => void
   saveSuggestion: (id: string, date: string, time: string) => void
@@ -141,6 +145,19 @@ type StoreValue = {
   ensureHomeSuggestion: (input: HomeSuggestion) => string
 }
 
+function archiveChat(current: Persisted, today: string): Persisted {
+  const threads = current.threads ?? []
+  if (current.chat.length === 0) return { ...current, threads }
+  const first = current.chat.find((message) => message.role === 'me')
+  const title = first && first.role === 'me' ? first.text.slice(0, 40) : '相談'
+  const spoken = current.chat.find((message) => message.role === 'answer')
+  const preview = spoken && spoken.role === 'answer' ? spoken.answer.状況整理 : title
+  return {
+    ...current,
+    threads: [{ id: uid(), at: today, title, preview: preview.slice(0, 80), messages: current.chat }, ...threads].slice(0, 20),
+  }
+}
+
 const StoreContext = createContext<StoreValue | null>(null)
 
 const initialOb = (): ObDraft => ({
@@ -151,6 +168,8 @@ const initialOb = (): ObDraft => ({
   offDad: null,
   offPartner: null,
   home: null,
+  usual: [],
+  leaveAt: null,
 })
 
 function readMode(): Mode {
@@ -429,6 +448,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     },
   ) => {
     setPending(true)
+    logUsage('consult_started')
     try {
       const consultationId = uid()
       const request = buildRequest(snapshot, todayRef.current, scene, answers, entry, userText, extra?.taskHints ?? [], consultationId)
@@ -538,6 +558,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         offDad: ob.offDad,
         offPartner: ob.offPartner,
         home: ob.home,
+        usual: ob.usual,
+        leaveAt: ob.leaveAt,
       }
       if (!scene) {
         commit({
@@ -578,7 +600,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         { id: uid(), role: 'me', text: SCENES[scene].title },
         { id: uid(), role: 'bot', text: prompt },
       ]
-      commit({ ...current, chat: fresh ? messages : [...current.chat, ...messages] })
+      const base = fresh ? archiveChat(current, todayRef.current) : current
+      commit({ ...base, chat: fresh ? messages : [...base.chat, ...messages] })
       setFlow({ scene, answers: [], lazy })
       setTab('consult')
     },
@@ -713,6 +736,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setSheet(null)
       setTab('consult')
       setFlow(null)
+      logUsage('umbrella_tapped')
       void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: 'オウチ予報' })
     },
     retryConsult: (retry) => {
@@ -737,8 +761,23 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     newChat: () => {
       const current = dataRef.current
       if (!current) return
-      commit({ ...current, chat: [] })
+      const next = archiveChat(current, todayRef.current)
+      commit({ ...next, chat: [] })
       setFlow(null)
+    },
+    openThread: (id) => {
+      const current = dataRef.current
+      if (!current) return
+      const thread = current.threads.find((item) => item.id === id)
+      if (!thread) return
+      const next = archiveChat(current, todayRef.current)
+      commit({
+        ...next,
+        chat: thread.messages,
+        threads: next.threads.filter((item) => item.id !== id),
+      })
+      setFlow(null)
+      setTab('consult')
     },
     openSheet: setSheet,
     closeSheet: () => setSheet(null),
@@ -898,6 +937,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setReview: (stepId, status) => {
       const current = dataRef.current
       if (!current) return
+      logUsage('review_done')
       commit({
         ...current,
         steps: current.steps.map((step) => (step.id === stepId ? { ...step, status, reason: '' } : step)),

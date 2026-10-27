@@ -60,6 +60,26 @@ export function Review() {
           </div>
         </>
       ) : null}
+      <h2 className="mt-4 text-sm font-bold">これまでの相談</h2>
+      {data.threads.length === 0 ? (
+        <p className="mt-2 text-[13px] text-muted">まだありません。新しい相談を始めても、ここから前の相談を開けます。</p>
+      ) : (
+        <div className="mt-2 space-y-2" data-testid="consult-history">
+          {data.threads.map((thread) => (
+            <button
+              key={thread.id}
+              type="button"
+              className="block min-h-11 w-full rounded-xl bg-white px-3 py-2 text-left"
+              data-testid={`thread-${thread.id}`}
+              onClick={() => store.openThread(thread.id)}
+            >
+              <span className="block text-[11px] text-muted">{formatMd(thread.at)}</span>
+              <span className="mt-0.5 block text-[14px] font-bold">{thread.title}</span>
+              {thread.preview ? <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">{thread.preview}</span> : null}
+            </button>
+          ))}
+        </div>
+      )}
       <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       {data.memories.length === 0 ? (
         <p className="mt-2 text-[13px] text-muted">まだありません。一手のあと、2タップするとここに残ります。</p>

@@ -554,7 +554,9 @@ function ForecastSheet({ slotId }: { slotId: string }) {
       <p className="mt-1 text-base font-bold">
         {slot.range} {slot.sky}
       </p>
-      <p className="mt-2 text-[14px] leading-relaxed">{slot.reason}</p>
+      <p className="mt-2 text-[14px] leading-relaxed" data-testid="forecast-why">
+        なぜ {slot.reason}
+      </p>
       <p className="mt-2 text-[13px] leading-relaxed text-muted">人の気持ちではなく、この時間に家の仕事が重なっている、という見立てです。</p>
       <Button className="mt-3 min-h-11" size="lg" data-testid="forecast-sheet-ask" onClick={() => store.askForecast(slot.prompt)}>
         傘 {slot.umbrella}

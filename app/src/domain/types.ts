@@ -98,6 +98,8 @@ export type Profile = {
   partner: string
   showInv: boolean
   notif: boolean | null
+  usual: string[]
+  leaveAt: string | null
 }
 
 export type NiceKind = '誕生日' | '記念日' | '美容院' | 'ネイル' | 'その他'
@@ -192,6 +194,14 @@ export type ChatMessage =
       selfHarm?: boolean
     }
 
+export type ConsultThread = {
+  id: string
+  at: string
+  title: string
+  preview: string
+  messages: ChatMessage[]
+}
+
 export type ConsultationRecord = {
   id: string
   createdAt: string
@@ -216,6 +226,7 @@ export type Persisted = {
   suggestions: Record<string, Suggestion>
   dismiss: Record<string, true>
   consultations: ConsultationRecord[]
+  threads: ConsultThread[]
 }
 
 export const GOMI_KINDS: GomiKind[] = ['可燃', 'プラ', '資源']

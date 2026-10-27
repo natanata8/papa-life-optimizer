@@ -37,6 +37,11 @@ export function Consult() {
       {data.chat.length === 0 ? (
         <>
           <p className="mt-1 text-[13px] text-muted">家の時間の負荷を見て、次の一手と伝え方を出します。</p>
+          {data.threads.length > 0 ? (
+            <button type="button" className="mt-2 inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep" data-testid="open-history" onClick={() => store.setTab('review')}>
+              これまでの相談
+            </button>
+          ) : null}
           <div className="mt-3">
             <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id, true)} />
           </div>
@@ -46,7 +51,7 @@ export function Consult() {
           {data.chat.map((message, index) => (
             <Message key={message.id} message={message} latest={index === data.chat.length - 1} />
           ))}
-          {store.pending ? <p className="text-[13px] text-muted">整理しています…</p> : null}
+          {store.pending ? <Thinking /> : null}
         </div>
       )}
       <div ref={endRef} />
@@ -104,6 +109,54 @@ function CareCard() {
   )
 }
 
+function Thinking() {
+  return (
+    <p className="flex min-h-11 items-center gap-2 text-[13px] text-muted" data-testid="consult-thinking">
+      <span className="thinking-cloud inline-block text-rain-ink" aria-hidden="true">
+        <svg width="28" height="16" viewBox="0 0 28 16" fill="currentColor">
+          <ellipse cx="10" cy="10" rx="8" ry="5" />
+          <ellipse cx="18" cy="8" rx="7" ry="5" />
+        </svg>
+      </span>
+      整理しています
+    </p>
+  )
+}
+
+function LastGood() {
+  const store = useStore()
+  const good = store.data?.steps.filter((step) => step.status === 'good').sort((a, b) => b.date.localeCompare(a.date))[0]
+  if (!good) return null
+  return (
+    <p className="mb-2 text-[13px] leading-relaxed text-muted" data-testid="last-good">
+      前回うまくいったこと：{good.title}
+    </p>
+  )
+}
+
+function ReadAloud({ text }: { text: string }) {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    setReady(typeof window !== 'undefined' && 'speechSynthesis' in window)
+  }, [])
+  if (!ready || !text.trim()) return null
+  return (
+    <button
+      type="button"
+      className="mb-2 inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep"
+      data-testid="read-aloud"
+      onClick={() => {
+        const utterance = new SpeechSynthesisUtterance(text)
+        utterance.lang = 'ja-JP'
+        window.speechSynthesis.cancel()
+        window.speechSynthesis.speak(utterance)
+      }}
+    >
+      読み上げ
+    </button>
+  )
+}
+
 function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role: 'answer' }>; latest: boolean }) {
   const store = useStore()
   const data = store.data
@@ -116,6 +169,8 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
   return (
     <div data-testid={latest ? 'latest-answer' : undefined}>
       {message.care ? <CareCard /> : null}
+      <LastGood />
+      <ReadAloud text={`${message.answer.状況整理}${message.answer.声かけ例 ? `。${message.answer.声かけ例}` : ''}`} />
       {message.sample ? (
         <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent-deep">サンプル回答</p>
       ) : null}

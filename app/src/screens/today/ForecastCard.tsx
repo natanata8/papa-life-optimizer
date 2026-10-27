@@ -1,11 +1,19 @@
+import { useEffect, useState } from 'react'
 import { useStore } from '@/app/store.tsx'
 import { Button } from '@/components/ui/button.tsx'
+import { logUsage } from '@/data/usage.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import type { ForecastSlot } from '@/domain/forecast.ts'
+
+const INTRO_KEY = 'tone-app:forecast-intro'
 
 export function ForecastCard() {
   const store = useStore()
   const data = store.data
+  const [intro, setIntro] = useState(() => localStorage.getItem(INTRO_KEY) !== '1')
+  useEffect(() => {
+    logUsage('forecast_viewed')
+  }, [])
   if (!data) return null
   const cast = forecastFor(data, store.today)
   const busy = cast.slots.filter((slot) => slot.sky !== '晴れ')
@@ -15,15 +23,30 @@ export function ForecastCard() {
 
   return (
     <section className="mt-3 rounded-[14px] bg-white p-3 shadow-sm" data-testid="forecast-card">
+      {intro ? (
+        <div className="mb-2 flex items-start justify-between gap-2 rounded-xl bg-sun px-3 py-2" data-testid="forecast-intro">
+          <p className="text-[13px] leading-relaxed">予報は採点じゃなくて、備えるためのもの。</p>
+          <button
+            type="button"
+            className="inline-flex min-h-11 shrink-0 items-center px-2 text-[13px] font-bold text-accent-deep"
+            data-testid="forecast-intro-dismiss"
+            onClick={() => {
+              localStorage.setItem(INTRO_KEY, '1')
+              setIntro(false)
+            }}
+          >
+            わかった
+          </button>
+        </div>
+      ) : null}
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-sm font-bold">オウチ予報</h2>
         <span className="text-[11px] font-bold text-muted">予報</span>
       </div>
-      {cast.quiet ? (
-        <p className="mt-2 text-[15px] leading-snug font-bold" data-testid="forecast-quiet">
-          {cast.line}
-        </p>
-      ) : (
+      <p className={`mt-1 text-[15px] leading-snug font-bold ${cast.quiet ? '' : 'text-ink'}`} data-testid={cast.quiet ? 'forecast-quiet' : 'forecast-headline'}>
+        {cast.headline}
+      </p>
+      {cast.quiet ? null : (
         <>
           <div className="mt-2 grid grid-cols-4 gap-1.5" data-testid="forecast-strip">
             {cast.slots.map((slot) => (
@@ -32,14 +55,17 @@ export function ForecastCard() {
           </div>
           <div className="mt-2 space-y-2">
             {busy.map((slot) => (
-              <div key={slot.id} className="rounded-xl bg-rain px-3 py-2.5 text-rain-ink">
+              <div key={slot.id} className="rounded-xl bg-rain px-3 py-2 text-rain-ink">
                 <p className="text-[13px] leading-snug font-bold">
-                  {slot.range} {slot.sky}: {slot.reason}
+                  {slot.range} {slot.sky}
+                </p>
+                <p className="mt-0.5 text-[13px] leading-snug" data-testid={`forecast-why-${slot.id}`}>
+                  なぜ {slot.reason}
                 </p>
                 <button
                   type="button"
                   data-testid={`forecast-ask-${slot.id}`}
-                  className="mt-1.5 inline-flex min-h-11 items-center text-left text-[13px] font-bold"
+                  className="mt-1 inline-flex min-h-11 items-center text-left text-[13px] font-bold"
                   onClick={() => store.askForecast(slot.prompt)}
                 >
                   傘 {slot.umbrella}
