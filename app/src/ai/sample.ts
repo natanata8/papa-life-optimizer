@@ -74,6 +74,7 @@ export function sampleAnswer(request: ConsultRequest): ToneAnswer {
 
 function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.entry === 'invisible') return invisibleAnswer(request)
+  if (request.entry.startsWith('オウチ予報')) return forecastConsult(request)
   const blocked = blockedTitles(request.memory)
   if (request.scene === 'nomi') return noteBlocked(nomi(request), blocked)
   if (request.scene === 'tired') return noteBlocked(tired(request), blocked)
@@ -111,6 +112,29 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
     一手: [step(short, '今週分だけ自分がやると、次の声かけが具体的になります', '今やる', '今夜', steps)],
     声かけ例: `${short}、今週は俺がやってみる。コツがあったら教えて。`,
     明日やること: steps[0] ?? '中身を1つ確認する',
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function forecastConsult(request: ConsultRequest): ToneAnswer {
+  if (request.userText.includes('持ち物')) {
+    return {
+      状況整理: '明日の持ち物が、今夜の枠に残っています。中身を一つだけ決めます。',
+      気づき: '全部揃えなくて大丈夫です。一つ決まると、その枠は短くなります。',
+      一手: [step('持ち物を一つ決める', '残っているのは中身の確認です', '今やる', '今夜', ['お弁当の中身を一つ決める', '玄関に置く'])],
+      声かけ例: '明日の持ち物、お弁当は俺が詰めるね。',
+      明日やること: '持ち物を一つ出す',
+      questions: [],
+      safety_flag: false,
+    }
+  }
+  return {
+    状況整理: '18時から20時は、風呂と寝かしつけが重なります。帰る時刻を先に一つ伝えます。',
+    気づき: '遅れることより、風呂をどちらがやるかが先です。',
+    一手: [step('帰る時刻を先に送る', '重なる時間を短くするには、時刻が先です', '事前に伝える', '今', ['着く時刻を送る', '風呂の担当を一つ決める'])],
+    声かけ例: '19時までには帰るね。今夜の風呂、お願いできる？残りは俺がやる。',
+    明日やること: '風呂の担当を一つ決める',
     questions: [],
     safety_flag: false,
   }

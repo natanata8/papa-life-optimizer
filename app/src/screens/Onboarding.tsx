@@ -25,13 +25,9 @@ export function Onboarding() {
 
       {ob.step === 0 ? (
         <div className="pt-6">
-          <h1 className="text-[28px] leading-tight font-bold">
-            t<span className="text-accent">ONE</span>
-            <span className="ml-1 text-[13px] font-normal text-faint">（仮）</span>
-          </h1>
-          <p className="mt-3 text-[15px] leading-relaxed">
-            迷った時に、<b>次の一手</b>と<b>パートナーへの伝え方</b>を出す相談相手です。
-          </p>
+          <h1 className="text-[28px] leading-tight font-bold">ハレゴト</h1>
+          <p className="mt-3 text-[15px] leading-relaxed">パパの家のことを、晴れごとに</p>
+          <p className="mt-2 text-[13px] leading-relaxed text-muted">見えない家事・育児を、晴れた気持ちで回ることに</p>
           <p className="mt-2 text-[13px] leading-relaxed text-muted">
             登録なし・メールアドレス不要・パートナーの登録も不要。
             <br />
@@ -41,7 +37,7 @@ export function Onboarding() {
             はじめる
           </Button>
           <button type="button" className="mx-auto mt-3 block min-h-11 px-3 py-2 text-[13px] text-muted" onClick={() => store.setOb({ step: 5 })}>
-            あとで答える → すぐ相談する
+            あとで答える → 予報士に聞く
           </button>
         </div>
       ) : null}

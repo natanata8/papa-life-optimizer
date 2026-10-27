@@ -102,7 +102,7 @@ export function Profile() {
       </div>
       <p className="mt-1 text-[11px] leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
 
-      <h2 className="mt-4 text-sm font-bold">tONEが覚えていること</h2>
+      <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       {data.memories.length === 0 ? (
         <p className="mt-2 text-[13px] text-muted">まだありません。</p>
       ) : (

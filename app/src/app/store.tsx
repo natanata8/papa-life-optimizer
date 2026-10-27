@@ -54,6 +54,7 @@ export type Sheet =
   | { type: 'addNice' }
   | { type: 'children'; editId?: string; image?: boolean }
   | { type: 'quick' }
+  | { type: 'forecast'; slotId: string }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -100,6 +101,7 @@ type StoreValue = {
   answerFlow: (option: string) => void
   skipLazy: () => void
   sendText: (text: string) => void
+  askForecast: (text: string) => void
   retryConsult: (retry: ConsultRetry) => void
   startOwnHome: () => void
   newChat: () => void
@@ -688,6 +690,31 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       setFlow({ scene, answers: [], lazy, care })
     },
+    askForecast: (text) => {
+      const trimmed = text.trim()
+      const current = dataRef.current
+      if (!trimmed || !current || pending) return
+      if (safetyLevel(trimmed) === 'stop') {
+        commit({
+          ...current,
+          chat: [
+            ...current.chat,
+            { id: uid(), role: 'me', text: trimmed },
+            { id: uid(), role: 'bot', text: HOTLINE_MESSAGE, safety: 'stop', selfHarm: isSelfHarm(trimmed) },
+          ],
+        })
+        setSheet(null)
+        setTab('consult')
+        setFlow(null)
+        return
+      }
+      const next = { ...current, chat: [...current.chat, { id: uid(), role: 'me' as const, text: trimmed }] }
+      commit(next)
+      setSheet(null)
+      setTab('consult')
+      setFlow(null)
+      void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: 'オウチ予報' })
+    },
     retryConsult: (retry) => {
       const current = dataRef.current
       if (!current || pending) return
@@ -895,7 +922,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         memories: [{ id: uid(), date: todayRef.current, text }, ...current.memories].slice(0, 30),
       })
       setSheet(null)
-      showToast('tONEが覚えました')
+      showToast('ハレゴトが覚えました')
     },
     deleteStep: (id) => {
       const current = dataRef.current

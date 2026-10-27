@@ -3,15 +3,18 @@
 @theme {
   --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
     Meiryo, sans-serif;
-  --color-sand: #efe9e1;
-  --color-paper: #faf7f2;
+  --color-sand: #f3eadf;
+  --color-paper: #fffaf4;
   --color-ink: #2c2a28;
   --color-muted: #736b63;
   --color-faint: #a59c92;
-  --color-line: #e0d6cc;
-  --color-accent: #d9825b;
-  --color-accent-deep: #a8552f;
-  --color-accent-soft: #fbeee6;
+  --color-line: #eadfce;
+  --color-accent: #9a5414;
+  --color-accent-deep: #8a4510;
+  --color-accent-soft: #fff1d6;
+  --color-sun: #fff4df;
+  --color-rain: #e7f1f8;
+  --color-rain-ink: #1a4f78;
   --color-inv: #fffbf0;
   --color-inv-ink: #6b5a2a;
   --color-inv-line: #c9a227;
@@ -23,7 +26,7 @@
   --color-step-ink: #8a3f1d;
   --color-good: #e3efe3;
   --color-good-ink: #3d6b3d;
-  --color-meh: #f0ebe5;
+  --color-meh: #f3eee6;
   --color-lazy: #f1f6f1;
   --color-lazy-ink: #3d6b3d;
 }

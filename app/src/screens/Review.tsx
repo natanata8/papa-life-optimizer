@@ -60,7 +60,7 @@ export function Review() {
           </div>
         </>
       ) : null}
-      <h2 className="mt-4 text-sm font-bold">tONEが覚えていること</h2>
+      <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       {data.memories.length === 0 ? (
         <p className="mt-2 text-[13px] text-muted">まだありません。一手のあと、2タップするとここに残ります。</p>
       ) : (

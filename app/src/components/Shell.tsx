@@ -100,10 +100,7 @@ function AuthScreen() {
   return (
     <Frame>
       <div className="px-5 pt-16">
-        <h1 className="text-2xl font-bold">
-          t<span className="text-accent">ONE</span>
-          <span className="ml-1 text-xs font-normal text-faint">（仮）</span>
-        </h1>
+        <h1 className="text-2xl font-bold">ハレゴト</h1>
         <p className="mt-3 text-sm leading-relaxed">
           この環境は Supabase に保存します。メールのリンクで入れます。パートナーの登録は要りません。
         </p>

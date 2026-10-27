@@ -22,7 +22,7 @@ export function noticeFor(
     return {
       kind: 'card',
       time: '7:30',
-      body: `昨日の一手「${pending[0].title}」、どうでした？（2タップ）`,
+      body: '昨日の夕方、晴れにできた？',
       target: 'review',
     }
   }

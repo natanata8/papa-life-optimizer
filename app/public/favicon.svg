@@ -1,4 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#d9825b"/>
-  <text x="32" y="44" text-anchor="middle" font-family="Georgia, serif" font-size="36" font-weight="700" fill="#fff">t</text>
+  <rect width="64" height="64" rx="16" fill="#fffaf4"/>
+  <g fill="#9a5414" transform="translate(32 32)">
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(0)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(45)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(90)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(135)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(180)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(225)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(270)"/>
+    <rect x="-2.2" y="-28" width="4.4" height="12" rx="2" transform="rotate(315)"/>
+  </g>
+  <circle cx="32" cy="32" r="11" fill="#e0a04a"/>
 </svg>

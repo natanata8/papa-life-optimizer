@@ -15,7 +15,7 @@ export function googleCalendarUrl(title: string, date: string, time: string, det
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: `【一手】${title}`,
-    details: `tONE（仮）の一手：${details}`,
+    details: `ハレゴトの一手：${details}`,
   })
   return `https://calendar.google.com/calendar/render?${params.toString()}&dates=${dates}`
 }
@@ -31,10 +31,10 @@ export function downloadIcs(title: string, date: string, time: string): void {
   const body = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//tONE//JA',
+    'PRODID:-//ハレゴト//JA',
     'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
-    `UID:${crypto.randomUUID()}@tone`,
+    `UID:${crypto.randomUUID()}@haregoto`,
     `DTSTAMP:${compact}T000000`,
     start,
     `SUMMARY:【一手】${title.replace(/\n/g, ' ')}`,
@@ -44,7 +44,7 @@ export function downloadIcs(title: string, date: string, time: string): void {
   const link = document.createElement('a')
   const url = URL.createObjectURL(new Blob([body], { type: 'text/calendar' }))
   link.href = url
-  link.download = 'tone-ippo.ics'
+  link.download = 'haregoto-ippo.ics'
   link.click()
   URL.revokeObjectURL(url)
 }

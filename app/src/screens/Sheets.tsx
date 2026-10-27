@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
+import { forecastFor } from '@/domain/forecastView.ts'
 import { SceneGrid } from '@/components/SceneGrid.tsx'
 import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
@@ -34,6 +35,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'addNice') return <AddNiceSheet />
   if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} image={sheet.image} />
   if (sheet.type === 'quick') return <QuickSheet />
+  if (sheet.type === 'forecast') return <ForecastSheet slotId={sheet.slotId} />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
@@ -64,7 +66,7 @@ function AddSheet({ id }: { id: string }) {
       </div>
       <Option
         icon="📅"
-        title="tONEのカレンダーに入れる"
+        title="ハレゴトのカレンダーに入れる"
         note="翌日に「どうだった？」と聞きます"
         onClick={() => saveAnd()}
       />
@@ -535,6 +537,30 @@ function ResetSheet() {
       </Button>
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
+      </Button>
+    </div>
+  )
+}
+
+function ForecastSheet({ slotId }: { slotId: string }) {
+  const store = useStore()
+  const data = store.data
+  if (!data) return null
+  const slot = forecastFor(data, store.today).slots.find((item) => item.id === slotId)
+  if (!slot || slot.sky === '晴れ') return null
+  return (
+    <div data-testid="forecast-sheet">
+      <p className="text-xs font-bold text-muted">オウチ予報・予報</p>
+      <p className="mt-1 text-base font-bold">
+        {slot.range} {slot.sky}
+      </p>
+      <p className="mt-2 text-[14px] leading-relaxed">{slot.reason}</p>
+      <p className="mt-2 text-[13px] leading-relaxed text-muted">人の気持ちではなく、この時間に家の仕事が重なっている、という見立てです。</p>
+      <Button className="mt-3 min-h-11" size="lg" data-testid="forecast-sheet-ask" onClick={() => store.askForecast(slot.prompt)}>
+        傘 {slot.umbrella}
+      </Button>
+      <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
+        閉じる
       </Button>
     </div>
   )

@@ -27,7 +27,7 @@ export function Consult() {
     <div className={`px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-28'}`}>
       <DemoBar />
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">相談</h1>
+        <h1 className="text-lg font-bold">予報士</h1>
         {data.chat.length > 0 ? (
           <Button size="sm" variant="ghost" onClick={store.newChat}>
             新しい相談
@@ -36,7 +36,7 @@ export function Consult() {
       </div>
       {data.chat.length === 0 ? (
         <>
-          <p className="mt-1 text-[13px] text-muted">迷った瞬間に開いてください。次の一手と伝え方を出します。</p>
+          <p className="mt-1 text-[13px] text-muted">家の時間の負荷を見て、次の一手と伝え方を出します。</p>
           <div className="mt-3">
             <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id, true)} />
           </div>

@@ -26,6 +26,7 @@ import { addMinutes } from '@/domain/dates.ts'
 import { ChildToday } from '@/screens/today/ChildToday.tsx'
 import { MessageComposer } from '@/screens/today/MessageComposer.tsx'
 import { NiceEvents } from '@/screens/today/NiceEvents.tsx'
+import { ForecastCard } from '@/screens/today/ForecastCard.tsx'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
 
 const TASK_IDS: Record<InvItem['def'], string> = {
@@ -64,14 +65,10 @@ export function Home() {
   const info = returnInfo(data.profile.home)
   const clock = store.mode === '帰宅前' && info ? info.open : meta.time
   const where = store.mode === '帰宅前' && info ? `${meta.where}（帰宅の目安 ${info.back}）` : meta.where
-  const pending = data.steps
-    .filter((step) => step.date < store.today && !step.status)
-    .sort((a, b) => b.date.localeCompare(a.date))
   const todaySteps = data.steps.filter((step) => step.date === store.today)
   const todayInvisible = invisibleOn(store.today, data.profile, data.events, data.hidden, store.today)
   const notice = noticeFor(store.mode, store.today, data.profile, data.events, data.steps, data.hidden)
   const cards = buildCards(store.mode, {
-    pending,
     todaySteps,
     todayInvisible,
     events: data.events,
@@ -93,6 +90,7 @@ export function Home() {
           {meta.sub}
         </b>
       </p>
+      <ForecastCard />
       <h2 className="mt-3 text-sm font-bold" data-testid="today-tasks">
         やること
       </h2>
@@ -115,7 +113,7 @@ export function Home() {
       ) : null}
       {cards.length === 0 ? (
         <div className="mt-2 rounded-[14px] bg-white p-3" data-testid="home-empty">
-          <p className="text-[13px] leading-relaxed">まだ予定がありません。迷ったら「すぐ相談」から1つ選んでください。</p>
+          <p className="text-[13px] leading-relaxed">まだ予定がありません。迷ったら右下から、予報士に聞いてください。</p>
           <button
             type="button"
             className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-3 text-sm font-bold text-white"
@@ -150,7 +148,6 @@ export function Home() {
 function buildCards(
   mode: keyof typeof MODE_META,
   input: {
-    pending: Step[]
     todaySteps: Step[]
     todayInvisible: InvItem[]
     events: FamEvent[]
@@ -159,7 +156,6 @@ function buildCards(
     hidden: Record<string, true>
   },
 ): CardModel[] {
-  const review = input.pending[0]
   const stepsCard: CardModel | null = input.todaySteps.length
     ? {
         key: 'steps',
@@ -168,20 +164,10 @@ function buildCards(
         actions: <CalendarButton />,
       }
     : null
-  const reviewCard: CardModel | null = review
-    ? {
-        key: 'review',
-        anchor: 'review',
-        kicker: `${dayName(review.date, input.today)}の一手、どうでした？`,
-        title: review.title,
-        actions: <ReviewButtons stepId={review.id} />,
-      }
-    : null
 
   if (mode === '朝') {
     const upcoming = input.events.filter((event) => event.date === input.today || event.date === addDays(input.today, 1))
     return compact([
-      reviewCard,
       upcoming.length
         ? {
             key: 'plan',
@@ -205,7 +191,6 @@ function buildCards(
         actions: <SceneButton scene="nomi" label="🍻 飲み会に行きたい" />,
       },
       stepsCard,
-      reviewCard,
     ])
   }
 
@@ -224,7 +209,7 @@ function buildCards(
           <BeforeActions title={plan.title} line={plan.line} item={plan.item} time={info ? addMinutes(info.back, -15) : '19:30'} />
         ),
       },
-      stepsCard ?? reviewCard,
+      stepsCard,
     ])
   }
 
@@ -259,7 +244,7 @@ function buildCards(
         key: 'tired',
         kicker: '今日はどうだった？',
         title: 'しんどそうだったら、明日の朝の一手を1つ決めておきましょう',
-        actions: <SceneButton scene="tired" label="🌧 妻がしんどそう" ghost />,
+        actions: <SceneButton scene="tired" label="妻がしんどそうで気になる" ghost />,
       },
     ])
   }
@@ -273,7 +258,7 @@ function buildCards(
   return compact([
     {
       key: 'weekend',
-      kicker: '☀️ 週末どうする？',
+      kicker: '週末どうする？',
       title: 'ひとりでいられる時間をどこに置くか、先に決めると楽です',
       meta: weekendEvents.map((event) => `${dayName(event.date, input.today)}：${event.title}`).join(' / '),
       actions: <SceneButton scene="week" label="週末の一手を決める" />,
@@ -291,7 +276,6 @@ function buildCards(
           actions: <WeekButton />,
         }
       : null,
-    reviewCard,
   ])
 }
 
@@ -325,7 +309,7 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
       type="button"
       className="mb-2 flex w-full gap-2.5 rounded-2xl border border-[#eee] bg-white p-2.5 text-left shadow-md"
       onClick={() => {
-        if (notice.target === 'review') store.setTab('review')
+        if (notice.target === 'review') document.getElementById('forecast-review')?.scrollIntoView({ block: 'center' })
         if (notice.target === 'before') document.getElementById('before')?.scrollIntoView({ block: 'center' })
         if (notice.target === 'calendar') {
           store.setCal('day', store.today)
@@ -334,9 +318,9 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
         if (notice.target === 'weekend') store.beginScene('week', true)
       }}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-extrabold text-white">t</span>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun text-sm text-accent-deep" aria-hidden="true">☀</span>
       <span className="text-[13px] leading-snug">
-        <span className="block text-[10.5px] text-muted">tONE（仮）・{notice.time} 〈通知の見本・準備中〉</span>
+        <span className="block text-[10.5px] text-muted">ハレゴト・{notice.time} 〈通知の見本・準備中〉</span>
         {notice.body}
       </span>
     </button>
@@ -383,23 +367,6 @@ function EventButton({ id }: { id: string }) {
     >
       前後の段取り
     </Button>
-  )
-}
-
-function ReviewButtons({ stepId }: { stepId: string }) {
-  const store = useStore()
-  return (
-    <div className="flex w-full gap-2">
-      <Button className="flex-1" variant="good" onClick={() => store.setReview(stepId, 'good')}>
-        😊 うまくいった
-      </Button>
-      <Button className="flex-1" variant="meh" onClick={() => store.setReview(stepId, 'meh')}>
-        😐 微妙
-      </Button>
-      <Button size="sm" variant="ghost" onClick={() => store.setTab('review')}>
-        一覧
-      </Button>
-    </div>
   )
 }
 
