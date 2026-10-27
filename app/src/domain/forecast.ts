@@ -73,6 +73,8 @@ export type ForecastSlot = {
   noun: string
   /** 重なっている家の仕事の短い名前。 */
   bits: string[]
+  /** 引き受ける名詞の種類。表示用。判定には使わない。 */
+  kind: UmbrellaKind
 }
 
 export type Forecast = {
@@ -254,6 +256,7 @@ export function forecast(input: ForecastInput): Forecast {
       freedMin: FREED_MIN[lead.kind],
       noun: lead.kind === 'child' || lead.kind === 'prep' || lead.kind === 'event' ? lead.bit : acceptNoun(lead.kind),
       bits,
+      kind: lead.kind,
     }
   }
 
@@ -304,8 +307,12 @@ export function slotClock(slot: ForecastSlot): string {
   return `${start}〜${end}`
 }
 
+export function smallerUmbrella(kind: UmbrellaKind): string {
+  return UMBRELLAS[kind][1]
+}
+
 function emptySlot(id: ForecastSlotId): ForecastSlot {
-  return { id, label: id, range: RANGE[id], sky: '晴れ', call: '', reason: '', umbrella: '', prompt: '', stack: 0, lifted: false, note: '', freedMin: 0, noun: '', bits: [] }
+  return { id, label: id, range: RANGE[id], sky: '晴れ', call: '', reason: '', umbrella: '', prompt: '', stack: 0, lifted: false, note: '', freedMin: 0, noun: '', bits: [], kind: 'event' }
 }
 
 function bitFor(kind: UmbrellaKind, reason: string, fact: string): string {

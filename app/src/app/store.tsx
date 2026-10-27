@@ -58,6 +58,7 @@ export type Sheet =
   | { type: 'children'; editId?: string; image?: boolean }
   | { type: 'quick' }
   | { type: 'forecast'; slotId: string; date?: string }
+  | { type: 'cant'; date: string; slotId: string }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -111,6 +112,11 @@ type StoreValue = {
   openThread: (id: string) => void
   liftSlot: (date: string, slotId: string) => void
   dropLift: (date: string, slotId: string) => void
+  beginAccept: (date: string, slotId: string, line?: string, small?: boolean) => void
+  finishAccept: (date: string, slotId: string) => void
+  passAccept: (date: string, slotId: string) => void
+  deferAccept: (date: string, slotId: string) => void
+  clearAccept: (date: string, slotId: string) => void
   openSheet: (sheet: Sheet) => void
   closeSheet: () => void
   saveSuggestion: (id: string, date: string, time: string) => void
@@ -552,6 +558,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     finishOb: (scene) => {
       const current = dataRef.current
       if (!current) return
+      localStorage.setItem('tone-app:forecast-intro', '1')
       const labels = ob.ages.filter((age): age is AgeLabel => Boolean(age))
       const profile = {
         ...current.profile,
@@ -781,6 +788,45 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!current) return
       const key = `${date}|${slotId}`
       commit({ ...current, lifted: (current.lifted ?? []).filter((item) => item !== key) })
+    },
+    beginAccept: (date, slotId, line, small) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      const lifted = current.lifted ?? []
+      commit({
+        ...current,
+        lifted: small || lifted.includes(key) ? lifted : [...lifted, key],
+        accept: { ...(current.accept ?? {}), [key]: { phase: 'telling', line, small: Boolean(small) } },
+      })
+    },
+    finishAccept: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      const prev = current.accept?.[key]
+      if (!prev) return
+      commit({ ...current, accept: { ...current.accept, [key]: { ...prev, phase: 'done' } } })
+    },
+    passAccept: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      commit({ ...current, accept: { ...(current.accept ?? {}), [key]: { phase: 'passed' } } })
+    },
+    deferAccept: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      commit({ ...current, accept: { ...(current.accept ?? {}), [key]: { phase: 'later' } } })
+    },
+    clearAccept: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      const accept = { ...(current.accept ?? {}) }
+      delete accept[key]
+      commit({ ...current, lifted: (current.lifted ?? []).filter((item) => item !== key), accept })
     },
     openThread: (id) => {
       const current = dataRef.current

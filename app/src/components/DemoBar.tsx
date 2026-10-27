@@ -1,37 +1,74 @@
+import { useState } from 'react'
 import { demoOnly } from '@/domain/demo.ts'
 import { MODES } from '@/domain/types.ts'
 import { useStore } from '@/app/store.tsx'
 
-export function DemoBar() {
+export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; fold?: boolean }) {
   const store = useStore()
-  if (!store.demo) return null
+  const [open, setOpen] = useState(false)
+  if (!store.demo && !title) return null
   return (
-    <div className="mb-2 flex min-h-11 flex-nowrap items-center gap-1 overflow-x-auto rounded-[10px] bg-[#f0e8df] px-1.5 py-1 text-xs whitespace-nowrap text-muted" data-testid="sample-banner">
-      {store.ownHome ? null : <span className="pl-1 font-bold text-accent-deep">サンプル</span>}
-      <span className="pl-1">時間帯</span>
-      {MODES.map((mode) => (
-        <button
-          key={mode}
-          type="button"
-          data-testid={`mode-${mode}`}
-          className={
-            mode === store.mode
-              ? 'inline-flex min-h-11 items-center rounded-lg bg-ink px-1.5 text-xs text-white'
-              : 'inline-flex min-h-11 items-center rounded-lg bg-white px-1.5 text-xs text-[#6b625a]'
-          }
-          onClick={() => store.setMode(mode)}
-        >
-          {mode}
-        </button>
-      ))}
-      <button type="button" data-testid="demo-reset" className="inline-flex min-h-11 items-center rounded-lg bg-white px-1.5 text-xs text-[#6b625a]" onClick={store.reset}>
-        最初から
-      </button>
-      {demoOnly || store.ownHome ? null : (
-        <button type="button" data-testid="start-own" className="inline-flex min-h-11 items-center rounded-lg bg-accent-deep px-2 text-xs font-bold text-white" onClick={store.startOwnHome}>
-          自分の家で始める
-        </button>
-      )}
+    <div className={`relative mb-2 flex min-h-11 items-center gap-2 ${fold ? '' : ''}`} data-fold={fold ? 'bar' : undefined}>
+      {title ? <h1 className="min-w-0 text-base font-bold">{title}</h1> : null}
+      <div className="ml-auto flex min-w-0 items-center gap-1">
+        {store.demo && !store.ownHome ? <span className="shrink-0 rounded-full bg-accent-soft px-2 py-1 text-xs font-bold whitespace-nowrap text-accent-deep">サンプル</span> : null}
+        {meta ? <span className="truncate text-xs whitespace-nowrap text-muted">{meta}</span> : null}
+        {store.demo ? (
+          <button
+            type="button"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-base font-bold"
+            data-testid="demo-menu"
+            aria-expanded={open}
+            aria-label="メニュー"
+            onClick={() => setOpen((value) => !value)}
+          >
+            ⋯
+          </button>
+        ) : null}
+      </div>
+      {open ? (
+        <div className="absolute top-12 right-0 z-20 w-56 rounded-xl bg-white p-2 shadow-lg">
+          <p className="px-2 py-1 text-xs font-bold text-muted">時間帯</p>
+          {MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              data-testid={`mode-${mode}`}
+              className={`flex min-h-11 w-full items-center rounded-lg px-2 text-left text-sm ${mode === store.mode ? 'bg-ink font-bold text-white' : ''}`}
+              onClick={() => {
+                store.setMode(mode)
+                setOpen(false)
+              }}
+            >
+              {mode}
+            </button>
+          ))}
+          <button
+            type="button"
+            data-testid="demo-reset"
+            className="flex min-h-11 w-full items-center rounded-lg px-2 text-left text-sm"
+            onClick={() => {
+              setOpen(false)
+              store.reset()
+            }}
+          >
+            最初から
+          </button>
+          {demoOnly || store.ownHome ? null : (
+            <button
+              type="button"
+              data-testid="start-own"
+              className="flex min-h-11 w-full items-center rounded-lg px-2 text-left text-sm font-bold"
+              onClick={() => {
+                setOpen(false)
+                store.startOwnHome()
+              }}
+            >
+              自分の家で始める
+            </button>
+          )}
+        </div>
+      ) : null}
     </div>
   )
 }

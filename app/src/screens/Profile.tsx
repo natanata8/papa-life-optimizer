@@ -16,6 +16,7 @@ import {
   setShop,
   toggleGomi,
   toggleMulti,
+  isSet,
 } from '@/domain/profile.ts'
 import { AGES, GOMI_KINDS, type GomiKind, type School } from '@/domain/types.ts'
 
@@ -67,6 +68,11 @@ export function Profile() {
       <p className="mt-1 text-[13px] leading-relaxed text-muted">
         相談の答えと、カレンダーの 👀 に使います。わかるところだけでOK。{data.profile.partner}さんの登録は要りません。
       </p>
+      {(['gomi', 'school', 'shop'] as const).some((key) => !isSet(data.profile, key)) ? (
+        <p className="mt-2 rounded-xl bg-white px-3 py-2 text-[13px] leading-relaxed">
+          ゴミの日・園・学校・買い物の曜日を入れると、裏で回っている仕事がもっと見えます。
+        </p>
+      ) : null}
       {GROUPS.map((group) => (
         <section key={group}>
           <h2 className="mt-4 text-sm font-bold">{group}</h2>

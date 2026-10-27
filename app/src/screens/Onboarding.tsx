@@ -1,4 +1,5 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { AGES } from '@/domain/types.ts'
@@ -146,7 +147,10 @@ export function Onboarding() {
           <button type="button" className="mx-auto mt-3 block text-[13px] text-muted" onClick={() => store.finishOb(null)}>
             今はない → 今日の画面へ
           </button>
-          <p className="mt-4 text-center text-xs text-muted">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
+          <p className="mt-4 text-center text-sm leading-relaxed">
+            <Phrase text="予報は採点じゃなくて、備えるためのもの。" />
+          </p>
+          <p className="mt-2 text-center text-xs text-muted">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
         </div>
       ) : null}
     </div>

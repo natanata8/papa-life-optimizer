@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
 import { forecastFor } from '@/domain/forecastView.ts'
+import { smallerUmbrella } from '@/domain/forecast.ts'
 import { SceneGrid } from '@/components/SceneGrid.tsx'
 import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
@@ -36,6 +37,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} image={sheet.image} />
   if (sheet.type === 'quick') return <QuickSheet />
   if (sheet.type === 'forecast') return <ForecastSheet slotId={sheet.slotId} date={sheet.date} />
+  if (sheet.type === 'cant') return <CantSheet date={sheet.date} slotId={sheet.slotId} />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
@@ -538,6 +540,60 @@ function ResetSheet() {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
+    </div>
+  )
+}
+
+function CantSheet({ date, slotId }: { date: string; slotId: string }) {
+  const store = useStore()
+  const data = store.data
+  if (!data) return null
+  const cast = forecastFor(data, date, store.today)
+  const slot = cast.slots.find((item) => item.id === slotId)
+  if (!slot) return null
+  const smaller = smallerUmbrella(slot.kind)
+  const sendSmall = (line: string) => {
+    store.beginAccept(date, slotId, line, true)
+    store.closeSheet()
+  }
+  return (
+    <div data-testid="sheet-cant">
+      <h2 className="text-lg font-bold">大丈夫。小さい一手もあります</h2>
+      <p className="mt-1 text-sm leading-relaxed text-muted">今夜できそうなものを1つ選ぶか、今日はパスでOK。</p>
+      <button type="button" className="mt-3 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall(`今から帰るね。${smaller}`)}>
+        <span className="block text-sm font-bold">{smaller}</span>
+        <span className="mt-0.5 block text-xs text-muted">1分・送る文あり</span>
+      </button>
+      <button type="button" className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall('今から帰るね。何かいるものある？')}>
+        <span className="block text-sm font-bold">帰りに何かいるか聞く</span>
+        <span className="mt-0.5 block text-xs text-muted">1分・送る文あり</span>
+      </button>
+      <button
+        type="button"
+        className="mt-2 flex min-h-[60px] w-full items-center rounded-xl bg-white px-3 py-3 text-left"
+        onClick={() => {
+          store.askForecast(`${slot.prompt} 今日は引き受けられない。もっと小さい一手を一つ。`)
+          store.closeSheet()
+        }}
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-bold">予報士に、別の一手を相談</span>
+          <span className="mt-0.5 block text-xs text-muted">今夜の状況は入力済み</span>
+        </span>
+        <span aria-hidden="true" className="text-muted">›</span>
+      </button>
+      <button
+        type="button"
+        data-testid="cant-pass"
+        className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left"
+        onClick={() => {
+          store.passAccept(date, slotId)
+          store.closeSheet()
+        }}
+      >
+        <span className="block text-sm font-bold">今日はパスする</span>
+        <span className="mt-0.5 block text-xs text-muted">記録には残しません</span>
+      </button>
     </div>
   )
 }

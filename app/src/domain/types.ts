@@ -211,6 +211,14 @@ export type ConsultationRecord = {
   answer: ToneAnswer | null
 }
 
+export type AcceptPhase = 'telling' | 'done' | 'passed' | 'later'
+
+export type AcceptState = {
+  phase: AcceptPhase
+  line?: string
+  small?: boolean
+}
+
 export type Persisted = {
   version: 1
   onboarded: boolean
@@ -228,6 +236,8 @@ export type Persisted = {
   consultations: ConsultationRecord[]
   threads: ConsultThread[]
   lifted: string[]
+  /** 日付|時間帯 → 決めたあとの段階。パスは記録ではなく、その日の表示だけ。 */
+  accept: Record<string, AcceptState>
 }
 
 export const GOMI_KINDS: GomiKind[] = ['可燃', 'プラ', '資源']

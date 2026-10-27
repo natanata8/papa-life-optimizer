@@ -3,33 +3,23 @@ import { Phrase } from '@/components/Phrase.tsx'
 import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
-import { type ForecastSlotId } from '@/domain/forecast.ts'
+import { slotClock, type ForecastSlotId } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
-import { SHOW_WEEKLY_MARGIN, weekActionLine, weekSummaryLine } from '@/domain/freed.ts'
-import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf, weekdayChar } from '@/domain/dates.ts'
+import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf } from '@/domain/dates.ts'
 import { DAILY_TASKS, adoptedKeys, invisibleOn, type InvItem } from '@/domain/invisible.ts'
 import { partnerDay, type PartnerBlock } from '@/domain/partnerDay.ts'
-import { isSet } from '@/domain/profile.ts'
 import { childName } from '@/domain/childEvents.ts'
 import type { ChildEvent, FamEvent, Step } from '@/domain/types.ts'
-
-const HINTS: Record<string, string> = {
-  gomi: 'ゴミの日',
-  school: '園・学校',
-  shop: '買い物の曜日',
-}
 
 export function Calendar() {
   const store = useStore()
   const data = store.data
   if (!data) return null
-  const missing = ['gomi', 'school', 'shop'].filter((key) => !isSet(data.profile, key)).map((key) => HINTS[key])
 
   return (
     <div className="px-3.5 pt-3.5 pb-28" data-testid="calendar">
-      <DemoBar />
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">カレンダー</h1>
+      <DemoBar title="カレンダー" />
+      <div className="flex items-center justify-end">
         <div className="flex rounded-xl bg-[#f0e8df] p-0.5 text-xs font-bold">
           <button
             type="button"
@@ -49,19 +39,6 @@ export function Calendar() {
           </button>
         </div>
       </div>
-      {missing.length > 0 ? (
-        <button
-          type="button"
-          className="mt-2 w-full rounded-xl border border-inv-line bg-inv px-3 py-2 text-left text-[13px] leading-relaxed text-inv-ink"
-          onClick={() => store.setTab('profile')}
-        >
-          <Phrase text="👀 いまは予定から分かる段取りだけ出ています。" />
-          <b>
-            <Phrase text={missing.join('・')} />
-          </b>
-          <Phrase text="を入れると、裏で回っている仕事がもっと見えます。" />
-        </button>
-      ) : null}
       {store.cal === 'week' ? <Week /> : <Day />}
       <div className="mt-3 flex gap-2">
         <Button className="flex-1" size="lg" variant="ghost" onClick={() => store.openSheet({ type: 'addEvent' })}>
@@ -112,111 +89,106 @@ function Week() {
   const rows = days.map((date) => {
     const cast = forecastFor(data, date, store.today)
     const peak = cast.slots.find((slot) => slot.id === cast.peak) ?? null
-    const yama = Boolean(peak && !peak.lifted && (peak.sky === '注意報' || peak.sky === '警報'))
-    const child = data.childEvents.filter((event) => event.date === date).sort(byStart)[0]
-    const event = data.events.filter((item) => item.date === date).sort(byTime)[0]
-    const step = data.steps.filter((item) => item.date === date).sort(byTime)[0]
-    const main = child
-      ? `${childName(data.profile.kids, child.childId)} ${child.title}`.trim()
-      : event
-        ? event.title
-        : step
-          ? step.title
-          : ''
-    return { date, cast, peak, yama, main }
+    const key = peak ? `${date}|${peak.id}` : ''
+    const phase = key ? data.accept?.[key]?.phase : undefined
+    const open = Boolean(peak && !peak.lifted && (peak.sky === '注意報' || peak.sky === '警報') && date >= store.today && !phase)
+    return { date, cast, peak, open }
   })
-  const yamaRows = rows.filter((row) => row.yama && row.peak)
-  const yamaLabel = yamaRows.map((row) => `${weekdayChar(row.date)}の${row.peak?.id}`).join('と')
-  const marginTotal = yamaRows.reduce((sum, row) => sum + (row.peak?.freedMin ?? 0), 0)
+  const openRows = rows.filter((row) => row.open && row.peak)
 
   return (
     <div data-testid="week-view">
       <DateBar
-        label={`${formatMd(store.weekStart)} 〜 ${formatMd(addDays(store.weekStart, 6))}`}
+        label={`${formatMd(store.weekStart)}〜${formatMd(addDays(store.weekStart, 6))}`}
         prevLabel="前の週"
         nextLabel="次の週"
         onPrev={() => store.shiftWeek(-1)}
         onNext={() => store.shiftWeek(1)}
       />
-      <div className="rounded-xl bg-margin-wash px-3 py-2 text-sm leading-relaxed">
-        <p className="font-bold">
-          <Phrase text={yamaLabel ? `今週の山場は ${yamaLabel}` : '今週の山場はありません'} />
-        </p>
-        {SHOW_WEEKLY_MARGIN && yamaRows.length > 0 ? (
-          <p className="mt-1">
-            <Phrase text={weekSummaryLine(yamaRows.length, marginTotal)} />
-          </p>
-        ) : null}
-      </div>
-      <div className="mt-2 divide-y divide-line overflow-hidden rounded-xl bg-white">
+      <div className="mt-2 grid grid-cols-7 gap-1">
         {rows.map((row) => {
           const dow = dowIndex(row.date)
           const peak = row.peak
-          const sky = !row.cast.known ? 'none' : peak && peak.sky !== '晴れ' ? peak.sky : '晴れ'
-          const heading = weekHeading(row.cast.known, peak)
-          const second =
-            row.yama && peak
-              ? weekActionLine(peak.noun, peak.freedMin)
-              : row.cast.known && row.cast.freeFrom
-                ? `余白：${row.cast.freeFrom}以降`
-                : row.cast.known && row.cast.quiet
-                  ? '余白：夜はまるごと'
-                  : ''
+          const known = row.cast.known
+          const sky = !known ? 'none' : peak && peak.sky !== '晴れ' ? peak.sky : '晴れ'
+          const label = !known ? '予報なし' : peak?.lifted ? '解除' : peak?.call || sky
           return (
-            <div key={row.date} className={`flex gap-2 px-2 py-2 ${row.date === store.today ? 'bg-watch/40' : ''}`}>
-              <button
-                type="button"
-                data-testid={`cal-date-${row.date}`}
-                className={`flex w-12 shrink-0 flex-col items-center justify-center rounded-lg ${dow === 0 ? 'text-[#b3261e]' : dow === 6 ? 'text-margin' : ''}`}
-                onClick={() => store.setCal('day', row.date)}
-              >
-                <span className="text-xs">{row.date === store.today ? '今日' : DOW_CHARS[dow]}</span>
-                <span className="text-xl leading-none font-bold">{Number(row.date.slice(8))}</span>
-              </button>
-              <button
-                type="button"
-                data-testid={`cal-sky-${row.date}`}
-                aria-label={!row.cast.known ? '予報なし' : peak?.lifted ? '解除' : peak?.call || (sky === 'none' ? '予報なし' : sky)}
-                className="inline-flex min-h-11 w-9 shrink-0 items-center justify-center"
-                onClick={() => {
-                  if (!row.cast.known || !peak || peak.sky === '晴れ') {
-                    store.setCal('day', row.date)
-                    return
-                  }
-                  store.openSheet({ type: 'forecast', slotId: peak.id, date: row.date })
-                }}
-              >
-                <SkyMark sky={sky} size={28} lifted={Boolean(peak?.lifted)} />
-              </button>
-              <button type="button" className="min-w-0 flex-1 py-1 text-left" onClick={() => store.setCal('day', row.date)}>
-                <p className="flex flex-wrap items-center gap-1 text-[15px] leading-snug font-bold">
-                  <span>
-                    <Phrase text={heading} />
-                  </span>
-                  {row.yama && peak ? <LevelBadge sky={peak.sky} call={peak.sky} lifted={false} /> : null}
-                </p>
-                {second ? (
-                  <p className="mt-0.5 text-sm leading-snug text-margin">
-                    <Phrase text={second} />
-                  </p>
-                ) : null}
-                {row.main ? <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{row.main}</p> : null}
-              </button>
-            </div>
+            <button
+              key={row.date}
+              type="button"
+              data-testid={`cal-date-${row.date}`}
+              className={`flex min-h-11 flex-col items-center rounded-xl py-1 ${row.date === store.today ? 'bg-watch/50' : ''} ${dow === 0 ? 'text-[#b3261e]' : dow === 6 ? 'text-margin' : ''}`}
+              onClick={() => store.setCal('day', row.date)}
+            >
+              <span className="text-xs">{DOW_CHARS[dow]}</span>
+              <span className="text-base leading-none font-bold">{Number(row.date.slice(8))}</span>
+              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-6 items-center justify-center">
+                {known ? <SkyMark sky={sky} size={24} lifted={Boolean(peak?.lifted)} /> : <span className="h-1.5 w-1.5 rounded-full bg-muted" />}
+              </span>
+            </button>
           )
         })}
       </div>
+      <h2 className="mt-4 text-sm font-bold">今週、決めること {openRows.length}つ</h2>
+      <div className="mt-2 space-y-2">
+        {openRows.map((row) => {
+          const peak = row.peak
+          if (!peak) return null
+          const today = row.date === store.today
+          return (
+            <article key={row.date} className="rounded-[14px] bg-white p-3 shadow-sm">
+              <p className="flex flex-wrap items-center gap-1 text-xs font-bold">
+                <span className="whitespace-nowrap">{today ? `今日 ${formatMd(row.date)}` : formatMd(row.date)}</span>
+                <span className="whitespace-nowrap">{slotClock(peak)}</span>
+                <span className={`rounded-full px-2 py-0.5 whitespace-nowrap ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`}>{peak.sky}</span>
+              </p>
+              <p className="mt-2 text-base font-bold">
+                <Phrase text={`${peak.noun}を引き受ける？`} />
+              </p>
+              {peak.freedMin > 0 ? (
+                <p className="mt-1 text-sm">
+                  <Phrase text={`家に${peak.freedMin}分の余白（目安）`} />
+                </p>
+              ) : null}
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  data-testid={`week-accept-${row.date}`}
+                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-accent-deep text-sm font-bold text-white"
+                  onClick={() => store.beginAccept(row.date, peak.id)}
+                >
+                  引き受ける
+                </button>
+                {today ? (
+                  <button
+                    type="button"
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
+                    onClick={() => store.openSheet({ type: 'cant', date: row.date, slotId: peak.id })}
+                  >
+                    今日は無理
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    data-testid={`week-later-${row.date}`}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
+                    onClick={() => store.deferAccept(row.date, peak.id)}
+                  >
+                    あとで
+                  </button>
+                )}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+      <p className="mt-3 text-xs leading-relaxed text-muted">
+        <Phrase text="日付をタップすると、その日の予定と時間帯が見られます。" />
+        <Phrase text="妻の1日・推定もそこにあります。" />
+        <Phrase text="天気はつけません。" />
+      </p>
     </div>
   )
-}
-
-function weekHeading(known: boolean, peak: { id: string; sky: string; lifted: boolean } | null): string {
-  if (!known) return '予報なし'
-  if (!peak || peak.sky === '晴れ') return '晴れ'
-  if (peak.lifted) return 'くもり'
-  if (peak.sky === '注意報' || peak.sky === '警報') return `${peak.id}が山場`
-  if (peak.sky === 'にわか雨') return `${peak.id}がいそがしい`
-  return 'くもり'
 }
 
 function Day() {

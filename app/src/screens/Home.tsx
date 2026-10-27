@@ -1,13 +1,10 @@
 import type { ReactNode } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
-import { Phrase } from '@/components/Phrase.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
 import { addDays, dayName, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import { beforeLeaving, invisibleOn, SLOT_TIME, type InvItem } from '@/domain/invisible.ts'
-import { forecastFor } from '@/domain/forecastView.ts'
-import { noticeFor } from '@/domain/notify.ts'
 import {
   FIELDS,
   LAZY_WHY,
@@ -66,12 +63,8 @@ export function Home() {
   const meta = MODE_META[store.mode]
   const info = returnInfo(data.profile.home)
   const clock = store.mode === '帰宅前' && info ? info.open : meta.time
-  const where = meta.where
   const todaySteps = data.steps.filter((step) => step.date === store.today)
   const todayInvisible = invisibleOn(store.today, data.profile, data.events, data.hidden, store.today)
-  const cast = forecastFor(data, store.today)
-  const pendingReview = data.steps.some((step) => step.date < store.today && !step.status)
-  const notice = noticeFor(data.profile, pendingReview, cast.quiet, cast.headline)
   const cards = buildCards(store.mode, {
     todaySteps,
     todayInvisible,
@@ -80,64 +73,35 @@ export function Home() {
     profile: data.profile,
     hidden: data.hidden,
   }).slice(0, 3)
-  const peak = cast.slots.find((slot) => slot.id === cast.peak)
-  const shownCards = cards
-    .filter((card) => {
-      if (cast.quiet) return true
-      if (card.key === 'before') return false
-      if (card.key === 'steps' && peak && /風呂|寝かしつけ/.test(card.title)) return false
-      return true
-    })
-    .slice(0, 2)
-  const line = shownCards.find((card) => card.line)?.line
+  const line = cards.find((card) => card.line)?.line
 
   return (
     <div className="px-3.5 pt-3.5 pb-28">
-      <DemoBar />
-      <div className="mt-1 flex items-baseline justify-between gap-2">
-        <p className="text-base font-bold">ハレゴト</p>
-        <p className="text-right text-xs leading-snug text-muted">
-          {formatMd(store.today)} {clock}・{where}
-        </p>
-      </div>
+      <DemoBar title="ハレゴト" meta={`${formatMd(store.today)} ${clock}`} fold />
       <ForecastCard />
-      <Notice notice={notice} />
-      {shownCards.length > 0 ? (
-        <h2 className="mt-4 text-sm font-bold" data-testid="today-tasks">
-          やること
-        </h2>
-      ) : null}
-      <div className="mt-2 space-y-2">
-        {shownCards.map((card) => (
-          <article
-            key={card.key}
-            id={card.anchor}
-            className={`rounded-[14px] p-3 shadow-sm ${card.tone === 'inv' ? 'border-[1.5px] border-dashed border-inv-line bg-inv' : 'bg-white'}`}
-          >
-            <p className={`text-xs font-bold ${card.tone === 'inv' ? 'text-inv-ink' : 'text-accent'}`}>{card.kicker}</p>
-            <p className="mt-0.5 text-[15px] leading-snug font-bold whitespace-pre-line">{card.title}</p>
-            {card.meta ? <p className="mt-1 text-xs leading-relaxed text-muted">{card.meta}</p> : null}
-            {card.actions ? <div className="mt-2 flex flex-wrap gap-1.5">{card.actions}</div> : null}
-          </article>
-        ))}
-      </div>
-      {line ? (
-        <p className="mt-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">送る文の例：「{line}」</p>
-      ) : null}
-      {cards.length === 0 ? (
-        <div className="mt-2 rounded-[14px] bg-white p-3" data-testid="home-empty">
-          <p className="text-[13px] leading-relaxed">まだ予定がありません。迷ったら右下から、予報士に聞いてください。</p>
-          <button
-            type="button"
-            className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-3 text-sm font-bold text-white"
-            onClick={() => store.openSheet({ type: 'quick' })}
-          >
-            💬 すぐ相談
-          </button>
-        </div>
-      ) : null}
-      <details className="mt-4" data-testid="today-more">
-        <summary className="min-h-11 py-2 text-sm font-bold">ほかの今日</summary>
+      <details className="mt-4" data-testid="today-more" data-fold="more">
+        <summary className="min-h-11 py-2 text-sm font-bold">ほかにできること</summary>
+        {cards.length > 0 ? (
+          <div className="mt-2 space-y-2">
+            {cards.map((card) => (
+              <article
+                key={card.key}
+                id={card.anchor}
+                className={`rounded-[14px] p-3 shadow-sm ${card.tone === 'inv' ? 'border-[1.5px] border-dashed border-inv-line bg-inv' : 'bg-white'}`}
+              >
+                <p className={`text-xs font-bold ${card.tone === 'inv' ? 'text-inv-ink' : 'text-accent'}`}>{card.kicker}</p>
+                <p className="mt-0.5 text-[15px] leading-snug font-bold whitespace-pre-line">{card.title}</p>
+                {card.meta ? <p className="mt-1 text-xs leading-relaxed text-muted">{card.meta}</p> : null}
+                {card.actions ? <div className="mt-2 flex flex-wrap gap-1.5">{card.actions}</div> : null}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-relaxed" data-testid="home-empty">
+            まだ予定がありません。予報士に、ひとことで聞けます。
+          </p>
+        )}
+        {line ? <p className="mt-2 rounded-xl bg-white px-3 py-2.5 text-[13px] leading-relaxed">送る文の例：「{line}」</p> : null}
         <ChildToday />
         <h2 className="mt-4 text-sm font-bold">あったらいいこと</h2>
         <NiceEvents />
@@ -145,18 +109,6 @@ export function Home() {
         <WeekendCard />
         <LazyQuestion />
       </details>
-      {store.sheet ? null : (
-        <div className="pointer-events-none fixed bottom-[calc(53px+12px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2">
-          <button
-            type="button"
-            data-testid="quick-open"
-            className="pointer-events-auto absolute right-3 bottom-0 inline-flex min-h-12 items-center rounded-full bg-accent-deep px-4 text-sm font-bold text-white shadow-md"
-            onClick={() => store.openSheet({ type: 'quick' })}
-          >
-            💬 すぐ相談
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -297,30 +249,6 @@ function buildCards(
 
 function compact(cards: (CardModel | null)[]): CardModel[] {
   return cards.filter((card): card is CardModel => Boolean(card))
-}
-
-function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
-  if (notice.kind === 'card' && notice.body === '昨日の夕方、晴れにできた？') return null
-  if (notice.kind === 'off') {
-    if (notice.text === '今日は通知しません') return null
-    return <p className="mb-2 text-center text-xs text-muted">🔕 {notice.text}</p>
-  }
-  return (
-    <button
-      type="button"
-      className="mb-2 flex w-full gap-2.5 rounded-2xl border border-[#eee] bg-white p-2.5 text-left shadow-md"
-      onClick={() => {
-        if (notice.target === 'review') document.getElementById('forecast-review')?.scrollIntoView({ block: 'center' })
-        if (notice.target === 'before') document.getElementById('before')?.scrollIntoView({ block: 'center' })
-      }}
-    >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun text-sm text-accent-deep" aria-hidden="true">☀</span>
-      <span className="text-[13px] leading-snug">
-        <span className="block text-xs text-muted">ハレゴト・{notice.time} 〈通知の見本・準備中〉</span>
-        <Phrase text={notice.body} />
-      </span>
-    </button>
-  )
 }
 
 function CalendarButton() {

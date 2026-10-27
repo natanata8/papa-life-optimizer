@@ -15,6 +15,7 @@ type ClientState = {
   usual?: string[]
   leaveAt?: string | null
   lifted?: string[]
+  accept?: Persisted['accept']
 }
 
 type FamilyRow = {
@@ -201,6 +202,7 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
     })),
     threads: blob.threads ?? [],
     lifted: blob.lifted ?? [],
+    accept: blob.accept ?? {},
   }
 }
 
@@ -225,6 +227,7 @@ async function writeFamily(
     usual: state.profile.usual,
     leaveAt: state.profile.leaveAt,
     lifted: state.lifted,
+    accept: state.accept,
   }
   const { error: familyError } = await client
     .from('families')

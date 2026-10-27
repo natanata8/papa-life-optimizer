@@ -9,7 +9,7 @@ export function SkyMark({
   label,
 }: {
   sky: Sky
-  size?: 26 | 28 | 44
+  size?: 24 | 26 | 28 | 44
   lifted?: boolean
   label?: string
 }) {
