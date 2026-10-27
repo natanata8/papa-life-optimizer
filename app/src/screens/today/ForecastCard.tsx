@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '@/app/store.tsx'
+import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { logUsage } from '@/data/usage.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
@@ -55,22 +56,7 @@ export function ForecastCard() {
           </div>
           <div className="mt-2 space-y-2">
             {busy.map((slot) => (
-              <div key={slot.id} className="rounded-xl bg-rain px-3 py-2 text-rain-ink">
-                <p className="text-[13px] leading-snug font-bold">
-                  {slot.range} {slot.sky}
-                </p>
-                <p className="mt-0.5 text-[13px] leading-snug" data-testid={`forecast-why-${slot.id}`}>
-                  なぜ {slot.reason}
-                </p>
-                <button
-                  type="button"
-                  data-testid={`forecast-ask-${slot.id}`}
-                  className="mt-1 inline-flex min-h-11 items-center text-left text-[13px] font-bold"
-                  onClick={() => store.askForecast(slot.prompt)}
-                >
-                  傘 {slot.umbrella}
-                </button>
-              </div>
+              <SlotDetail key={slot.id} slot={slot} />
             ))}
           </div>
         </>
@@ -97,12 +83,54 @@ export function ForecastCard() {
   )
 }
 
+function SlotDetail({ slot }: { slot: ForecastSlot }) {
+  const store = useStore()
+  const alert = slot.sky === '注意報' || slot.sky === '警報' || slot.lifted
+  const tone = slot.sky === '警報' ? 'bg-alert text-alert-ink' : slot.sky === '注意報' ? 'border-2 border-watch-ink bg-watch text-watch-ink' : 'bg-rain text-rain-ink'
+  return (
+    <div className={`rounded-xl px-3 py-2 ${slot.lifted ? 'bg-cloud text-cloud-ink' : tone}`} data-testid={`forecast-detail-${slot.id}`}>
+      <div className="flex items-center gap-2">
+        <SkyMark sky={slot.sky} lifted={slot.lifted} />
+        {slot.lifted ? <LevelBadge sky={slot.sky} call={slot.call} lifted /> : slot.call ? <LevelBadge sky={slot.sky} call={slot.call} lifted={false} /> : <p className="text-[13px] font-bold">{slot.range} {slot.sky}</p>}
+      </div>
+      {slot.note ? <p className="mt-1 text-[12px] leading-relaxed">{slot.note}</p> : null}
+      <p className="mt-0.5 text-[13px] leading-snug" data-testid={`forecast-why-${slot.id}`}>
+        なぜ {slot.reason}
+      </p>
+      <button type="button" data-testid={`forecast-ask-${slot.id}`} className="mt-1 inline-flex min-h-11 items-center text-left text-[13px] font-bold" onClick={() => store.askForecast(slot.prompt)}>
+        傘 {slot.umbrella}
+      </button>
+      {alert ? (
+        <div className="mt-1 flex flex-wrap gap-2">
+          <button type="button" data-testid={`forecast-consult-${slot.id}`} className="inline-flex min-h-11 items-center text-[13px] font-bold" onClick={() => store.askForecast(slot.prompt)}>
+            予報士に相談
+          </button>
+          {slot.lifted ? null : (
+            <button type="button" data-testid={`forecast-lift-${slot.id}`} className="inline-flex min-h-11 items-center text-[13px] font-bold" onClick={() => store.liftSlot(store.today, slot.id)}>
+              解除
+            </button>
+          )}
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 function SlotChip({ slot }: { slot: ForecastSlot }) {
   const store = useStore()
   const rainy = slot.sky !== '晴れ'
-  const className = `flex min-h-11 flex-col items-center justify-center rounded-xl px-1 text-[11px] leading-tight font-bold ${
-    rainy ? 'bg-rain text-rain-ink' : 'bg-sun text-accent-deep'
-  }`
+  const tone = slot.lifted
+    ? 'bg-cloud text-cloud-ink'
+    : slot.sky === '警報'
+      ? 'bg-alert text-alert-ink'
+      : slot.sky === '注意報'
+        ? 'border-2 border-watch-ink bg-watch text-watch-ink'
+        : slot.sky === 'くもり'
+          ? 'bg-cloud text-cloud-ink'
+          : rainy
+            ? 'bg-rain text-rain-ink'
+            : 'bg-sun text-accent-deep'
+  const className = `flex min-h-11 flex-col items-center justify-center rounded-xl px-1 text-[11px] leading-tight font-bold ${tone}`
   if (!rainy) {
     return (
       <div className={className} data-testid={`forecast-slot-${slot.id}`}>

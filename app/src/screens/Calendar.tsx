@@ -1,6 +1,9 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
+import { worstSky, type ForecastSlotId } from '@/domain/forecast.ts'
+import { forecastFor } from '@/domain/forecastView.ts'
 import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf } from '@/domain/dates.ts'
 import { DAILY_TASKS, adoptedKeys, invisibleOn, weekStats, type InvItem } from '@/domain/invisible.ts'
 import { partnerDay, type PartnerBlock } from '@/domain/partnerDay.ts'
@@ -142,17 +145,32 @@ function Week() {
           const laneKeys = new Set((lane?.blocks ?? []).map((block) => block.invisibleKey).filter((key): key is string => Boolean(key)))
           const shownInvisible = invisible.filter((item) => !laneKeys.has(item.key))
           const dow = dowIndex(date)
+          const cast = forecastFor(data, date, store.today)
+          const mark = worstSky(cast)
           return (
             <div key={date} className={`flex gap-2 rounded-xl bg-white p-1.5 ${date === store.today ? 'ring-2 ring-accent' : ''}`}>
-              <button
-                type="button"
-                data-testid={`cal-date-${date}`}
-                className={`w-11 shrink-0 rounded-lg py-1 text-center ${dow === 0 ? 'text-[#c4554a]' : dow === 6 ? 'text-[#3d6b9a]' : ''}`}
-                onClick={() => store.setCal('day', date)}
-              >
-                <span className="block text-[11px]">{date === store.today ? '今日' : DOW_CHARS[dow]}</span>
-                <span className="text-base font-bold">{Number(date.slice(8))}</span>
-              </button>
+              <div className="flex w-11 shrink-0 flex-col items-center">
+                <button
+                  type="button"
+                  data-testid={`cal-date-${date}`}
+                  className={`w-full rounded-lg py-1 text-center ${dow === 0 ? 'text-[#c4554a]' : dow === 6 ? 'text-[#3d6b9a]' : ''}`}
+                  onClick={() => store.setCal('day', date)}
+                >
+                  <span className="block text-[11px]">{date === store.today ? '今日' : DOW_CHARS[dow]}</span>
+                  <span className="text-base font-bold">{Number(date.slice(8))}</span>
+                </button>
+                {mark ? (
+                  <button
+                    type="button"
+                    data-testid={`cal-sky-${date}`}
+                    aria-label={mark.lifted ? '解除' : mark.call || mark.sky}
+                    className="inline-flex min-h-11 w-full items-center justify-center"
+                    onClick={() => store.openSheet({ type: 'forecast', slotId: mark.id, date })}
+                  >
+                    <SkyMark sky={mark.sky} lifted={mark.lifted} large />
+                  </button>
+                ) : null}
+              </div>
               <div className="min-w-0 flex-1 space-y-1">
                 {store.filters.ev ? events.map((event) => <EventPill key={event.id} event={event} />) : null}
                 {store.filters.child
@@ -205,6 +223,7 @@ function Day() {
   const steps = data.steps.filter((step) => step.date === store.day).sort(byTime)
   const invisible = invisibleOn(store.day, data.profile, data.events, data.hidden, store.today)
   const lane = store.filters.wife ? partnerDay(store.day, data.profile, data.events, data.childEvents, data.hidden, store.today) : null
+  const cast = forecastFor(data, store.day, store.today)
   const laneKeys = new Set((lane?.blocks ?? []).map((block) => block.invisibleKey).filter((key): key is string => Boolean(key)))
   const dadInvisible = invisible.filter((item) => !laneKeys.has(item.key))
   const adopted = adoptedKeys(data.steps)
@@ -255,9 +274,28 @@ function Day() {
         const slotInv = store.filters.inv ? dadInvisible.filter((item) => item.slot === slot) : []
         const slotWife = lane?.blocks.filter((block) => slotOf(block.time) === slot) ?? []
         if (!slotEvents.length && !slotChild.length && !slotSteps.length && !slotInv.length && !slotWife.length && slot === '終日') return null
+        const forecastId = forecastSlotId(slot)
+        const skySlot = forecastId ? cast.slots.find((item) => item.id === forecastId) : null
         return (
           <div key={slot} className="mt-2">
-            <p className="text-[11px] font-bold text-muted">{slot}</p>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-[11px] font-bold text-muted">{slot}</p>
+              {cast.known && skySlot && skySlot.sky !== '晴れ' ? (
+                <button
+                  type="button"
+                  data-testid={`cal-slot-${slot}`}
+                  className="inline-flex min-h-11 items-center gap-1"
+                  onClick={() => store.openSheet({ type: 'forecast', slotId: skySlot.id, date: store.day })}
+                >
+                  <SkyMark sky={skySlot.sky} lifted={skySlot.lifted} />
+                  {skySlot.lifted || skySlot.call ? (
+                    <LevelBadge sky={skySlot.sky} call={skySlot.call} lifted={skySlot.lifted} />
+                  ) : (
+                    <span className={`text-[11px] font-bold ${skySlot.sky === 'くもり' ? 'text-cloud-ink' : 'text-rain-ink'}`}>{skySlot.sky}</span>
+                  )}
+                </button>
+              ) : null}
+            </div>
             <div className={lane ? 'mt-1 grid grid-cols-2 items-start gap-1' : 'mt-1 space-y-1'}>
               <div className="space-y-1">
                 {slotEvents.map((event) => (
@@ -297,6 +335,12 @@ function Day() {
       </Button>
     </div>
   )
+}
+
+function forecastSlotId(slot: string): ForecastSlotId | null {
+  if (slot === '朝' || slot === '夕方' || slot === '夜') return slot
+  if (slot === '日中') return '昼'
+  return null
 }
 
 function DateBar({

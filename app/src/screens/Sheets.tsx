@@ -35,7 +35,7 @@ function SheetBody({ sheet }: { sheet: Sheet }) {
   if (sheet.type === 'addNice') return <AddNiceSheet />
   if (sheet.type === 'children') return <ChildSheet editId={sheet.editId} image={sheet.image} />
   if (sheet.type === 'quick') return <QuickSheet />
-  if (sheet.type === 'forecast') return <ForecastSheet slotId={sheet.slotId} />
+  if (sheet.type === 'forecast') return <ForecastSheet slotId={sheet.slotId} date={sheet.date} />
   if (sheet.type === 'step') return <StepSheet id={sheet.id} />
   if (sheet.type === 'reason') return <ReasonSheet stepId={sheet.stepId} status={sheet.status} />
   if (sheet.type === 'notif') return <NotifSheet />
@@ -542,25 +542,45 @@ function ResetSheet() {
   )
 }
 
-function ForecastSheet({ slotId }: { slotId: string }) {
+function ForecastSheet({ slotId, date }: { slotId: string; date?: string }) {
   const store = useStore()
   const data = store.data
   if (!data) return null
-  const slot = forecastFor(data, store.today).slots.find((item) => item.id === slotId)
-  if (!slot || slot.sky === '晴れ') return null
+  const day = date ?? store.today
+  const cast = forecastFor(data, day, store.today)
+  const slot = cast.slots.find((item) => item.id === slotId)
+  if (!cast.known || !slot) return null
+  const alert = slot.sky === '注意報' || slot.sky === '警報' || slot.lifted
   return (
     <div data-testid="forecast-sheet">
       <p className="text-xs font-bold text-muted">オウチ予報・予報</p>
       <p className="mt-1 text-base font-bold">
-        {slot.range} {slot.sky}
+        {slot.lifted ? '解除' : slot.call || `${slot.range} ${slot.sky}`}
       </p>
-      <p className="mt-2 text-[14px] leading-relaxed" data-testid="forecast-why">
-        なぜ {slot.reason}
-      </p>
+      {slot.note ? <p className="mt-1 text-[13px] leading-relaxed">備えておけば大丈夫</p> : null}
+      {slot.reason ? (
+        <p className="mt-2 text-[14px] leading-relaxed" data-testid="forecast-why">
+          なぜ {slot.reason}
+        </p>
+      ) : (
+        <p className="mt-2 text-[14px] leading-relaxed">この時間は晴れ。特に重ねるものは見えていません。</p>
+      )}
       <p className="mt-2 text-[13px] leading-relaxed text-muted">人の気持ちではなく、この時間に家の仕事が重なっている、という見立てです。</p>
-      <Button className="mt-3 min-h-11" size="lg" data-testid="forecast-sheet-ask" onClick={() => store.askForecast(slot.prompt)}>
-        傘 {slot.umbrella}
-      </Button>
+      {slot.umbrella ? (
+        <Button className="mt-3 min-h-11" size="lg" data-testid="forecast-sheet-ask" onClick={() => store.askForecast(slot.prompt)}>
+          傘 {slot.umbrella}
+        </Button>
+      ) : null}
+      {alert ? (
+        <Button className="mt-2 min-h-11" size="lg" variant="ghost" data-testid="forecast-sheet-consult" onClick={() => store.askForecast(slot.prompt)}>
+          予報士に相談
+        </Button>
+      ) : null}
+      {alert && !slot.lifted ? (
+        <Button className="mt-2 min-h-11" size="lg" variant="quiet" data-testid="forecast-sheet-lift" onClick={() => store.liftSlot(day, slot.id)}>
+          解除
+        </Button>
+      ) : null}
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         閉じる
       </Button>

@@ -17,6 +17,7 @@ function read(): Persisted | null {
       niceEvents: parsed.niceEvents ?? [],
       childEvents: parsed.childEvents ?? [],
       threads: parsed.threads ?? [],
+      lifted: parsed.lifted ?? [],
       profile: {
         ...parsed.profile,
         usual: parsed.profile.usual ?? [],

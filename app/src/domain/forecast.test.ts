@@ -4,6 +4,20 @@ import { forecast, noticeBody, type ForecastInput } from './forecast.ts'
 
 const banned = /妻|雷|機嫌|家は雨|家族は|気分/
 
+function alertDay(): ForecastInput {
+  return base({
+    returnAt: '20:00',
+    overtime: true,
+    lane: [
+      { time: '10:00', title: '食事の見守り' },
+      { time: '12:00', title: '昼寝の見守り' },
+      { time: '15:00', title: 'おやつ' },
+    ],
+    childEvents: [{ date: '2026-10-26', startTime: '10:00', allDay: false, title: '避難訓練', items: [] }],
+    steps: [{ date: '2026-10-25', time: '21:00', title: '買い物', status: 'meh' }],
+  })
+}
+
 function base(patch: Partial<ForecastInput> = {}): ForecastInput {
   return {
     today: '2026-10-26',
@@ -65,14 +79,14 @@ test('忙しい枠は2つまで。残りは晴れ', () => {
   assert.equal(result.slots.length, 4)
 })
 
-test('明日の遠足の持ち物は夜のもよう', () => {
+test('明日の遠足の持ち物は夜のくもり', () => {
   const result = forecast(
     base({
       childEvents: [{ date: '2026-10-27', startTime: '', allDay: true, title: '遠足', items: ['お弁当', '水筒'] }],
     }),
   )
   const night = result.slots.find((slot) => slot.id === '夜')
-  assert.equal(night?.sky, 'もよう')
+  assert.equal(night?.sky, 'くもり')
   assert.match(night?.reason ?? '', /遠足の持ち物/)
   assert.match(night?.reason ?? '', /お弁当/)
 })
@@ -148,6 +162,58 @@ test('通知の見本は、雨の枠かふりかえり待ちだけ', () => {
   assert.equal(noticeBody(true, false, 'だいたい晴れ'), null)
   assert.equal(noticeBody(true, true, 'だいたい晴れ'), '昨日の夕方、晴れにできた？')
   assert.equal(noticeBody(false, false, 'だいたい晴れ・18〜20時にわか雨'), 'だいたい晴れ・18〜20時にわか雨')
+  assert.equal(noticeBody(false, false, 'だいたい晴れ・18〜20時寝かしつけ注意報'), 'だいたい晴れ・18〜20時寝かしつけ注意報')
+  assert.equal(noticeBody(false, false, 'だいたい晴れ・18〜20時寝かしつけ警報'), 'だいたい晴れ・18〜20時寝かしつけ警報')
+})
+
+const nameBan = /妻|嫁|イライラ|家庭内|機嫌|雷/
+
+test('晩と残業が重なると寝かしつけ注意報', () => {
+  const result = forecast(base({ returnAt: '20:00', overtime: true }))
+  const evening = result.slots.find((slot) => slot.id === '夕方')
+  assert.equal(evening?.sky, '注意報')
+  assert.equal(evening?.call, '寝かしつけ注意報')
+  assert.match(evening?.reason ?? '', /／/)
+  assert.ok(evening?.umbrella)
+  assert.equal(evening?.note, '備えておけば大丈夫')
+  assert.equal(nameBan.test(evening?.call ?? ''), false)
+  assert.equal(result.slots.filter((slot) => slot.sky === '警報').length, 0)
+})
+
+test('残業と子どもの予定と重い日中と、昨日の微妙が揃うと警報は一つ', () => {
+  const result = forecast(alertDay())
+  const alerts = result.slots.filter((slot) => slot.sky === '警報')
+  assert.equal(alerts.length, 1)
+  assert.equal(alerts[0]?.call, '寝かしつけ警報')
+  assert.match(alerts[0]?.reason ?? '', /／/)
+  assert.ok(alerts[0]?.umbrella)
+  assert.equal(nameBan.test(JSON.stringify(result)), false)
+})
+
+test('条件が落ちた翌日は警報にしない', () => {
+  const next = forecast(
+    base({
+      today: '2026-10-27',
+      returnAt: '20:00',
+      overtime: true,
+      priorAlert: true,
+      childEvents: [{ date: '2026-10-27', startTime: '10:00', allDay: false, title: '健診', items: [] }],
+    }),
+  )
+  assert.equal(next.slots.some((slot) => slot.sky === '警報'), false)
+})
+
+test('同じ条件が翌日も揃えば警報が続いてよい', () => {
+  const next = forecast({ ...alertDay(), today: '2026-10-27', priorAlert: true, childEvents: [{ date: '2026-10-27', startTime: '10:00', allDay: false, title: '健診', items: [] }], steps: [{ date: '2026-10-26', time: '21:00', title: '買い物', status: 'meh' }] })
+  assert.equal(next.slots.filter((slot) => slot.sky === '警報').length, 1)
+})
+
+test('解除すると警報を下ろして解除と出す', () => {
+  const result = forecast({ ...alertDay(), liftedSlots: ['夕方'] })
+  const evening = result.slots.find((slot) => slot.id === '夕方')
+  assert.equal(evening?.lifted, true)
+  assert.notEqual(evening?.sky, '警報')
+  assert.match(result.headline, /解除/)
 })
 
 test('育休で家にいる日は、遅い帰宅の雨を足さない', () => {

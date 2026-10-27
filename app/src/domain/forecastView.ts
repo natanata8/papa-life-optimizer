@@ -1,10 +1,20 @@
-import { forecast, type Forecast, type ForecastInput } from '@/domain/forecast.ts'
+import { forecast, unknownForecast, type Forecast, type ForecastInput, type ForecastSlotId } from '@/domain/forecast.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { Persisted } from '@/domain/types.ts'
 
-export function forecastFor(data: Persisted, today: string): Forecast {
-  return forecast(forecastInput(data, today))
+export function forecastFor(data: Persisted, date: string, today = date): Forecast {
+  const future = date > today
+  const has =
+    data.events.some((event) => event.date === date) ||
+    data.childEvents.some((event) => event.date === date) ||
+    data.steps.some((event) => event.date === date)
+  if (future && !has) return unknownForecast(date)
+  const input = forecastInput(data, date)
+  input.liftedSlots = (data.lifted ?? [])
+    .filter((key) => key.startsWith(`${date}|`))
+    .map((key) => key.slice(date.length + 1) as ForecastSlotId)
+  return forecast(input)
 }
 
 export function forecastInput(data: Persisted, today: string): ForecastInput {

@@ -5,7 +5,7 @@
 
 export type ForecastSlotId = '朝' | '昼' | '夕方' | '夜'
 
-export type ForecastSky = '晴れ' | 'もよう' | 'にわか雨'
+export type ForecastSky = '晴れ' | 'くもり' | 'にわか雨' | '注意報' | '警報'
 
 export type ForecastEvent = {
   date: string
@@ -46,6 +46,10 @@ export type ForecastInput = {
   lane: ForecastLane[]
   overtime: boolean
   steps: ForecastStep[]
+  /** この日付の枠を、本人が備えて解除した。 */
+  liftedSlots?: ForecastSlotId[]
+  /** 前日が警報だった。条件が揃わない翌日は警報にしない。 */
+  priorAlert?: boolean
 }
 
 export type ForecastSlot = {
@@ -53,19 +57,32 @@ export type ForecastSlot = {
   label: string
   range: string
   sky: ForecastSky
+  /** 寝かしつけ注意報 のように、家の仕事の名前。晴れ・くもり・にわか雨は空。 */
+  call: string
   reason: string
   umbrella: string
   prompt: string
+  stack: number
+  lifted: boolean
+  note: string
 }
 
 export type Forecast = {
   date: string
   estimate: true
+  known: boolean
   quiet: boolean
   line: string
   headline: string
   slots: ForecastSlot[]
   cleared: number
+}
+
+const SKY_RANK: Record<ForecastSky, number> = { 晴れ: 0, くもり: 1, にわか雨: 2, 注意報: 3, 警報: 4 }
+
+export function worstSky(cast: Forecast): ForecastSlot | null {
+  if (!cast.known) return null
+  return [...cast.slots].sort((a, b) => SKY_RANK[b.sky] - SKY_RANK[a.sky] || Number(a.lifted) - Number(b.lifted))[0] ?? null
 }
 
 const ORDER: ForecastSlotId[] = ['朝', '昼', '夕方', '夜']
@@ -92,7 +109,7 @@ const UMBRELLAS: Record<UmbrellaKind, [string, string]> = {
   leave: ['家を出る前に、送りを一つ決める', '出る時刻を一言送る'],
 }
 
-type Load = {
+type Source = {
   weight: number
   reason: string
   fact: string
@@ -103,24 +120,24 @@ type Load = {
 }
 
 export function forecast(input: ForecastInput): Forecast {
-  const loads = new Map<ForecastSlotId, Load>()
+  const loads = new Map<ForecastSlotId, Source[]>()
   const add = (id: ForecastSlotId, weight: number, reason: string, fact: string, kind: UmbrellaKind, range = RANGE[id]) => {
     if (weight <= 0 || !reason.trim() || !fact.trim()) return
-    const current = loads.get(id)
-    const umbrella = pickUmbrella(kind, input.steps)
-    if (!current || weight > current.rank) {
-      loads.set(id, {
-        weight: (current?.weight ?? 0) + weight,
-        reason,
-        fact,
-        umbrella,
-        range,
-        rank: weight,
-        kind,
-      })
+    const list = loads.get(id) ?? []
+    const current = list.find((item) => item.kind === kind)
+    if (!current) {
+      list.push({ weight, reason, fact, umbrella: pickUmbrella(kind, input.steps), range, rank: weight, kind })
+      loads.set(id, list)
       return
     }
     current.weight += weight
+    if (weight > current.rank) {
+      current.reason = reason
+      current.fact = fact
+      current.range = range
+      current.rank = weight
+      current.umbrella = pickUmbrella(kind, input.steps)
+    }
   }
 
   const usualBath = input.usual.some((item) => item === 'お風呂' || item === '寝かしつけ')
@@ -133,7 +150,7 @@ export function forecast(input: ForecastInput): Forecast {
   }
 
   if (input.overtime && input.kidCount > 0) {
-    add('夕方', 2, 'お風呂と寝かしつけが重なる', '残業の記録あり', 'overtime', '18–20時')
+    add('夕方', 2, '残業が風呂の時間に重なる', '残業の記録あり', 'overtime', '18–20時')
   }
 
   for (const event of input.events) {
@@ -183,43 +200,129 @@ export function forecast(input: ForecastInput): Forecast {
   }
 
   if (input.steps.some((step) => step.date === input.today && /風呂|寝かしつけ/.test(step.title))) {
-    const evening = loads.get('夕方')
-    if (evening) evening.weight = Math.max(0, evening.weight - 1)
+    for (const source of loads.get('夕方') ?? []) {
+      if (source.kind === 'bath' || source.kind === 'overtime') source.weight = Math.max(0, source.weight - 1)
+    }
   }
 
   const tie = { 夕方: 0, 夜: 1, 朝: 2, 昼: 3 }
   const ranked = [...loads.entries()]
-    .filter(([, load]) => load.weight > 0)
-    .sort((a, b) => b[1].weight - a[1].weight || tie[a[0]] - tie[b[0]])
+    .map(([id, sources]) => ({ id, sources: sources.filter((source) => source.weight > 0) }))
+    .filter((item) => item.sources.length > 0)
+    .sort((a, b) => weightOf(b.sources) - weightOf(a.sources) || b.sources.length - a.sources.length || tie[a.id] - tie[b.id])
     .slice(0, 2)
-  const busy = new Map(ranked)
+  const alertId = pickAlertSlot(input, ranked)
+  const lifted = new Set(input.liftedSlots ?? [])
 
-  const slots: ForecastSlot[] = ORDER.map((id) => {
-    const load = busy.get(id)
-    if (!load) {
-      return { id, label: id, range: RANGE[id], sky: '晴れ', reason: '', umbrella: '', prompt: '' }
+  const slots: ForecastSlot[] = ORDER.map((id) => emptySlot(id))
+  for (const item of ranked) {
+    const lead = [...item.sources].sort((a, b) => b.rank - a.rank)[0]
+    if (!lead) continue
+    const why = `${item.sources.map((source) => source.reason).join('、')}／${item.sources.map((source) => source.fact).join('・')}`
+    if (!why.includes('／')) continue
+    let sky = skyFromSources(item.sources)
+    if (item.id === alertId) sky = '警報'
+    const isLifted = lifted.has(item.id) || clearedByStep(input, lead.kind)
+    if (isLifted && (sky === '注意報' || sky === '警報')) sky = 'くもり'
+    const call = sky === '注意報' || (item.id === alertId && !isLifted) ? levelName(lead.kind, item.id, input.today, sky === '注意報' ? '注意報' : '警報') : ''
+    const shownSky: ForecastSky = item.id === alertId && !isLifted ? '警報' : sky
+    const prompt = `オウチ予報です。${lead.range}は${call || shownSky}。家の負荷の予報で、人の気持ちではありません。なぜ：${why}。傘は「${lead.umbrella}」。この枠を短くする一手を一つ。`
+    slots[ORDER.indexOf(item.id)] = {
+      id: item.id,
+      label: item.id,
+      range: lead.range,
+      sky: shownSky,
+      call: isLifted ? '' : call,
+      reason: why,
+      umbrella: lead.umbrella,
+      prompt,
+      stack: item.sources.length,
+      lifted: isLifted && (skyFromSources(item.sources) === '注意報' || item.id === alertId),
+      note: item.id === alertId || skyFromSources(item.sources) === '注意報' ? '備えておけば大丈夫' : '',
     }
-    const why = `${load.reason}／${load.fact}`
-    if (!why.includes('／') || !load.fact.trim()) {
-      return { id, label: id, range: RANGE[id], sky: '晴れ', reason: '', umbrella: '', prompt: '' }
-    }
-    const sky: ForecastSky = load.weight >= 2 ? 'にわか雨' : 'もよう'
-    const prompt = `オウチ予報です。${load.range}は${sky}。家の負荷の予報で、人の気持ちではありません。なぜ：${why}。傘は「${load.umbrella}」。この枠を短くする一手を一つ。`
-    return { id, label: id, range: load.range, sky, reason: why, umbrella: load.umbrella, prompt }
-  })
+  }
 
   const shown = slots.filter((slot) => slot.sky !== '晴れ')
   const quiet = shown.length === 0
-  const headline = quiet ? QUIET_LINE : `だいたい晴れ・${shown.map((slot) => `${slot.range.split('–').join('〜')}${slot.sky}`).join('・')}`
+  const headline = quiet
+    ? QUIET_LINE
+    : `だいたい晴れ・${shown
+        .map((slot) => {
+          const range = slot.range.split('–').join('〜')
+          if (slot.lifted) return `${range}は解除`
+          return slot.call || `${range}${slot.sky}`
+        })
+        .join('・')}`
   return {
     date: input.today,
     estimate: true,
+    known: true,
     quiet,
     line: quiet ? QUIET_LINE : '',
     headline,
     slots,
     cleared: input.steps.filter((step) => step.status === 'good').length,
   }
+}
+
+export function unknownForecast(date: string): Forecast {
+  return {
+    date,
+    estimate: true,
+    known: false,
+    quiet: true,
+    line: '',
+    headline: '',
+    slots: ORDER.map((id) => emptySlot(id)),
+    cleared: 0,
+  }
+}
+
+function emptySlot(id: ForecastSlotId): ForecastSlot {
+  return { id, label: id, range: RANGE[id], sky: '晴れ', call: '', reason: '', umbrella: '', prompt: '', stack: 0, lifted: false, note: '' }
+}
+
+function weightOf(sources: Source[]): number {
+  return sources.reduce((sum, source) => sum + source.weight, 0)
+}
+
+function skyFromSources(sources: Source[]): ForecastSky {
+  if (sources.length >= 2) return '注意報'
+  if (sources.some((source) => source.weight >= 2)) return 'にわか雨'
+  if (sources.length === 1) return 'くもり'
+  return '晴れ'
+}
+
+function pickAlertSlot(input: ForecastInput, ranked: { id: ForecastSlotId; sources: Source[] }[]): ForecastSlotId | null {
+  if (ranked.length === 0 || !alertCombo(input)) return null
+  if (input.priorAlert && !alertCombo(input)) return null
+  return ranked[0]?.id ?? null
+}
+
+function alertCombo(input: ForecastInput): boolean {
+  const childToday = input.childEvents.some((event) => event.date === input.today && event.title.trim())
+  const laneHeavy = input.lane.length >= 3
+  const mehYesterday = input.steps.some((step) => step.date === addDays(input.today, -1) && step.status === 'meh')
+  return input.overtime && childToday && laneHeavy && mehYesterday && !input.dadHome
+}
+
+function clearedByStep(input: ForecastInput, kind: UmbrellaKind): boolean {
+  return input.steps.some((step) => step.date === input.today && step.status === 'good' && matchesKind(kind, step.title))
+}
+
+function levelName(kind: UmbrellaKind, slot: ForecastSlotId, today: string, sky: '注意報' | '警報'): string {
+  const weekend = [0, 6].includes(utcDay(today))
+  if (weekend && sky === '警報') return '週末ワンオペ警報'
+  if (kind === 'leave' || slot === '朝') return sky === '警報' ? '朝の支度警報' : '朝の支度注意報'
+  if (kind === 'prep') return `持ち物${sky}`
+  if (kind === 'pickup') return `迎え${sky}`
+  if (kind === 'child') return `段取り${sky}`
+  return sky === '警報' ? '寝かしつけ警報' : '寝かしつけ注意報'
+}
+
+function utcDay(ymd: string): number {
+  const [year, month, day] = ymd.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day)).getUTCDay()
 }
 
 export function noticeBody(quiet: boolean, pendingReview: boolean, headline: string): string | null {

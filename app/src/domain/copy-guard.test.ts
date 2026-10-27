@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 
-const weather = /晴れ|くもり|曇|にわか|もよう|雷|☔|☀|☁|⛅|🌧|⛈|🌦|🌩|🌈/
+const weather = /晴れ|くもり|曇|にわか|もよう|雷|注意報|警報|☔|☀|☁|⛅|🌧|⛈|🌦|🌩|🌈/
 
 const files = [
   new URL('./scenes.ts', import.meta.url),
@@ -20,6 +20,13 @@ test('妻のそばに天気の言葉も絵文字も置かない', () => {
       assert.equal(weather.test(line), false, `${file.pathname}: ${line.trim()}`)
     }
   }
+})
+
+test('注意報と警報の名前は家の仕事', () => {
+  const source = readFileSync(new URL('./forecast.ts', import.meta.url), 'utf8')
+  const names = source.match(/'[^'\n]*(?:注意報|警報)[^'\n]*'/g) ?? []
+  assert.ok(names.length >= 4)
+  for (const name of names) assert.equal(/妻|嫁|イライラ|家庭内|機嫌/.test(name), false, name)
 })
 
 test('妻がしんどそうの場面アイコンは天気にしない', () => {

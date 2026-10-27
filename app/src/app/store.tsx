@@ -57,7 +57,7 @@ export type Sheet =
   | { type: 'addNice' }
   | { type: 'children'; editId?: string; image?: boolean }
   | { type: 'quick' }
-  | { type: 'forecast'; slotId: string }
+  | { type: 'forecast'; slotId: string; date?: string }
   | { type: 'step'; id: string }
   | { type: 'reason'; stepId: string; status: 'good' | 'meh' }
   | { type: 'notif' }
@@ -109,6 +109,7 @@ type StoreValue = {
   startOwnHome: () => void
   newChat: () => void
   openThread: (id: string) => void
+  liftSlot: (date: string, slotId: string) => void
   openSheet: (sheet: Sheet) => void
   closeSheet: () => void
   saveSuggestion: (id: string, date: string, time: string) => void
@@ -764,6 +765,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const next = archiveChat(current, todayRef.current)
       commit({ ...next, chat: [] })
       setFlow(null)
+    },
+    liftSlot: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      const lifted = current.lifted ?? []
+      if (lifted.includes(key)) return
+      commit({ ...current, lifted: [...lifted, key] })
     },
     openThread: (id) => {
       const current = dataRef.current

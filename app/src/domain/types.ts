@@ -227,6 +227,7 @@ export type Persisted = {
   dismiss: Record<string, true>
   consultations: ConsultationRecord[]
   threads: ConsultThread[]
+  lifted: string[]
 }
 
 export const GOMI_KINDS: GomiKind[] = ['可燃', 'プラ', '資源']
