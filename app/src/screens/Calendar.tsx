@@ -133,8 +133,8 @@ function Week() {
             >
               <span className="text-xs">{DOW_CHARS[dow]}</span>
               <span className="text-base leading-none font-bold">{Number(row.date.slice(8))}</span>
-              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-4 items-center justify-center">
-                {known && !peak?.lifted ? <WeatherDot sky={sky} /> : <span className="h-1.5 w-1.5 rounded-full bg-faint" />}
+              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-4 w-4 items-center justify-center">
+                {known && !peak?.lifted ? <WeatherDot sky={sky} /> : <span className="inline-block h-4 w-4 rounded-full border-2 border-dashed border-muted" />}
               </span>
             </button>
           )
@@ -160,7 +160,7 @@ function Week() {
                 <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
                   <Icon name={titleIcon(peak.noun)} size={16} />
                 </span>
-                {peak.noun}
+                <Phrase text={peak.noun} />
               </p>
               {taken ? (
                 <p className="mt-1 text-sm">✓ 引き受けた・やるに入っています</p>
@@ -172,8 +172,8 @@ function Week() {
               <div className="mt-2 flex justify-end">
                 {taken ? (
                   <button type="button" className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-[#f3eee6] px-4 text-sm font-bold" onClick={() => store.setTab('do')}>
-                    <Icon name="chevron" size={14} />
                     開く
+                    <Icon name="chevron" size={14} />
                   </button>
                 ) : (
                   <button

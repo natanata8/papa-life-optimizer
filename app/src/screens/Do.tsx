@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon, ProgressRing } from '@/components/icons.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { firstUnchecked, listLabel, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
 import { taskIcon } from '@/domain/taskIcon.ts'
@@ -68,7 +69,9 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
             <Icon name={taskIcon(id)} size={22} />
           </span>
-          <span className="min-w-0">{rowTitle(id, ages, ensoku)}</span>
+          <span className="min-w-0">
+            <Phrase text={rowTitle(id, ages, ensoku)} />
+          </span>
         </h2>
         <p className="text-xs whitespace-nowrap text-muted">
           {label.start}〜 約{label.minutes}分
@@ -91,7 +94,8 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
               </span>
               <span className="min-w-0">
                 <span className={`block text-sm font-bold ${on ? 'text-muted line-through' : ''}`}>
-                  {plusMinutes(at, step.offsetMin ?? 0)} {stepLabel(step, ages)}
+                  <span className="whitespace-nowrap">{plusMinutes(at, step.offsetMin ?? 0)} </span>
+                  <Phrase text={stepLabel(step, ages)} />
                 </span>
                 <span className="block text-xs text-muted">約{step.minutes}分</span>
                 {step.tip && !on ? <span className="mt-1 block rounded-lg bg-[#fff6e4] px-2 py-1 text-xs leading-relaxed text-watch-ink">{step.tip}</span> : null}
@@ -154,7 +158,9 @@ function Focus({
       <p className="mt-3 text-sm font-bold text-margin">
         {rowTitle(id, ages, ensoku)} {index + 1}/{flat.length}
       </p>
-      <h2 className="mt-2 text-[26px] leading-snug font-bold">{stepLabel(current.step, ages)}</h2>
+      <h2 className="mt-2 text-[26px] leading-snug font-bold">
+        <Phrase text={stepLabel(current.step, ages)} />
+      </h2>
       <p className="mt-1 text-sm text-muted">
         {plusMinutes(at, current.step.offsetMin ?? 0)} ・ 約{current.step.minutes}分
       </p>
@@ -179,7 +185,13 @@ function Focus({
           とばす
         </button>
       </div>
-      {next ? <p className="mt-3 text-xs text-muted">次：{stepLabel(next.step, ages)}（{next.step.minutes}分）</p> : <p className="mt-3 text-sm font-bold">今夜はこれでOK</p>}
+      {next ? (
+        <p className="mt-3 text-xs text-muted">
+          次：<Phrase text={`${stepLabel(next.step, ages)}（${next.step.minutes}分）`} />
+        </p>
+      ) : (
+        <p className="mt-3 text-sm font-bold">今夜はこれでOK</p>
+      )}
     </article>
   )
 }

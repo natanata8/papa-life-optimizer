@@ -1,4 +1,5 @@
 import { Icon } from '@/components/icons.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { SCENE_LIST } from '@/domain/scenes.ts'
 import { sceneIcon } from '@/domain/taskIcon.ts'
 import type { SceneId } from '@/domain/types.ts'
@@ -17,7 +18,9 @@ export function SceneGrid({ onPick, testPrefix }: { onPick: (id: SceneId) => voi
           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
             <Icon name={sceneIcon(scene.id)} size={20} />
           </span>
-          <span className="line-clamp-2">{scene.title}</span>
+          <span>
+            <Phrase text={scene.title} />
+          </span>
         </button>
       ))}
     </div>

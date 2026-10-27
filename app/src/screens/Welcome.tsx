@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BubbleSketch, FlowSketch, Icon, StepSketch } from '@/components/icons.tsx'
+import { BubbleSketch, Icon, StepSketch } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 
@@ -72,12 +72,39 @@ export function Welcome() {
   )
 }
 
+const SAMPLE_ROWS = [
+  { at: '19:40', title: 'お風呂', hot: false },
+  { at: '20:30', title: '寝かしつけ', hot: true },
+  { at: '21:00', title: '明日の持ち物', hot: true },
+]
+
 function Picture({ page }: { page: number }) {
-  const art = page === 1 ? <StepSketch /> : page === 2 ? <BubbleSketch /> : <FlowSketch />
+  if (page === 0) return <SampleFlow />
   return (
-    <div className="mt-4" aria-hidden="true">
-      {art}
+    <div className="mt-4">
+      <div aria-hidden="true">{page === 1 ? <StepSketch /> : <BubbleSketch />}</div>
       <p className="mt-2 text-center text-xs font-bold text-muted">見本（押せません）</p>
+    </div>
+  )
+}
+
+function SampleFlow() {
+  return (
+    <div className="hare-card mt-4 p-3">
+      <p className="text-xs font-bold text-muted">見本（押せません）</p>
+      <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-watch-ink">
+        <Icon name="cloud" size={16} className="text-cloud-ink" />
+        <span className="rounded-full bg-watch-tag px-1.5 py-0.5">注意報</span>
+        <span className="whitespace-nowrap">20〜22時</span>
+      </p>
+      <div className="mt-2 space-y-1.5">
+        {SAMPLE_ROWS.map((row) => (
+          <div key={row.at} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-bold ${row.hot ? 'border-l-4 border-watch-line bg-watch/60' : ''}`}>
+            <span className="w-12 shrink-0 whitespace-nowrap">{row.at}</span>
+            <Phrase text={row.title} />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

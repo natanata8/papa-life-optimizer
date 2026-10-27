@@ -44,6 +44,19 @@ export function nextDow(today: string, dow: number): string {
   return cursor
 }
 
+/** 「20〜22時」に時刻が入るか。終わりの時刻は含まない。 */
+export function hourInRange(time: string, label: string): boolean {
+  const match = label.match(/(\d{1,2})〜(\d{1,2})/)
+  if (!match || !/^\d{2}:\d{2}$/.test(time)) return false
+  const start = Number(match[1]) * 60
+  let end = Number(match[2]) * 60
+  const [hour, minute] = time.split(':').map(Number)
+  const at = hour * 60 + minute
+  if (end <= start) end += 24 * 60
+  const point = at < start ? at + 24 * 60 : at
+  return point >= start && point < end
+}
+
 export function formatMd(ymd: string): string {
   const date = parseYmd(ymd)
   return `${date.getMonth() + 1}/${date.getDate()}(${DOW[date.getDay()]})`

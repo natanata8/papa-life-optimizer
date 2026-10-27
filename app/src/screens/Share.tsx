@@ -58,25 +58,22 @@ export function ShareScreen() {
         <span className="w-11" />
       </div>
       <h2 className="mt-3 text-[25px] leading-snug font-bold">{heading}</h2>
-      <div className="mt-3 rounded-2xl bg-[#dfe7ea] px-3 py-4">
-        <div className="ml-8 rounded-2xl rounded-tr-md bg-[#d9fdd3] px-3 py-2 text-sm leading-relaxed shadow-sm">
-          <Phrase text={text || '送る文がここに出ます'} />
-        </div>
-      </div>
       <label className="mt-3 block text-xs text-muted" htmlFor="share-line">
         送る文（編集できます）
       </label>
-      <textarea
-        id="share-line"
-        data-testid="share-line"
-        className="mt-1 w-full rounded-xl bg-[#f7f1e8] px-3 py-2 text-sm leading-relaxed"
-        rows={4}
-        value={text}
-        onChange={(event) => {
-          setDirty(true)
-          setText(event.target.value)
-        }}
-      />
+      <div className="mt-1 rounded-2xl bg-[#dfe7ea] px-3 py-3">
+        <textarea
+          id="share-line"
+          data-testid="share-line"
+          className="ml-8 block w-[calc(100%-2rem)] resize-none rounded-2xl rounded-tr-md border-0 bg-[#d9fdd3] px-3 py-2 text-sm leading-relaxed shadow-sm outline-none"
+          rows={4}
+          value={text}
+          onChange={(event) => {
+            setDirty(true)
+            setText(event.target.value)
+          }}
+        />
+      </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {PRONOUNS.map((item) => (
           <button
@@ -190,7 +187,7 @@ export function PartnerPreview() {
               {withExtra.map((step) => (
                 <li key={step.id} className="flex items-center gap-2 text-sm">
                   <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${item.checked.includes(step.id) ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4]'}`}>{item.checked.includes(step.id) ? <Icon name="check" size={12} /> : ''}</span>
-                  {step.title}
+                  <Phrase text={step.title} />
                 </li>
               ))}
             </ul>

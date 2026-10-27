@@ -2,7 +2,7 @@ import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
-import { formatMd } from '@/domain/dates.ts'
+import { formatMd, hourInRange } from '@/domain/dates.ts'
 import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import { returnInfo } from '@/domain/profile.ts'
@@ -37,7 +37,7 @@ export function Home() {
   const warning = Boolean(peak && (peak.sky === '注意報' || peak.sky === '警報'))
   const bits = (peak?.bits ?? []).map((bit) => (ensoku && /弁当|持/.test(bit) ? '明日の遠足の持ち物' : bit))
   const overlap = warning && peak ? overlapLine(slotClock(peak), bits) : ''
-  const hot = new Set<RoutineId>(warning ? ['bath', 'bedtime', 'tomorrow', 'dinnerClean'] : [])
+  const windowLabel = warning && peak ? slotClock(peak) : ''
   const recommended = peak ? routineForPeak(peak.noun, peak.kind) : null
   const ids = tonightIds(store.mode)
   const taken = data.taken?.[store.today] ?? []
@@ -74,9 +74,9 @@ export function Home() {
       {shared ? <p className="mt-1 text-sm font-bold text-margin" data-testid="tonight-shared">共有済み</p> : null}
       {warning && peak && overlap ? (
         <p className={`mt-3 flex min-w-0 items-start gap-2 rounded-2xl px-3 py-2 text-sm font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="warning">
-          <Icon name={peak.sky === '警報' ? 'alert' : 'warning'} size={18} className="mt-0.5 shrink-0" />
+          <Icon name="cloud" size={16} className={`mt-0.5 shrink-0 ${peak.sky === '警報' ? 'text-alert-ink' : 'text-cloud-ink'}`} />
+          <span className={`inline-flex h-6 shrink-0 items-center rounded-full px-1.5 text-xs ${peak.sky === '警報' ? 'bg-white text-alert-ink' : 'bg-watch-tag text-watch-ink'}`}>{peak.sky}</span>
           <span className="min-w-0 flex-1">
-            <span className="mr-1 whitespace-nowrap">{peak.sky}</span>
             <Phrase text={overlap} />
           </span>
         </p>
@@ -90,8 +90,9 @@ export function Home() {
         {rows.map((row, index) => {
           const on = Boolean(row.item)
           const finishedRow = Boolean(on && row.item && routineDone(row.item, ages, ensoku))
-          const band = hot.has(row.id)
+          const band = Boolean(windowLabel && hourInRange(row.start, windowLabel))
           const bandColor = peak?.sky === '警報' ? 'bg-alert-line' : 'bg-watch-line'
+          const bandEdge = peak?.sky === '警報' ? 'border-alert-line' : 'border-watch-line'
           return (
             <div key={row.id} className="flex items-stretch gap-2" data-fold={`row-${index}`}>
               <div className="relative w-11 shrink-0">
@@ -105,22 +106,19 @@ export function Home() {
                 >
                   {finishedRow ? <Icon name="check" size={10} /> : null}
                 </span>
-                {band && (index === 0 || !hot.has(rows[index - 1].id)) ? (
-                  <span aria-hidden="true" className={`absolute top-6 -right-1 z-10 flex h-4 w-4 items-center justify-center rounded-full ${peak?.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`}>
-                    <Icon name={peak?.sky === '警報' ? 'alert' : 'warning'} size={11} />
-                  </span>
-                ) : null}
               </div>
-              <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${band ? 'ring-1 ring-watch-line/70' : ''}`}>
+              <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${band ? `border-l-4 ${bandEdge}` : ''}`}>
                 <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${on ? 'bg-accent-deep text-white' : 'bg-sand text-ink'}`}>
                   <Icon name={taskIcon(row.id)} size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
-                    <span>{rowTitle(row.id, ages, ensoku)}</span>
+                    <Phrase text={rowTitle(row.id, ages, ensoku)} />
                     {row.id === recommended ? <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
                   </p>
-                  <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)}</p>
+                  <p className="text-xs text-muted">
+                    <Phrase text={rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)} />
+                  </p>
                 </div>
                 <button
                   type="button"

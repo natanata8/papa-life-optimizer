@@ -73,3 +73,31 @@ export function phraseChunks(text: string): string[] {
   if (tail) chunks.push(tail)
   return chunks.filter((chunk) => chunk.length > 0)
 }
+
+const LABEL_PARTICLE = new Set(['の', 'を', 'に', 'で', 'へ', 'と', 'は', 'や'])
+const LABEL_MAX = 8
+
+/** 短い見出しを、助詞のあとでだけ折る。一文字だけを次の行に送らない。 */
+export function labelChunks(text: string): string[] {
+  return phraseChunks(text).flatMap((chunk) => (chunk.includes('（目安）') ? [chunk] : splitLabel(chunk)))
+}
+
+function splitLabel(chunk: string): string[] {
+  const chars = [...chunk]
+  if (chars.length <= LABEL_MAX) return [chunk]
+  let best = -1
+  for (let index = 0; index < chars.length - 1; index += 1) {
+    const left = index + 1
+    const right = chars.length - left
+    if (left < 2 || right < 2 || left > LABEL_MAX) continue
+    const mark = chars[index]
+    if (LABEL_PARTICLE.has(mark) || (mark === 'か' && left >= 6)) {
+      best = index
+      break
+    }
+  }
+  if (best < 0) return [chunk]
+  const left = chars.slice(0, best + 1).join('')
+  const right = chars.slice(best + 1).join('')
+  return [left, ...splitLabel(right)]
+}

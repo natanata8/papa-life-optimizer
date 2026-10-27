@@ -13,6 +13,7 @@ export type IconName =
   | 'line'
   | 'sent'
   | 'share'
+  | 'send'
   | 'plus'
   | 'chevron'
   | 'clock'
@@ -33,7 +34,7 @@ export type IconName =
   | 'back'
 
 const PATHS: Record<IconName, string[]> = {
-  today: ['M4 11.5 12 4l8 7.5', 'M6 10.5V20h12v-9.5', 'M10 20v-5h4v5'],
+  today: ['M12 12.8a6.5 6.5 0 1 0 .01 0', 'M12 9.2V12.5l2.8 1.8'],
   do: ['M8 6h11', 'M8 12h11', 'M8 18h11', 'M4 6l1.2 1.2L7.2 4.8', 'M4 12l1.2 1.2L7.2 10.8', 'M4 18h2.4'],
   consult: ['M5 6h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z'],
   plan: ['M6 5h12a1 1 0 0 1 1 1v13H5V6a1 1 0 0 1 1-1z', 'M8 3.5v3', 'M16 3.5v3', 'M5 9h14', 'M9 13h2', 'M13 13h2', 'M9 16h2'],
@@ -53,6 +54,7 @@ const PATHS: Record<IconName, string[]> = {
   line: ['M5 6h11a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H9l-3 2.5V14H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z', 'M18 10h2', 'M18 13l3-1.5'],
   sent: ['M12 4.5a7.5 7.5 0 1 0 0.01 0', 'M8.2 12.2 11 15l5-5.5'],
   share: ['M12 4v10', 'M8 7.5 12 3.5l4 4', 'M6 13v6h12v-6'],
+  send: ['M4.5 11.5 20 4.5 13.5 20l-2.2-6.8z', 'M11.3 13.2 20 4.5'],
   plus: ['M12 5v14', 'M5 12h14'],
   chevron: ['M9 6l6 6-6 6'],
   clock: ['M12 12.5a6.5 6.5 0 1 0 0.01 0', 'M12 9.2V12l2.2 1.6'],
@@ -95,10 +97,12 @@ export function Icon({ name, size = 20, className }: { name: IconName; size?: nu
 }
 
 export function WeatherDot({ sky }: { sky: string }) {
-  if (sky === '晴れ') return <Icon name="sun" size={12} className="text-[#e0a04a]" />
-  if (sky === 'くもり' || sky === 'にわか雨') return <Icon name="cloud" size={12} className="text-faint" />
-  const tone = sky === '警報' ? 'bg-alert-line' : sky === '注意報' ? 'bg-watch-line' : 'bg-faint'
-  return <span className={`inline-block h-1.5 w-1.5 rounded-full ${tone}`} />
+  if (sky === '晴れ') return <Icon name="sun" size={16} className="text-accent-deep" />
+  if (sky === 'くもり') return <Icon name="cloud" size={16} className="text-cloud-ink" />
+  if (sky === 'にわか雨') return <Icon name="cloud" size={16} className="text-rain-ink" />
+  if (sky === '注意報') return <span className="inline-block h-4 w-4 rounded-full border-2 border-watch-ink bg-watch-tag" />
+  if (sky === '警報') return <span className="inline-block h-4 w-4 rounded-full border-2 border-alert-ink bg-alert-line" />
+  return <span className="inline-block h-4 w-4 rounded-full border-2 border-dashed border-muted" />
 }
 
 export function ProgressRing({ value, total, children }: { value: number; total: number; children?: ReactNode }) {
@@ -125,24 +129,6 @@ export function ProgressRing({ value, total, children }: { value: number; total:
       </svg>
       <div className="absolute inset-0 flex items-center justify-center text-accent-deep">{children}</div>
     </div>
-  )
-}
-
-export function FlowSketch() {
-  return (
-    <svg width="220" height="132" viewBox="0 0 220 132" fill="none" aria-hidden="true" className="mx-auto text-ink">
-      <rect x="8" y="8" width="204" height="116" rx="16" fill="#fff" />
-      <path d="M36 28v76" stroke="#eadfce" strokeWidth="2" />
-      <path d="M36 28v48" stroke="#e6cf00" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="36" cy="28" r="5" fill="#8a4510" />
-      <circle cx="36" cy="58" r="5" fill="#fff" stroke="#8a4510" strokeWidth="2" />
-      <circle cx="36" cy="88" r="5" fill="#fff" stroke="#a59c92" strokeWidth="2" />
-      <path d="M58 22h28" stroke="#9a5414" strokeWidth="2" strokeLinecap="round" />
-      <path d="M58 36h70" stroke="#2c2a28" strokeWidth="2" strokeLinecap="round" />
-      <path d="M58 66h64" stroke="#2c2a28" strokeWidth="2" strokeLinecap="round" />
-      <path d="M58 96h52" stroke="#a59c92" strokeWidth="2" strokeLinecap="round" />
-      <path d="M168 24h28" stroke="#e6cf00" strokeWidth="6" strokeLinecap="round" />
-    </svg>
   )
 }
 

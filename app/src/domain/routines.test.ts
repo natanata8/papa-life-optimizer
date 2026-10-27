@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { phraseChunks } from './freed.ts'
+import { hourInRange } from './dates.ts'
+import { labelChunks, phraseChunks } from './freed.ts'
+import { SCENE_LIST } from './scenes.ts'
 import { TASK_ICONS, taskIcon, titleIcon } from './taskIcon.ts'
 import { FREED_MIN } from './freed.ts'
 import { fallbackScenes } from './scenes.ts'
@@ -82,6 +84,38 @@ test('相談の使用情報は送った時点のチップで決まり、前の�
   const next = usedFromChips(labels, sent.filter((chip) => chip !== '4歳・1歳'))
   assert.deepEqual(next, ['両方フルタイム'])
   assert.deepEqual(first, kept)
+})
+
+test('仕事名と手順と場面は、語の途中で割れない', () => {
+  const labels = [
+    '明日の遠足の持ち物',
+    'パジャマ・おむつ・タオルを脱衣所に出す',
+    '下の子（1歳）を洗う：頭→体',
+    '上の子（4歳）を洗う：頭→体',
+    '妻がしんどそうで気になる',
+    '怒られて、どうしたらいいか分からない',
+    ...ROUTINES.flatMap((routine) => [routine.title, ...routine.steps.map((step) => step.title)]),
+    ...SCENE_LIST.map((scene) => scene.title),
+  ]
+  for (const label of labels) {
+    const chunks = labelChunks(label)
+    assert.equal(chunks.join(''), label, label)
+    for (const chunk of chunks) assert.ok([...chunk].length <= 8 || chunk.includes('（目安）'), `${label} → ${chunk}`)
+    for (const broken of ['物', 'す', '体', 'る', 'いか']) assert.equal(chunks.includes(broken), false, `${label} → ${broken}`)
+  }
+  assert.ok(labelChunks('明日の遠足の持ち物').some((chunk) => chunk.includes('持ち物')))
+  assert.ok(labelChunks('下の子（1歳）を洗う：頭→体').some((chunk) => chunk.includes('頭→体')))
+  assert.ok(labelChunks('妻がしんどそうで気になる').some((chunk) => chunk.includes('気になる')))
+  assert.ok(labelChunks('怒られて、どうしたらいいか分からない').some((chunk) => chunk.includes('いいか')))
+  assert.ok(labelChunks('パジャマ・おむつ・タオルを脱衣所に出す').some((chunk) => chunk.includes('出す')))
+})
+
+test('注意報の線は、その時間の中だけ', () => {
+  assert.equal(hourInRange('19:40', '20〜22時'), false)
+  assert.equal(hourInRange('20:00', '20〜22時'), true)
+  assert.equal(hourInRange('20:30', '20〜22時'), true)
+  assert.equal(hourInRange('21:30', '20〜22時'), true)
+  assert.equal(hourInRange('22:00', '20〜22時'), false)
 })
 
 test('家の仕事には、それぞれ一つの印がある', () => {

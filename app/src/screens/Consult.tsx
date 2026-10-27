@@ -402,7 +402,7 @@ function Composer() {
           className="min-w-0 flex-1 rounded-lg border border-[#ddd] bg-white px-2 py-2 text-[15px]"
         />
         <Button size="sm" type="submit">
-          <Icon name="share" size={14} />
+          <Icon name="send" size={14} />
           送る
         </Button>
       </form>
