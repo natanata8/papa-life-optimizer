@@ -114,7 +114,7 @@ function Toast() {
   const store = useStore()
   if (!store.toast) return null
   return (
-    <div className="fixed top-[76px] left-1/2 z-[60] flex w-[min(360px,calc(100%-24px))] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg" data-testid="toast">
+    <div className={`fixed left-1/2 z-[60] flex w-[min(360px,calc(100%-24px))] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg ${store.demo && !store.ownHome && !store.panel && store.tab === 'home' ? 'top-[124px]' : 'top-[76px]'}`} data-testid="toast">
       <p className="min-w-0 flex-1"><Phrase text={store.toast} /></p>
       {store.toastUndo ? (
         <button type="button" data-testid="toast-undo" className="inline-flex min-h-11 items-center font-bold whitespace-nowrap" onClick={() => { store.toastUndo?.(); store.dismissToast() }}>

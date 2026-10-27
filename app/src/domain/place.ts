@@ -46,6 +46,6 @@ export function placeTiming(timing: string, today: string, sceneDate: string): {
     case '週末':
       return { date: nextDow(today, 6), time: '10:00' }
     default:
-      return { date: today, time: '21:00' }
+      return { date: today, time: /^\d{2}:\d{2}$/.test(timing) ? timing : '21:00' }
   }
 }

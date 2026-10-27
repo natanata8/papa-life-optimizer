@@ -4,15 +4,21 @@ import { phraseChunks } from './freed.ts'
 import { FREED_MIN } from './freed.ts'
 import { fallbackScenes } from './scenes.ts'
 import {
+  ROUTINES,
   dadBusy,
   extraOffsets,
   firstStepAt,
   firstUnchecked,
   footerLine,
   freedFor,
+  listLabel,
+  listedSteps,
   openRoutineCount,
   overlapLine,
+  placedTime,
+  plusMinutes,
   routineDone,
+  rowAt,
   shareLine,
   shownMinutes,
   stepsFor,
@@ -75,6 +81,37 @@ test('相談の使用情報は送った時点のチップで決まり、前の�
   const next = usedFromChips(labels, sent.filter((chip) => chip !== '4歳・1歳'))
   assert.deepEqual(next, ['両方フルタイム'])
   assert.deepEqual(first, kept)
+})
+
+test('表示の分数は見える手順の合計で、開始は最初の手順', () => {
+  for (const routine of ROUTINES) {
+    const ages = ['4歳', '1歳'] as const
+    const steps = listedSteps(routine.id, [...ages], false)
+    const at = rowAt(routine.id, '19:30')
+    const label = listLabel(steps, at)
+    const sum = stepsFor(routine.id, [...ages], false).reduce((total, step) => total + step.minutes, 0)
+    assert.equal(label.minutes, sum, routine.id)
+    assert.equal(label.start, plusMinutes(at, steps[0]?.offsetMin ?? 0), routine.id)
+  }
+  const partial = listedSteps('bath', ['4歳', '1歳'], false, ['bath-5', 'bath-7'])
+  const partialLabel = listLabel(partial, rowAt('bath', '19:30'))
+  assert.equal(partialLabel.start, '19:58')
+  assert.equal(partialLabel.minutes, 10)
+  const base = listedSteps('tomorrow', ['4歳', '1歳'], true)
+  const offsets = extraOffsets(base, 2)
+  const added = listedSteps('tomorrow', ['4歳', '1歳'], true, undefined, [
+    { id: 'x', minutes: 3, offsetMin: offsets[0] },
+    { id: 'y', minutes: 3, offsetMin: offsets[1] },
+  ])
+  const addedLabel = listLabel(added, rowAt('tomorrow', '19:30'))
+  assert.equal(added.length, 5)
+  assert.equal(addedLabel.minutes, 21)
+  assert.equal(addedLabel.start, plusMinutes(rowAt('tomorrow', '19:30'), added[0]?.offsetMin ?? 0))
+})
+
+test('お風呂の相談は、お風呂の開始時刻に置く', () => {
+  assert.equal(placedTime('お風呂', '19:30'), '19:40')
+  assert.equal(placedTime('今夜', '19:30'), null)
 })
 
 test('小さいお風呂の見出しは、最初の手順の時刻から始まる', () => {

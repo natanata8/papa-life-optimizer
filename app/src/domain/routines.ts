@@ -171,6 +171,27 @@ export function shownMinutes(id: RoutineId, ages: AgeLabel[], ensoku = false, pa
   return picked.reduce((sum, step) => sum + step.minutes, 0)
 }
 
+export function listedSteps(
+  id: RoutineId,
+  ages: AgeLabel[],
+  ensoku = false,
+  partial?: string[],
+  extra?: { id: string; minutes: number; offsetMin?: number }[],
+): { id: string; minutes: number; offsetMin: number }[] {
+  const steps = stepsFor(id, ages, ensoku)
+  const picked = partial?.length ? steps.filter((step) => partial.includes(step.id)) : steps
+  const added = (extra ?? []).map((step) => ({ id: step.id, minutes: step.minutes, offsetMin: step.offsetMin ?? 0 }))
+  return stepsInTime([...picked.map((step) => ({ id: step.id, minutes: step.minutes, offsetMin: step.offsetMin ?? 0 })), ...added])
+}
+
+/** 見出しの分数と開始時刻は、画面に出ている手順そのもの。 */
+export function listLabel(steps: { minutes: number; offsetMin?: number }[], at: string): { start: string; minutes: number } {
+  return {
+    start: firstStepAt(at, steps),
+    minutes: steps.reduce((sum, step) => sum + step.minutes, 0),
+  }
+}
+
 export function rowTitle(id: RoutineId, ages: AgeLabel[], ensoku = false): string {
   if (id === 'bath') return ages.length >= 2 ? 'お風呂（2人とも）' : 'お風呂'
   if (id === 'tomorrow' && ensoku) return '明日の遠足の持ち物'
@@ -178,12 +199,23 @@ export function rowTitle(id: RoutineId, ages: AgeLabel[], ensoku = false): strin
   return routineById(id).title
 }
 
-export function rowNote(id: RoutineId, ages: AgeLabel[], ensoku = false, partial?: string[]): string {
-  const steps = stepsFor(id, ages, ensoku)
-  const count = partial?.length ? steps.filter((step) => partial.includes(step.id)).length : steps.length
-  const minutes = shownMinutes(id, ages, ensoku, partial)
-  if (id === 'bedtime' && ages.length >= 2 && !partial?.length) return `約${minutes}分・2人いっしょ`
-  return `約${minutes}分・${count}つの手順`
+export function rowNote(
+  id: RoutineId,
+  ages: AgeLabel[],
+  ensoku = false,
+  partial?: string[],
+  extra?: { id: string; minutes: number; offsetMin?: number }[],
+): string {
+  const steps = listedSteps(id, ages, ensoku, partial, extra)
+  const minutes = steps.reduce((sum, step) => sum + step.minutes, 0)
+  if (id === 'bedtime' && ages.length >= 2 && !partial?.length && !extra?.length) return `約${minutes}分・2人いっしょ`
+  return `約${minutes}分・${steps.length}つの手順`
+}
+
+/** 相談の「お風呂」は、その家のお風呂の開始時刻。21:00 には置かない。 */
+export function placedTime(timing: string, back: string | null): string | null {
+  if (timing === 'お風呂') return rowAt('bath', back)
+  return null
 }
 
 const EVENING: RoutineId[] = ['bath', 'bedtime', 'tomorrow', 'dinnerClean']

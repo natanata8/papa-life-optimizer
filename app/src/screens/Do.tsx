@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { useStore } from '@/app/store.tsx'
-import { firstStepAt, firstUnchecked, plusMinutes, rowAt, rowTitle, shownMinutes, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
+import { firstUnchecked, listLabel, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
 
@@ -50,6 +50,7 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
   const done = steps.filter((step) => item.checked.includes(step.id)).length
   const current = steps.find((step) => !item.checked.includes(step.id))?.id
   const at = item.at || rowAt(id, back)
+  const label = listLabel(steps, at)
   return (
     <section className="mt-4">
       <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-sand">
@@ -58,7 +59,7 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-base font-bold">{rowTitle(id, ages, ensoku)}</h2>
         <p className="text-xs whitespace-nowrap text-muted">
-          {firstStepAt(at, steps)}〜 約{shownMinutes(id, ages, ensoku, item.partial)}分
+          {label.start}〜 約{label.minutes}分
           <span className="ml-2 font-bold text-ink">{done}/{steps.length}</span>
         </p>
       </div>

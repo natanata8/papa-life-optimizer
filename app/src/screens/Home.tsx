@@ -10,6 +10,8 @@ import {
   contextChips,
   footerLine,
   freedFor,
+  listLabel,
+  listedSteps,
   overlapLine,
   routineDone,
   routineForPeak,
@@ -40,7 +42,9 @@ export function Home() {
   const taken = data.taken?.[store.today] ?? []
   const rows = ids.map((id) => {
     const item = taken.find((row) => row.routineId === id)
-    return { id, at: item?.at || rowAt(id, back), item }
+    const anchor = item?.at || rowAt(id, back)
+    const clock = listLabel(listedSteps(id, ages, ensoku, item?.partial, item?.extra), anchor)
+    return { id, at: anchor, start: clock.start, item }
   })
   const margin = taken.reduce((sum, item) => sum + freedFor(item.routineId as RoutineId, item.partial, ages, ensoku), 0)
   const passed = Object.entries(data.accept ?? {}).some(([key, value]) => key.startsWith(`${store.today}|`) && value.phase === 'passed')
@@ -85,13 +89,13 @@ export function Home() {
           const on = Boolean(row.item)
           return (
             <article key={row.id} data-fold={`row-${index}`} className={`flex items-center gap-2 rounded-[14px] bg-white p-3 shadow-sm ${hot.has(row.id) ? 'border-l-4 border-watch-line' : ''}`}>
-              <p className="w-12 shrink-0 text-sm font-bold whitespace-nowrap">{row.at}</p>
+              <p className="w-12 shrink-0 text-sm font-bold whitespace-nowrap">{row.start}</p>
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
                   <span className="whitespace-nowrap">{rowTitle(row.id, ages, ensoku)}</span>
                   {row.id === recommended ? <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
                 </p>
-                <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku, row.item?.partial)}</p>
+                <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)}</p>
               </div>
               <button
                 type="button"

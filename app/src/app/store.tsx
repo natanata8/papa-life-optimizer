@@ -7,9 +7,9 @@ import { behindFor, gomiAround } from '@/domain/behind.ts'
 import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts'
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
-import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
+import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, returnInfo, usedLabels } from '@/domain/profile.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
-import { extraOffsets, stepsFor, usedFromChips, withoutPassed, type RoutineId } from '@/domain/routines.ts'
+import { extraOffsets, placedTime, rowAt, stepsFor, usedFromChips, withoutPassed, type RoutineId } from '@/domain/routines.ts'
 import { createEmpty, createPublicDemo } from '@/domain/seed.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
@@ -253,6 +253,7 @@ function attachAnswer(
     care?: boolean
     selfHarm?: boolean
     placements?: { date: string; time: string }[]
+    bathTime?: string
     invisibleKey?: string | null
     taskId?: string | null
     source?: string
@@ -261,7 +262,8 @@ function attachAnswer(
   const suggestions = { ...state.suggestions }
   const suggestionIds: string[] = []
   input.answer.一手.forEach((item, index) => {
-    const placed = input.placements?.[index] ?? placeTiming(item.タイミング, input.today, input.sceneDate)
+    const timing = placedTime(item.タイミング, null) ?? item.タイミング
+    const placed = input.placements?.[index] ?? placeTiming(item.タイミング === 'お風呂' && input.bathTime ? input.bathTime : timing, input.today, input.sceneDate)
     const id = uid()
     suggestionIds.push(id)
     suggestions[id] = {
@@ -512,6 +514,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const chips = extra?.chips ?? latestChips(snapshot.chat)
       const used = usedFromChips(usedLabels(snapshot.profile, scene), chips)
       const base = dataRef.current ?? snapshot
+      const bathTime = rowAt('bath', returnInfo(snapshot.profile.home)?.back ?? null)
       commit(
         attachAnswer(base, {
           answer,
@@ -526,6 +529,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           care: extra?.care,
           selfHarm: isSelfHarm(`${entry}\n${userText}\n${answers.join('\n')}`),
           placements: extra?.placements,
+          bathTime,
           invisibleKey: extra?.invisibleKey,
           taskId: extra?.taskId,
           source: extra?.source,
