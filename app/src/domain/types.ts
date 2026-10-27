@@ -30,7 +30,9 @@ export type ToneAnswer = {
 
 export type Mode = '朝' | '昼' | '帰宅前' | '夜' | '金曜夜'
 
-export type Tab = 'home' | 'out' | 'consult' | 'cal' | 'profile' | 'review'
+export type Tab = 'home' | 'do' | 'out' | 'consult' | 'cal' | 'profile' | 'review'
+
+export type Pronoun = '俺' | '僕' | '自分' | ''
 
 export type AgeLabel =
   | '妊娠中'
@@ -96,6 +98,7 @@ export type Profile = {
   pstate: string | null
   lesson: string | null
   partner: string
+  pronoun: Pronoun
   showInv: boolean
   notif: boolean | null
   usual: string[]
@@ -179,8 +182,18 @@ export type ConsultRetry = {
   care?: boolean
 }
 
+export type TakenRoutine = {
+  routineId: string
+  at: string
+  checked: string[]
+  sharedAt?: string
+  partial?: string[]
+  extra?: { id: string; title: string; minutes: number; tip?: string }[]
+}
+
 export type ChatMessage =
   | { id: string; role: 'me'; text: string }
+  | { id: string; role: 'context'; chips: string[] }
   | { id: string; role: 'bot'; text: string; scenes?: boolean; safety?: 'stop'; selfHarm?: boolean; retry?: ConsultRetry }
   | {
       id: string
@@ -238,6 +251,8 @@ export type Persisted = {
   lifted: string[]
   /** 日付|時間帯 → 決めたあとの段階。パスは記録ではなく、その日の表示だけ。 */
   accept: Record<string, AcceptState>
+  taken: Record<string, TakenRoutine[]>
+  seenWelcome: boolean
 }
 
 export const GOMI_KINDS: GomiKind[] = ['可燃', 'プラ', '資源']

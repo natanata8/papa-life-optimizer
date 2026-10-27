@@ -27,7 +27,7 @@ export function Consult() {
     <div className={`px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-28'}`}>
       <DemoBar />
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-bold">予報士</h1>
+        <h1 className="text-lg font-bold">相談</h1>
         {data.chat.length > 0 ? (
           <Button size="sm" variant="ghost" onClick={store.newChat}>
             新しい相談
@@ -36,7 +36,7 @@ export function Consult() {
       </div>
       {data.chat.length === 0 ? (
         <>
-          <p className="mt-1 text-[13px] text-muted">家の時間の負荷を見て、次の一手と伝え方を出します。</p>
+          <p className="mt-1 text-[13px] text-muted">今夜の流れを見て、次の手順と伝え方を出します。</p>
           {data.threads.length > 0 ? (
             <button type="button" className="mt-2 inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep" data-testid="open-history" onClick={() => store.setTab('review')}>
               これまでの相談
@@ -62,6 +62,20 @@ export function Consult() {
 
 function Message({ message, latest = false }: { message: ChatMessage; latest?: boolean }) {
   const store = useStore()
+  if (message.role === 'context') {
+    return (
+      <div className="rounded-xl bg-white px-3 py-2" data-testid="consult-context">
+        <p className="text-xs font-bold text-muted">この内容で相談します（タップで外せます）</p>
+        <div className="mt-1 flex flex-wrap gap-1.5">
+          {message.chips.map((chip) => (
+            <button key={chip} type="button" className="inline-flex min-h-11 items-center rounded-full bg-sand px-3 text-xs font-bold" onClick={() => store.removeChip(message.id, chip)}>
+              {chip}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
   if (message.role === 'me') {
     return <p className="ml-auto max-w-[88%] rounded-2xl rounded-br-sm bg-accent px-3 py-2 text-sm leading-relaxed text-white">{message.text}</p>
   }
@@ -90,7 +104,7 @@ function Hotline({ selfHarm = false }: { selfHarm?: boolean }) {
   return (
     <div data-testid="hotline-card">
       <p className="font-bold">あなたや家族の安全がいちばん大事です。</p>
-      <p className="mt-1">危険を感じる時は迷わず連絡してください。ここでは一手の提案はお休みします。</p>
+      <p className="mt-1">危険を感じる時は迷わず連絡してください。ここでは提案はお休みします。</p>
       <ul className="mt-2 space-y-1 text-[13px]">
         <li>警察 110</li>
         <li>DV相談ナビ #8008</li>
@@ -185,14 +199,23 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
         <div className="mt-2">
           <AddButton suggestionId={firstId} />
         </div>
-        <details className="mt-2">
-          <summary className="py-2 text-xs text-muted">手順</summary>
-          <ol className="mt-1 list-decimal pl-5 text-sm leading-relaxed">
+        {first.タスク分解ステップ.length > 0 ? (
+          <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-relaxed">
             {first.タスク分解ステップ.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
-        </details>
+        ) : null}
+        {first.タスク分解ステップ.length > 0 ? (
+          <button
+            type="button"
+            data-testid="add-to-routine"
+            className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
+            onClick={() => store.addExtraSteps(store.today, /風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'bath' : 'tomorrow', first.タスク分解ステップ)}
+          >
+            {/風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'お風呂の手順に追加' : 'やることの手順に追加'}
+          </button>
+        ) : null}
       </div>
       {message.answer.声かけ例 ? (
         <>
@@ -211,7 +234,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       ) : null}
       {rest.length > 0 ? (
         <details className="mt-3">
-          <summary className="py-2 text-[13px] text-muted">ほかの一手 {rest.length}つ</summary>
+          <summary className="py-2 text-[13px] text-muted">ほかの案 {rest.length}つ</summary>
           <div className="mt-2 space-y-2">
             {rest.map((item, index) => {
               const id = message.suggestionIds[index + 1]
@@ -237,7 +260,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       {message.behind.lines.length > 0 ? (
         <details className="mt-3 rounded-xl border-[1.5px] border-dashed border-inv-line bg-inv px-3 py-2">
           <summary className="py-2 text-[13px] font-bold text-inv-ink">
-            👀 {message.behind.why}（{message.behind.lines.length}件）
+            見えない家事：{message.behind.why}（{message.behind.lines.length}件）
           </summary>
           <div className="mt-1 text-xs leading-relaxed text-inv-ink">
             {message.behind.lines.map((line) => (
@@ -305,27 +328,38 @@ function ThumbDock() {
   )
 }
 
+const QUICK = ['下の子が湯船を嫌がったら？', '寝かしつけが長引いたら？', '帰りが遅れそう']
+
 function Composer() {
   const store = useStore()
   const [text, setText] = useState('')
   return (
-    <form
-      className="fixed bottom-16 left-1/2 z-20 flex w-full max-w-[430px] -translate-x-1/2 gap-1.5 border-t border-[#f0e8df] bg-paper px-3 py-2"
-      onSubmit={(event) => {
-        event.preventDefault()
-        store.sendText(text)
-        setText('')
-      }}
-    >
-      <input
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        placeholder="ひとことでOK（例：土曜どうしよう）"
-        className="min-w-0 flex-1 rounded-lg border border-[#ddd] bg-white px-2 py-2 text-[15px]"
-      />
-      <Button size="sm" type="submit">
-        送る
-      </Button>
-    </form>
+    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-[#f0e8df] bg-paper px-3 py-2">
+      <div className="mb-2 flex gap-2 overflow-x-auto">
+        {QUICK.map((chip) => (
+          <button key={chip} type="button" className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-white px-3 text-xs font-bold" onClick={() => store.sendText(chip)}>
+            {chip}
+          </button>
+        ))}
+      </div>
+      <form
+        className="flex gap-1.5"
+        onSubmit={(event) => {
+          event.preventDefault()
+          store.sendText(text)
+          setText('')
+        }}
+      >
+        <input
+          value={text}
+          onChange={(event) => setText(event.target.value)}
+          placeholder="ひとことでOK"
+          className="min-w-0 flex-1 rounded-lg border border-[#ddd] bg-white px-2 py-2 text-[15px]"
+        />
+        <Button size="sm" type="submit">
+          送る
+        </Button>
+      </form>
+    </div>
   )
 }

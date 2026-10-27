@@ -8,6 +8,9 @@ import { forecastFor } from '@/domain/forecastView.ts'
 import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf } from '@/domain/dates.ts'
 import { DAILY_TASKS, adoptedKeys, invisibleOn, type InvItem } from '@/domain/invisible.ts'
 import { partnerDay, type PartnerBlock } from '@/domain/partnerDay.ts'
+import { returnInfo } from '@/domain/profile.ts'
+import { routineForPeak, rowAt } from '@/domain/routines.ts'
+import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
 import { childName } from '@/domain/childEvents.ts'
 import type { ChildEvent, FamEvent, Step } from '@/domain/types.ts'
 
@@ -18,13 +21,13 @@ export function Calendar() {
 
   return (
     <div className="px-3.5 pt-3.5 pb-28" data-testid="calendar">
-      <DemoBar title="カレンダー" />
+      <DemoBar title="予定" />
       <div className="flex items-center justify-end">
         <div className="flex rounded-xl bg-[#f0e8df] p-0.5 text-xs font-bold">
           <button
             type="button"
             data-testid="cal-week"
-            className={`rounded-[10px] px-3 py-1.5 ${store.cal === 'week' ? 'bg-white text-ink' : 'text-muted'}`}
+            className={`inline-flex min-h-11 items-center rounded-[10px] px-3 ${store.cal === 'week' ? 'bg-white text-ink' : 'text-muted'}`}
             onClick={() => store.setCal('week')}
           >
             週
@@ -32,7 +35,7 @@ export function Calendar() {
           <button
             type="button"
             data-testid="cal-day"
-            className={`rounded-[10px] px-3 py-1.5 ${store.cal === 'day' ? 'bg-white text-ink' : 'text-muted'}`}
+            className={`inline-flex min-h-11 items-center rounded-[10px] px-3 ${store.cal === 'day' ? 'bg-white text-ink' : 'text-muted'}`}
             onClick={() => store.setCal('day', store.day)}
           >
             日
@@ -49,7 +52,7 @@ export function Calendar() {
         </Button>
       </div>
         <p className="mt-2 text-xs leading-relaxed text-muted">
-        <Phrase text="👀 は家庭プロフィールと、「家事・育児タスク一覧」から出ます。チェックや採点はしません。" />
+        <Phrase text="見えない家事は、家庭プロフィールと「家事・育児タスク一覧」から出ます。チェックや採点はしません。" />
         <Phrase text="妻の1日は推定です。編集もチェックもできません。" />
       </p>
     </div>
@@ -89,9 +92,7 @@ function Week() {
   const rows = days.map((date) => {
     const cast = forecastFor(data, date, store.today)
     const peak = cast.slots.find((slot) => slot.id === cast.peak) ?? null
-    const key = peak ? `${date}|${peak.id}` : ''
-    const phase = key ? data.accept?.[key]?.phase : undefined
-    const open = Boolean(peak && !peak.lifted && (peak.sky === '注意報' || peak.sky === '警報') && date >= store.today && !phase)
+    const open = Boolean(peak && (peak.sky === '注意報' || peak.sky === '警報') && date >= store.today)
     return { date, cast, peak, open }
   })
   const openRows = rows.filter((row) => row.open && row.peak)
@@ -129,52 +130,46 @@ function Week() {
           )
         })}
       </div>
-      <h2 className="mt-4 text-sm font-bold">今週、決めること {openRows.length}つ</h2>
+      <h2 className="mt-4 text-sm font-bold">今週、先回りできること {openRows.length}つ</h2>
       <div className="mt-2 space-y-2">
         {openRows.map((row) => {
           const peak = row.peak
           if (!peak) return null
-          const today = row.date === store.today
+          const routineId = routineForPeak(peak.noun, peak.kind)
+          const back = returnInfo(data.profile.home)?.back ?? null
+          const at = rowAt(routineId, back)
+          const taken = (data.taken?.[row.date] ?? []).some((item) => item.routineId === routineId)
           return (
             <article key={row.date} className="rounded-[14px] bg-white p-3 shadow-sm">
               <p className="flex flex-wrap items-center gap-1 text-xs font-bold">
-                <span className="whitespace-nowrap">{today ? `今日 ${formatMd(row.date)}` : formatMd(row.date)}</span>
+                <span className="whitespace-nowrap">{row.date === store.today ? `今日 ${formatMd(row.date)}` : formatMd(row.date)}</span>
                 <span className="whitespace-nowrap">{slotClock(peak)}</span>
                 <span className={`rounded-full px-2 py-0.5 whitespace-nowrap ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`}>{peak.sky}</span>
               </p>
-              <p className="mt-2 text-base font-bold">
-                <Phrase text={`${peak.noun}を引き受ける？`} />
-              </p>
-              {peak.freedMin > 0 ? (
+              <p className="mt-2 text-base font-bold">{peak.noun}</p>
+              {taken ? (
+                <p className="mt-1 text-sm">✓ 引き受けた・やるに入っています</p>
+              ) : peak.freedMin > 0 ? (
                 <p className="mt-1 text-sm">
                   <Phrase text={`家に${peak.freedMin}分の余白（目安）`} />
                 </p>
               ) : null}
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  data-testid={`week-accept-${row.date}`}
-                  className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-accent-deep text-sm font-bold text-white"
-                  onClick={() => store.beginAccept(row.date, peak.id)}
-                >
-                  引き受ける
-                </button>
-                {today ? (
-                  <button
-                    type="button"
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
-                    onClick={() => store.openSheet({ type: 'cant', date: row.date, slotId: peak.id })}
-                  >
-                    今日は無理
+              <div className="mt-2 flex justify-end">
+                {taken ? (
+                  <button type="button" className="inline-flex min-h-11 items-center rounded-xl bg-[#f3eee6] px-4 text-sm font-bold" onClick={() => store.setTab('do')}>
+                    開く
                   </button>
                 ) : (
                   <button
                     type="button"
-                    data-testid={`week-later-${row.date}`}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
-                    onClick={() => store.deferAccept(row.date, peak.id)}
+                    data-testid={`week-accept-${row.date}`}
+                    className="inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-4 text-sm font-bold text-white"
+                    onClick={() => {
+                      store.takeRoutine(row.date, routineId, at)
+                      store.showToast('引き受けました。「やる」に追加', () => store.dropRoutine(row.date, routineId))
+                    }}
                   >
-                    あとで
+                    引き受ける
                   </button>
                 )}
               </div>
@@ -182,6 +177,7 @@ function Week() {
           )
         })}
       </div>
+      <WeekendCard />
       <p className="mt-3 text-xs leading-relaxed text-muted">
         <Phrase text="日付をタップすると、その日の予定と時間帯が見られます。" />
         <Phrase text="妻の1日・推定もそこにあります。" />
@@ -213,10 +209,10 @@ function Day() {
           ■ 家族の予定
         </FilterChip>
         <FilterChip on={store.filters.step} tone="step" onClick={() => store.toggleFilter('step')}>
-          ■ 自分の一手
+          ■ 引き受けたこと
         </FilterChip>
         <FilterChip on={store.filters.inv} tone="inv" onClick={() => store.toggleFilter('inv')}>
-          👀 見えない仕事
+          見えない家事
         </FilterChip>
         <FilterChip on={store.filters.child} tone="child" onClick={() => store.toggleFilter('child')}>
           ■ 子どもの予定
@@ -235,7 +231,7 @@ function Day() {
       {store.filters.inv ? (
         <details className="rounded-xl border border-dashed border-inv-line bg-inv px-3 py-2">
           <summary className="py-2 text-[13px] font-bold text-inv-ink">
-            👀 毎日まわっている見えない仕事 {DAILY_TASKS.length}件（目安 約{minutes}分）
+            見えない家事 {DAILY_TASKS.length}件（目安 約{minutes}分）
           </summary>
           <div className="mt-2 space-y-1">
             {DAILY_TASKS.map((task) => (
@@ -411,7 +407,7 @@ function StepPill({ step }: { step: Step }) {
     >
       <span>{step.status === 'good' ? '😊' : step.status === 'meh' ? '😐' : '👉'}</span>
       {step.time ? <span className="text-xs">{step.time}</span> : null}
-      <span className="truncate">一手：{step.title}</span>
+      <span className="truncate">やること：{step.title}</span>
     </button>
   )
 }
@@ -442,7 +438,7 @@ function InvisiblePill({ item, adopted }: { item: InvItem; adopted: boolean }) {
     >
       <span>👀</span>
       <span>
-        <Phrase text={adopted ? `${item.title}（一手にした）` : item.title} />
+        <Phrase text={adopted ? `${item.title}（引き受けた）` : item.title} />
       </span>
     </button>
   )

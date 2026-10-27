@@ -19,8 +19,11 @@ function read(): Persisted | null {
       threads: parsed.threads ?? [],
       lifted: parsed.lifted ?? [],
       accept: parsed.accept ?? {},
+      taken: parsed.taken ?? {},
+      seenWelcome: parsed.seenWelcome ?? false,
       profile: {
         ...parsed.profile,
+        pronoun: parsed.profile.pronoun ?? '俺',
         usual: parsed.profile.usual ?? [],
         leaveAt: parsed.profile.leaveAt ?? null,
         kids: (parsed.profile.kids ?? []).map((kid) => ({

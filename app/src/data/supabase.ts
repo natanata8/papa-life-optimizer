@@ -16,6 +16,9 @@ type ClientState = {
   leaveAt?: string | null
   lifted?: string[]
   accept?: Persisted['accept']
+  taken?: Persisted['taken']
+  seenWelcome?: boolean
+  pronoun?: Persisted['profile']['pronoun']
 }
 
 type FamilyRow = {
@@ -150,7 +153,6 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
   return {
     ...base,
     onboarded: family.onboarded,
-    profile,
     events: (events as EventRow[]).map((row) => ({
       id: row.id,
       date: row.event_date,
@@ -203,6 +205,12 @@ async function readFamily(client: SupabaseClient, familyId: string): Promise<Per
     threads: blob.threads ?? [],
     lifted: blob.lifted ?? [],
     accept: blob.accept ?? {},
+    taken: blob.taken ?? {},
+    seenWelcome: blob.seenWelcome ?? false,
+    profile: {
+      ...profile,
+      pronoun: blob.pronoun ?? profile.pronoun ?? '俺',
+    },
   }
 }
 
@@ -228,6 +236,9 @@ async function writeFamily(
     leaveAt: state.profile.leaveAt,
     lifted: state.lifted,
     accept: state.accept,
+    taken: state.taken,
+    seenWelcome: state.seenWelcome,
+    pronoun: state.profile.pronoun,
   }
   const { error: familyError } = await client
     .from('families')

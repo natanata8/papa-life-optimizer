@@ -28,7 +28,7 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
       </div>
       {open ? (
         <div className="absolute top-12 right-0 z-20 w-56 rounded-xl bg-white p-2 shadow-lg">
-          <p className="px-2 py-1 text-xs font-bold text-muted">時間帯</p>
+          <p className="px-2 py-1 text-xs font-bold text-muted">デモ設定</p>
           {MODES.map((mode) => (
             <button
               key={mode}
@@ -43,17 +43,6 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
               {mode}
             </button>
           ))}
-          <button
-            type="button"
-            data-testid="demo-reset"
-            className="flex min-h-11 w-full items-center rounded-lg px-2 text-left text-sm"
-            onClick={() => {
-              setOpen(false)
-              store.reset()
-            }}
-          >
-            最初から
-          </button>
           {demoOnly || store.ownHome ? null : (
             <button
               type="button"

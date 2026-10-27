@@ -25,10 +25,10 @@ function withoutBlocked(items: ToneStep[], blocked: string[]): ToneStep[] {
   return [
     step(
       '別のやり方を1つだけ選ぶ',
-      '前回微妙だった一手は、今回の候補から外しています',
+      '前回微妙だったやり方は、今回の候補から外しています',
       '置き換える',
       '今夜',
-      ['前回と違う一手を1つ選ぶ', '日時だけ先に伝える'],
+      ['前回と違うやり方を1つ選ぶ', '日時だけ先に伝える'],
     ),
   ]
 }
@@ -58,7 +58,7 @@ function finish(answer: ToneAnswer): ToneAnswer {
 
 function noteBlocked(answer: ToneAnswer, blocked: string[]): ToneAnswer {
   if (blocked.length === 0) return answer
-  const extra = '前の一手は外しています。'
+  const extra = '前の案は外しています。'
   const room = 60 - extra.length
   const base = answer.気づき.length <= room ? answer.気づき : answer.気づき.slice(0, room)
   return {
@@ -74,7 +74,8 @@ export function sampleAnswer(request: ConsultRequest): ToneAnswer {
 
 function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.entry === 'invisible') return invisibleAnswer(request)
-  if (request.entry.startsWith('オウチ予報')) return forecastConsult(request)
+  if (request.userText.includes('湯船') || request.entry.includes('湯船')) return bathBoat()
+  if (request.entry.startsWith('オウチ予報') || request.entry.startsWith('今夜の流れ')) return forecastConsult(request)
   const blocked = blockedTitles(request.memory)
   if (request.scene === 'nomi') return noteBlocked(nomi(request), blocked)
   if (request.scene === 'tired') return noteBlocked(tired(request), blocked)
@@ -85,7 +86,7 @@ function rawAnswer(request: ConsultRequest): ToneAnswer {
   return {
     状況整理: '受け取りました。近い場面が分かると、残る仕事を1つに絞れます。',
     気づき: '',
-    一手: [step('近い場面を1つ選ぶ', '場面が分かると、一手と声かけを出せます', '今やる', '今夜', ['近い場面を1つ選ぶ'])],
+    一手: [step('近い場面を1つ選ぶ', '場面が分かると、手順と声かけを出せます', '今やる', '今夜', ['近い場面を1つ選ぶ'])],
     声かけ例: '',
     明日やること: '近い場面をもう一度選ぶ',
     questions: [],
@@ -112,6 +113,24 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
     一手: [step(short, '今週分だけ自分がやると、次の声かけが具体的になります', '今やる', '今夜', steps)],
     声かけ例: `${short}、今週は俺がやってみる。コツがあったら教えて。`,
     明日やること: steps[0] ?? '中身を1つ確認する',
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function bathBoat(): ToneAnswer {
+  return {
+    状況整理: '湯船は短くてOK。代わりにこの3つを。',
+    気づき: '全部やらなくても、上がったあとの3分は残します。',
+    一手: [
+      step('湯船は短くてOK', '代わりにこの3つで足ります', '今やる', '今夜', [
+        '湯船は1分だけ。おもちゃを先に',
+        '上がったらタオルで包む',
+        '保湿は3分以内',
+      ]),
+    ],
+    声かけ例: '湯船は1分だけにして、上がったらすぐ包むね。',
+    明日やること: '保湿は3分以内',
     questions: [],
     safety_flag: false,
   }

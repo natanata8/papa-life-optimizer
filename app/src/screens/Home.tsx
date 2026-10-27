@@ -1,494 +1,144 @@
-import { useState, type ReactNode } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
-import { Button } from '@/components/ui/button.tsx'
-import { Chip } from '@/components/ui/chip.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
+import { SkyMark } from '@/components/SkyMark.tsx'
 import { useStore } from '@/app/store.tsx'
-import { addDays, dayName, DOW_CHARS, formatMd } from '@/domain/dates.ts'
-import { beforeLeaving, invisibleOn, SLOT_TIME, type InvItem } from '@/domain/invisible.ts'
+import { formatMd } from '@/domain/dates.ts'
+import { slotClock } from '@/domain/forecast.ts'
+import { forecastFor } from '@/domain/forecastView.ts'
+import { returnInfo } from '@/domain/profile.ts'
 import {
-  FIELDS,
-  LAZY_WHY,
-  PRIVACY_LABEL,
-  fieldOptions,
-  lazyTitle,
-  nextLazyKey,
-  returnInfo,
-  setChoice,
-  setSchool,
-  setShop,
-  toggleGomi,
-} from '@/domain/profile.ts'
-import { DAY_ORDER } from '@/domain/dates.ts'
-import { MODE_META, type FamEvent, type Profile, type School, type Step } from '@/domain/types.ts'
-import { lineShareUrl } from '@/domain/export.ts'
-import { addMinutes } from '@/domain/dates.ts'
-import { ChildToday } from '@/screens/today/ChildToday.tsx'
-import { MessageComposer } from '@/screens/today/MessageComposer.tsx'
-import { NiceEvents } from '@/screens/today/NiceEvents.tsx'
-import { ForecastCard } from '@/screens/today/ForecastCard.tsx'
-import { moreSection } from '@/domain/todayFold.ts'
-import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
-
-const TASK_IDS: Record<InvItem['def'], string> = {
-  gomi: 'yu-092',
-  enweek: 'yu-234',
-  shop: 'yu-069',
-  diaper: 'yu-077',
-  vaccine: 'yu-400',
-  fee: 'yu-323',
-  med: 'yu-311',
-  shoes: 'yu-388',
-  wifetime: 'yu-357',
-  ensoku2: 'yu-266',
-  ensoku1: 'yu-225',
-  nomi: 'yu-113',
-  kisei: 'yu-394',
-  kisei2: 'yu-391',
-}
-
-type CardModel = {
-  key: string
-  anchor?: string
-  kicker: string
-  title: string
-  meta?: string
-  line?: string
-  tone?: 'inv'
-  actions?: ReactNode
-}
+  contextChips,
+  freedFor,
+  overlapLine,
+  routineForPeak,
+  rowAt,
+  rowNote,
+  rowTitle,
+  tonightIds,
+  type RoutineId,
+} from '@/domain/routines.ts'
+import type { AgeLabel } from '@/domain/types.ts'
 
 export function Home() {
   const store = useStore()
   const data = store.data
   if (!data) return null
-  const meta = MODE_META[store.mode]
   const info = returnInfo(data.profile.home)
-  const clock = store.mode === '帰宅前' && info ? info.open : meta.time
-  const todaySteps = data.steps.filter((step) => step.date === store.today)
-  const todayInvisible = invisibleOn(store.today, data.profile, data.events, data.hidden, store.today)
-  const cards = buildCards(store.mode, {
-    todaySteps,
-    todayInvisible,
-    events: data.events,
-    today: store.today,
-    profile: data.profile,
-    hidden: data.hidden,
-  }).slice(0, 3)
-  const line = cards.find((card) => card.line)?.line
-  const section = moreSection([
-    ...cards.map((card) => card.title),
-    '子どもの予定',
-    'あったらいいこと',
-    '声かけ',
-    '今週末の提案',
-  ])
+  const back = info?.back ?? null
+  const ages = data.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
+  const ensoku = data.childEvents.some((event) => event.date > store.today && (event.title.includes('遠足') || event.items.some((item) => item.includes('弁当'))))
+  const cast = forecastFor(data, store.today)
+  const peak = cast.slots.find((slot) => slot.id === cast.peak) ?? null
+  const warning = Boolean(peak && (peak.sky === '注意報' || peak.sky === '警報'))
+  const overlap = warning && peak ? overlapLine(slotClock(peak), peak.bits) : ''
+  const hot = new Set<RoutineId>(warning ? ['bath', 'bedtime', 'tomorrow'] : [])
+  const recommended = peak ? routineForPeak(peak.noun, peak.kind) : null
+  const ids = tonightIds(store.mode)
+  const taken = data.taken?.[store.today] ?? []
+  const rows = ids.map((id) => {
+    const item = taken.find((row) => row.routineId === id)
+    return { id, at: item?.at || rowAt(id, back), item }
+  })
+  const margin = taken.reduce((sum, item) => sum + freedFor(item.routineId as RoutineId, item.partial, ages, ensoku), 0)
+  const passed = data.accept?.[`${store.today}|day`]?.phase === 'passed'
+  const clock = store.mode === '帰宅前' && info ? info.open : back ?? ''
+  const partner = data.profile.partner || '家族'
 
   return (
-    <div className="px-3.5 pt-3.5 pb-28">
-      <DemoBar title="ハレゴト" meta={`${formatMd(store.today)} ${clock}`} fold />
-      <ForecastCard />
-      {section ? <MoreSection entries={section.entries} cards={cards} line={line} /> : null}
-    </div>
-  )
-}
-
-function MoreSection({ entries, cards, line }: { entries: string[]; cards: CardModel[]; line?: string }) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div className="mt-4" data-testid="today-more" data-fold="more" data-count={entries.length}>
+    <div className="px-3.5 pt-3.5 pb-44">
+      <DemoBar title="今夜の流れ" meta={`${formatMd(store.today)} ${clock}`} fold />
+      {store.demo && !store.ownHome ? (
+        <div className="mb-3 flex gap-2" data-fold="sample">
+          <p className="flex min-h-11 flex-1 items-center justify-center rounded-xl bg-accent-soft px-2 text-center text-xs font-bold text-accent-deep">サンプルの家族で表示中</p>
+          <button type="button" data-testid="start-own" className="min-h-11 flex-1 rounded-xl bg-white text-xs font-bold" onClick={store.startOwnHome}>
+            自分の家族で始める
+          </button>
+        </div>
+      ) : null}
+      <h2 className="text-[22px] leading-snug font-bold" data-fold="heading">
+        <Phrase text={back ? `帰宅 ${back}。先に決めておこう` : '今夜の流れを、先に決めておこう'} />
+      </h2>
+      {passed ? <p className="mt-2 text-sm">今日はパスしました。記録は残していません。</p> : null}
+      {warning && peak && overlap ? (
+        <p className="mt-3 flex items-center gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-fold="warning">
+          <SkyMark sky={peak.sky} size={24} />
+          <span>
+            <span className="mr-1 whitespace-nowrap">{peak.sky}</span>
+            <Phrase text={overlap} />
+          </span>
+        </p>
+      ) : cast.quiet ? (
+        <p className="mt-3 text-base font-bold" data-fold="warning">
+          今日は晴れ。余白はそのまま使おう
+        </p>
+      ) : null}
+      <div className="mt-3 space-y-2">
+        {rows.map((row, index) => {
+          const on = Boolean(row.item)
+          return (
+            <article key={row.id} data-fold={`row-${index}`} className={`flex items-center gap-2 rounded-[14px] bg-white p-3 shadow-sm ${hot.has(row.id) ? 'border-l-4 border-watch-line' : ''}`}>
+              <p className="w-12 shrink-0 text-sm font-bold whitespace-nowrap">{row.at}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-[15px] font-bold">
+                  {rowTitle(row.id, ages, ensoku)}
+                  {row.id === recommended ? <span className="ml-1 rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
+                </p>
+                <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku)}</p>
+              </div>
+              <button
+                type="button"
+                data-testid={`tonight-take-${row.id}`}
+                className={`inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-sm font-bold ${on ? 'bg-accent-deep text-white' : 'bg-[#f3eee6]'}`}
+                onClick={() => (on ? store.dropRoutine(store.today, row.id) : store.takeRoutine(store.today, row.id, row.at))}
+              >
+                {on ? '✓ 引き受けた' : '引き受ける'}
+              </button>
+            </article>
+          )
+        })}
+      </div>
       <button
         type="button"
-        className="flex min-h-11 w-full items-center gap-2 py-2 text-left text-sm font-bold"
-        aria-expanded={open}
-        aria-controls="today-more-panel"
-        onClick={() => setOpen((value) => !value)}
+        data-testid="tonight-consult"
+        data-fold="consult"
+        className="mt-3 flex min-h-11 w-full items-center gap-2 rounded-[14px] bg-white px-3 text-left text-sm font-bold shadow-sm"
+        onClick={() => {
+          const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
+          store.askForecast(peak?.prompt || '今夜の流れについて、次の手順を一つ。', contextChips({
+            dateLabel: `${formatMd(store.today)} 今夜`,
+            back,
+            titles,
+            overlap,
+            ages,
+          }))
+        }}
       >
-        <span>ほかにできること</span>
-        <span className="font-normal text-muted">{entries.length}</span>
-        <span aria-hidden="true" className="ml-auto">
-          {open ? '▲' : '▼'}
-        </span>
+        <span className="min-w-0 flex-1">迷ったら相談（今夜の流れは入力済み）</span>
+        <span aria-hidden="true">›</span>
       </button>
-      <div id="today-more-panel" data-testid="today-more-panel" inert={open ? undefined : true} aria-hidden={open ? undefined : true} className={open ? '' : 'h-0 overflow-hidden'}>
-        {cards.length > 0 ? (
-          <div className="mt-2 space-y-2">
-            {cards.map((card) => (
-              <article
-                key={card.key}
-                id={card.anchor}
-                className={`rounded-[14px] p-3 shadow-sm ${card.tone === 'inv' ? 'border-[1.5px] border-dashed border-inv-line bg-inv' : 'bg-white'}`}
-              >
-                <p className={`text-xs font-bold ${card.tone === 'inv' ? 'text-inv-ink' : 'text-accent'}`}>{card.kicker}</p>
-                <p className="mt-0.5 text-[15px] leading-snug font-bold whitespace-pre-line">{card.title}</p>
-                {card.meta ? <p className="mt-1 text-xs leading-relaxed text-muted">{card.meta}</p> : null}
-                {card.actions ? <div className="mt-2 flex flex-wrap gap-1.5">{card.actions}</div> : null}
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-2 text-sm leading-relaxed" data-testid="home-empty">
-            まだ予定がありません。予報士に、ひとことで聞けます。
-          </p>
-        )}
-        {line ? <p className="mt-2 rounded-xl bg-white px-3 py-2.5 text-[13px] leading-relaxed">送る文の例：「{line}」</p> : null}
-        <ChildToday />
-        <h2 className="mt-4 text-sm font-bold">あったらいいこと</h2>
-        <NiceEvents />
-        <MessageComposer />
-        <WeekendCard />
-        <LazyQuestion />
-      </div>
-    </div>
-  )
-}
-
-function buildCards(
-  mode: keyof typeof MODE_META,
-  input: {
-    todaySteps: Step[]
-    todayInvisible: InvItem[]
-    events: FamEvent[]
-    today: string
-    profile: Profile
-    hidden: Record<string, true>
-  },
-): CardModel[] {
-  const stepsCard: CardModel | null = input.todaySteps.length
-    ? {
-        key: 'steps',
-        kicker: '今日の一手',
-        title: input.todaySteps.map((step) => `${step.time ? `${step.time} ` : ''}${step.title}`).join('\n'),
-        actions: <CalendarButton />,
-      }
-    : null
-
-  if (mode === '朝') {
-    const upcoming = input.events.filter((event) => event.date === input.today || event.date === addDays(input.today, 1))
-    return compact([
-      upcoming.length
-        ? {
-            key: 'plan',
-            kicker: '今日・明日の予定',
-            title: upcoming.map((event) => `${dayName(event.date, input.today)} ${event.time} ${event.title}`).join('\n'),
-            meta: '前後の段取りはカレンダーの 👀 に出ています',
-            actions: <WeekButton />,
-          }
-        : null,
-      stepsCard,
-    ])
-  }
-
-  if (mode === '昼') {
-    return compact([
-      {
-        key: 'invite',
-        kicker: '飲み会に行きたい？',
-        title: '返事をする前に、30秒で整理しましょう',
-        meta: '行く・行かないより、抜ける時間に何が誰に移るかを先に',
-        actions: <SceneButton scene="nomi" label="🍻 飲み会に行きたい" />,
-      },
-      stepsCard,
-    ])
-  }
-
-  if (mode === '帰宅前') {
-    const plan = beforeLeaving(input.todayInvisible)
-    const info = returnInfo(input.profile.home)
-    return compact([
-      {
-        key: 'before',
-        anchor: 'before',
-        kicker: '🏃 帰宅前にできる一手',
-        title: plan.title,
-        meta: plan.item?.rel ?? '家に着いてから、一番手が足りない時間です',
-        line: plan.line,
-        actions: (
-          <BeforeActions title={plan.title} line={plan.line} item={plan.item} time={info ? addMinutes(info.back, -15) : '19:30'} />
-        ),
-      },
-      stepsCard,
-    ])
-  }
-
-  if (mode === '夜') {
-    const night = input.todayInvisible.find((item) => item.slot === '夜')
-    const tomorrow = input.events.find((event) => event.date === addDays(input.today, 1))
-    return compact([
-      night
-        ? {
-            key: 'night',
-            tone: 'inv',
-            kicker: '👀 今夜の見えない仕事',
-            title: night.title,
-            meta: night.rel,
-            actions: <InvisibleActions item={night} />,
-          }
-        : null,
-      tomorrow
-        ? {
-            key: 'tomorrow',
-            kicker: '明日の予定',
-            title: `🗓 ${tomorrow.title}${tomorrow.time ? ` ${tomorrow.time}` : ''}`,
-            actions:
-              tomorrow.kind === 'nomikai' ? (
-                <SceneButton scene="nomi" label="💬 明日の飲み会、どう伝える？" />
-              ) : (
-                <EventButton id={tomorrow.id} />
-              ),
-          }
-        : null,
-      {
-        key: 'tired',
-        kicker: '今日はどうだった？',
-        title: 'しんどそうだったら、明日の朝の一手を1つ決めておきましょう',
-        actions: <SceneButton scene="tired" label="妻がしんどそうで気になる" ghost />,
-      },
-    ])
-  }
-
-  const saturday = addDays(input.today, 1)
-  const sunday = addDays(input.today, 2)
-  const weekendEvents = input.events.filter((event) => event.date === saturday || event.date === sunday)
-  const weekendInvisible = [input.today, saturday, sunday].flatMap((date) =>
-    invisibleOn(date, input.profile, input.events, input.hidden, input.today),
-  )
-  return compact([
-    {
-      key: 'weekend',
-      kicker: '週末どうする？',
-      title: 'ひとりでいられる時間をどこに置くか、先に決めると楽です',
-      meta: weekendEvents.map((event) => `${dayName(event.date, input.today)}：${event.title}`).join(' / '),
-      actions: <SceneButton scene="week" label="週末の一手を決める" />,
-    },
-    weekendInvisible.length
-      ? {
-          key: 'behind',
-          tone: 'inv',
-          kicker: '👀 週末の裏側',
-          title: weekendInvisible
-            .slice(0, 3)
-            .map((item) => `${dayName(item.date, input.today)}：${item.title}`)
-            .join('\n'),
-          meta: weekendInvisible.length > 3 ? `ほか${weekendInvisible.length - 3}件` : undefined,
-          actions: <WeekButton />,
-        }
-      : null,
-  ])
-}
-
-function compact(cards: (CardModel | null)[]): CardModel[] {
-  return cards.filter((card): card is CardModel => Boolean(card))
-}
-
-function CalendarButton() {
-  const store = useStore()
-  return (
-    <Button size="sm" variant="ghost" onClick={() => { store.setCal('day', store.today); store.setTab('cal') }}>
-      📅 カレンダーで見る
-    </Button>
-  )
-}
-
-function WeekButton() {
-  const store = useStore()
-  return (
-    <Button size="sm" variant="ghost" onClick={() => { store.setCal('week'); store.setTab('cal') }}>
-      📅 カレンダーで見る
-    </Button>
-  )
-}
-
-function SceneButton({ scene, label, ghost }: { scene: 'nomi' | 'tired' | 'week' | 'me'; label: string; ghost?: boolean }) {
-  const store = useStore()
-  return (
-    <Button size="sm" variant={ghost ? 'ghost' : 'default'} onClick={() => store.beginScene(scene, true)}>
-      {label}
-    </Button>
-  )
-}
-
-function EventButton({ id }: { id: string }) {
-  const store = useStore()
-  return (
-    <Button
-      size="sm"
-      variant="ghost"
-      onClick={() => {
-        store.openSheet({ type: 'event', id })
-        store.setTab('cal')
-      }}
-    >
-      前後の段取り
-    </Button>
-  )
-}
-
-function BeforeActions({ title, line, item, time }: { title: string; line: string; item: InvItem | null; time: string }) {
-  const store = useStore()
-  const data = store.data
-  if (!data) return null
-  const saved = data.steps.some((step) => step.title === title && step.date === store.today)
-  return (
-    <>
-      {saved ? (
-        <Button size="sm" variant="good">✓ 一手にしました</Button>
-      ) : (
-        <Button
-          size="sm"
-          onClick={() => {
-            const id = store.ensureHomeSuggestion({
-              title,
-              date: store.today,
-              time,
-              why: '帰宅前の一手',
-              taskId: item ? TASK_IDS[item.def] : null,
-              invisibleKey: item ? `${item.date}:${item.key}` : null,
-              breakdown: [],
-            })
-            store.openSheet({ type: 'add', suggestionId: id })
-          }}
+      <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pt-2 pb-2">
+        <p className="text-center text-sm" data-fold="margin">
+          <Phrase text={taken.length ? `${taken.length}つ引き受け中 → 家に${margin}分の余白（目安）` : '引き受けると、家に余白が戻ります（目安）'} />
+        </p>
+        <button
+          type="button"
+          data-testid="tonight-share"
+          data-fold="share"
+          className="mt-2 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-accent-deep text-base font-bold text-white"
+          onClick={() => store.openShare()}
         >
-          📅 一手にする
-        </Button>
-      )}
-      <a className="inline-flex items-center rounded-lg bg-accent-soft px-2.5 py-1.5 text-xs font-bold text-accent-deep" href={lineShareUrl(line)} target="_blank" rel="noreferrer">
-        💬 LINEで送る
-      </a>
-    </>
-  )
-}
-
-function InvisibleActions({ item }: { item: InvItem }) {
-  const store = useStore()
-  const data = store.data
-  if (!data) return null
-  const saved = data.steps.some((step) => step.invisibleKey === `${item.date}:${item.key}`)
-  return (
-    <>
-      {saved ? (
-        <Button size="sm" variant="good">✓ 一手にしました</Button>
-      ) : (
-        <Button
-          size="sm"
-          onClick={() => {
-            const id = store.ensureHomeSuggestion({
-              title: item.title,
-              date: item.date,
-              time: SLOT_TIME[item.slot],
-              why: item.rel,
-              taskId: TASK_IDS[item.def],
-              invisibleKey: `${item.date}:${item.key}`,
-              breakdown: [],
-            })
-            store.openSheet({ type: 'add', suggestionId: id })
-          }}
+          {partner}に共有する
+        </button>
+        <button
+          type="button"
+          data-testid="tonight-cant"
+          data-fold="small"
+          className="mt-1 inline-flex min-h-11 w-full items-center justify-center text-sm font-bold text-accent-deep"
+          onClick={() => store.openSheet({ type: 'cant', date: store.today, slotId: peak?.id ?? '夜' })}
         >
-          📅 一手にする
-        </Button>
-      )}
-      <Button size="sm" variant="ghost" onClick={() => store.openSheet({ type: 'invisible', date: item.date, key: item.key })}>
-        くわしく
-      </Button>
-    </>
-  )
-}
-
-function LazyQuestion() {
-  const store = useStore()
-  const data = store.data
-  if (!data) return null
-  const key = nextLazyKey(data.profile, store.mode, store.lazyLock, Boolean(data.dismiss[store.today]))
-  if (!key) return null
-  const field = FIELDS.find((item) => item.key === key)
-  return (
-    <section className="mt-4 rounded-[14px] border border-[#dde9dd] bg-lazy p-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs font-bold text-lazy-ink">ひとつだけ教えてください</p>
-        <button type="button" className="text-[13px] text-muted" onClick={store.dismissLazy}>
-          あとで
+          今日はむずかしい → 小さく引き受ける
         </button>
       </div>
-      <p className="mt-1 text-sm">{lazyTitle(data.profile, key)}</p>
-      <p className="text-xs text-muted">
-        {LAZY_WHY[key] ?? ''} {field ? PRIVACY_LABEL[field.privacy] : ''}
-      </p>
-      <div className="mt-2">
-        <LazyControls fieldKey={key} />
-      </div>
-    </section>
-  )
-}
-
-function LazyControls({ fieldKey }: { fieldKey: string }) {
-  const store = useStore()
-  const data = store.data
-  if (!data) return null
-  if (fieldKey === 'kids') {
-    return (
-      <Button size="sm" variant="ghost" onClick={() => store.setTab('profile')}>
-        うちの画面で入れる →
-      </Button>
-    )
-  }
-  if (fieldKey === 'school') {
-    const index = data.profile.kids.findIndex((kid) => !kid.school)
-    if (index < 0) return null
-    return (
-      <div className="flex flex-wrap gap-1.5">
-        {fieldOptions('school').map((option) => (
-          <Chip key={option} onClick={() => store.patchProfile((profile) => setSchool(profile, index, option as School))}>
-            {option}
-          </Chip>
-        ))}
-      </div>
-    )
-  }
-  if (fieldKey === 'gomi') {
-    return (
-      <div>
-        <div className="flex flex-wrap gap-1">
-          {DAY_ORDER.map((dow) => (
-            <Chip
-              key={dow}
-              on={data.profile.gomi.可燃.includes(dow)}
-              onClick={() => {
-                store.lockLazy('gomi')
-                store.patchProfile((profile) => toggleGomi(profile, '可燃', dow))
-              }}
-            >
-              {DOW_CHARS[dow]}
-            </Chip>
-          ))}
-        </div>
-        {data.profile.gomi.可燃.length > 0 ? (
-          <Button size="sm" className="mt-2" onClick={store.dismissLazy}>
-            これでOK（ほかのゴミはあとで）
-          </Button>
-        ) : null}
-      </div>
-    )
-  }
-  if (fieldKey === 'shop') {
-    return (
-      <div className="flex flex-wrap gap-1">
-        {DAY_ORDER.map((dow) => (
-          <Chip key={dow} on={data.profile.shop === dow} onClick={() => store.patchProfile((profile) => setShop(profile, dow))}>
-            {DOW_CHARS[dow]}
-          </Chip>
-        ))}
-      </div>
-    )
-  }
-  const choiceKeys = ['home', 'car', 'area', 'pstate', 'work'] as const
-  if (!choiceKeys.includes(fieldKey as (typeof choiceKeys)[number])) return null
-  const key = fieldKey as (typeof choiceKeys)[number]
-  return (
-    <div className="flex flex-wrap gap-1.5">
-      {fieldOptions(fieldKey).map((option) => (
-        <Chip key={option} on={data.profile[key] === option} onClick={() => store.patchProfile((profile) => setChoice(profile, key, option))}>
-          {option}
-        </Chip>
-      ))}
     </div>
   )
 }

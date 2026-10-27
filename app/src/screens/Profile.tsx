@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
@@ -18,7 +19,7 @@ import {
   toggleMulti,
   isSet,
 } from '@/domain/profile.ts'
-import { AGES, GOMI_KINDS, type GomiKind, type School } from '@/domain/types.ts'
+import { AGES, GOMI_KINDS, type GomiKind, type Pronoun, type School } from '@/domain/types.ts'
 
 const GROUPS = ['家族', '子ども', 'くらし', '頼れる先', 'パートナー']
 
@@ -66,7 +67,7 @@ export function Profile() {
       <DemoBar />
       <h1 className="text-lg font-bold">うち</h1>
       <p className="mt-1 text-[13px] leading-relaxed text-muted">
-        相談の答えと、カレンダーの 👀 に使います。わかるところだけでOK。{data.profile.partner}さんの登録は要りません。
+        相談の答えと、見えない家事に使います。わかるところだけでOK。{data.profile.partner ? `${data.profile.partner}さんの登録は要りません。` : '相手の登録は要りません。'}
       </p>
       {(['gomi', 'school', 'shop'] as const).some((key) => !isSet(data.profile, key)) ? (
         <p className="mt-2 rounded-xl bg-white px-3 py-2 text-[13px] leading-relaxed">
@@ -92,7 +93,7 @@ export function Profile() {
         </section>
       ))}
 
-      <h2 className="mt-4 text-sm font-bold">カレンダーの 👀 見えない仕事</h2>
+      <h2 className="mt-4 text-sm font-bold">見えない家事</h2>
       <div className="mt-2 flex items-center justify-between rounded-[14px] bg-white px-3 py-2.5">
         <span className="text-sm">表示する</span>
         <Chip on={data.profile.showInv} onClick={() => store.patchProfile((profile) => ({ ...profile, showInv: !profile.showInv }))}>
@@ -139,7 +140,21 @@ export function Profile() {
         </div>
       )}
 
+      <h2 className="mt-6 text-sm font-bold">一人称</h2>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {(['俺', '僕', '自分', ''] as Pronoun[]).map((id) => (
+          <button
+            key={id || 'none'}
+            type="button"
+            className={`inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === id ? 'bg-accent-deep text-white' : 'bg-white'}`}
+            onClick={() => store.patchProfile((profile) => ({ ...profile, pronoun: id }))}
+          >
+            {id || '名前なし'}
+          </button>
+        ))}
+      </div>
       <DataHandling />
+      <Restart />
       {iosSafariHint() ? (
         <p className="mt-4 text-[13px] leading-relaxed text-muted">ホーム画面に追加すると、アプリのように開けます（共有ボタン →「ホーム画面に追加」）。</p>
       ) : null}
@@ -147,6 +162,31 @@ export function Profile() {
         この端末のデータを消す
       </Button>
     </div>
+  )
+}
+
+function Restart() {
+  const store = useStore()
+  const [ask, setAsk] = useState(false)
+  return (
+    <section className="mt-4">
+      <h2 className="text-sm font-bold">最初から</h2>
+      <p className="mt-1 text-[13px] leading-relaxed text-muted">サンプルの家族に戻して、はじめの案内をもう一度見ます。</p>
+      {ask ? (
+        <div className="mt-2 flex gap-2">
+          <button type="button" data-testid="demo-reset" className="inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-3 text-sm font-bold text-white" onClick={() => store.reset()}>
+            戻す
+          </button>
+          <button type="button" className="inline-flex min-h-11 items-center rounded-xl bg-white px-3 text-sm font-bold" onClick={() => setAsk(false)}>
+            やめる
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-accent-deep" onClick={() => setAsk(true)}>
+          最初から見る
+        </button>
+      )}
+    </section>
   )
 }
 

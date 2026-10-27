@@ -108,6 +108,8 @@ export function createSeed(today = todayInTokyo()): Persisted {
     threads: [],
     lifted: [],
     accept: {},
+    taken: {},
+    seenWelcome: false,
   }
 }
 

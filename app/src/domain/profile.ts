@@ -162,6 +162,7 @@ export function emptyProfile(): Profile {
     pstate: null,
     lesson: null,
     partner: '妻',
+    pronoun: '俺',
     showInv: true,
     notif: null,
     usual: [],

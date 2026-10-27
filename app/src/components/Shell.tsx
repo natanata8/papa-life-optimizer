@@ -1,12 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { CalendarDays, House, MapPin, MessageCircle, UserRound } from 'lucide-react'
+import { CalendarDays, House, ListChecks, MessageCircle, UserRound } from 'lucide-react'
 import { useStore } from '@/app/store.tsx'
 import { demoOnly } from '@/domain/demo.ts'
 import { Onboarding } from '@/screens/Onboarding.tsx'
+import { Welcome } from '@/screens/Welcome.tsx'
 import { Home } from '@/screens/Home.tsx'
+import { DoScreen } from '@/screens/Do.tsx'
+import { ShareScreen, PartnerPreview } from '@/screens/Share.tsx'
 import { Consult } from '@/screens/Consult.tsx'
 import { Calendar } from '@/screens/Calendar.tsx'
-import { Outings } from '@/screens/Outings.tsx'
 import { Profile } from '@/screens/Profile.tsx'
 import { Review } from '@/screens/Review.tsx'
 import { Sheets } from '@/screens/Sheets.tsx'
@@ -15,9 +17,9 @@ import type { Tab } from '@/domain/types.ts'
 
 const NAV: { tab: Tab; label: string; icon: typeof House }[] = [
   { tab: 'home', label: '今日', icon: House },
-  { tab: 'out', label: 'お出かけ', icon: MapPin },
+  { tab: 'do', label: 'やる', icon: ListChecks },
   { tab: 'consult', label: '相談', icon: MessageCircle },
-  { tab: 'cal', label: 'カレンダー', icon: CalendarDays },
+  { tab: 'cal', label: '予定', icon: CalendarDays },
   { tab: 'profile', label: 'うち', icon: UserRound },
 ]
 
@@ -31,7 +33,21 @@ export function Shell() {
     )
   }
   if (store.authRequired && !demoOnly) return <AuthScreen />
-  if (!store.data?.onboarded) {
+  if (!store.data) {
+    return (
+      <Frame>
+        <p className="px-6 pt-16 text-sm text-muted">読み込んでいます…</p>
+      </Frame>
+    )
+  }
+  if (!store.data.seenWelcome) {
+    return (
+      <Frame>
+        <Welcome />
+      </Frame>
+    )
+  }
+  if (!store.data.onboarded) {
     return (
       <Frame>
         <Onboarding />
@@ -39,26 +55,36 @@ export function Shell() {
     )
   }
   const tab = store.tab
+  const takenCount = store.data.taken?.[store.today]?.length ?? 0
   return (
     <Frame>
-      {tab === 'home' || tab === 'review' ? tab === 'review' ? <Review /> : <Home /> : null}
-      {tab === 'out' ? <Outings /> : null}
-      {tab === 'consult' ? <Consult /> : null}
-      {tab === 'cal' ? <Calendar /> : null}
-      {tab === 'profile' ? <Profile /> : null}
+      {store.panel === 'preview' ? <PartnerPreview /> : store.panel === 'share' ? <ShareScreen /> : null}
+      {store.panel ? null : tab === 'home' || tab === 'review' ? tab === 'review' ? <Review /> : <Home /> : null}
+      {store.panel ? null : tab === 'do' ? <DoScreen /> : null}
+      {store.panel ? null : tab === 'consult' ? <Consult /> : null}
+      {store.panel ? null : tab === 'cal' ? <Calendar /> : null}
+      {store.panel ? null : tab === 'profile' ? <Profile /> : null}
       <nav className="fixed bottom-0 left-1/2 z-30 flex w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         {NAV.map((item) => {
           const Icon = item.icon
-          const active = item.tab === 'home' ? tab === 'home' || tab === 'review' : tab === item.tab
+          const active = !store.panel && (item.tab === 'home' ? tab === 'home' || tab === 'review' : tab === item.tab)
           return (
             <button
               key={item.tab}
               type="button"
               data-testid={`nav-${item.tab}`}
-              className={`flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 py-1 text-xs font-bold ${active ? 'text-accent-deep' : 'text-muted'}`}
-              onClick={() => store.setTab(item.tab)}
+              className={`relative flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 py-1 text-xs font-bold ${active ? 'text-accent-deep' : 'text-muted'}`}
+              onClick={() => {
+                store.closePanel()
+                store.setTab(item.tab)
+              }}
             >
-              <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
+              <span className="relative">
+                <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
+                {item.tab === 'do' && takenCount > 0 ? (
+                  <span className="absolute -top-1.5 -right-2.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-margin px-1 text-[12px] leading-none font-bold text-white">{takenCount}</span>
+                ) : null}
+              </span>
               {item.label}
             </button>
           )
@@ -82,9 +108,14 @@ function Toast() {
   const store = useStore()
   if (!store.toast) return null
   return (
-    <p className="fixed bottom-20 left-1/2 z-50 max-w-[360px] -translate-x-1/2 rounded-full bg-ink px-4 py-2 text-center text-[13px] text-white shadow-lg">
-      {store.toast}
-    </p>
+    <div className="fixed bottom-20 left-1/2 z-50 flex max-w-[360px] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg" data-testid="toast">
+      <p>{store.toast}</p>
+      {store.toastUndo ? (
+        <button type="button" data-testid="toast-undo" className="inline-flex min-h-11 items-center font-bold whitespace-nowrap" onClick={() => { store.toastUndo?.(); store.dismissToast() }}>
+          元に戻す
+        </button>
+      ) : null}
+    </div>
   )
 }
 

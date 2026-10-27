@@ -10,7 +10,7 @@
     "publish:demo": "node scripts/build-demo.mjs --push",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
-    "test": "node --experimental-strip-types --test src/domain/forecast.test.ts src/domain/copy-guard.test.ts src/domain/todayFold.test.ts",
+    "test": "node --experimental-strip-types --test src/domain/forecast.test.ts src/domain/copy-guard.test.ts src/domain/todayFold.test.ts src/domain/routines.test.ts",
     "preview": "vite preview",
     "seed:tasks": "node scripts/seed-tasks.mjs",
     "shoot": "node scripts/shoot.mjs"

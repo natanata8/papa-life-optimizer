@@ -29,6 +29,18 @@ test('注意報と警報の名前は家の仕事', () => {
   for (const name of names) assert.equal(/妻|嫁|イライラ|家庭内|機嫌/.test(name), false, name)
 })
 
+test('画面の文言に予報士と一手を残さない', () => {
+  const screens = ['Home.tsx', 'Consult.tsx', 'Calendar.tsx', 'Do.tsx', 'Share.tsx', 'Welcome.tsx', '../components/Shell.tsx']
+  for (const name of screens) {
+    const source = readFileSync(new URL(`../screens/${name}`, import.meta.url), 'utf8')
+    for (const line of source.split('\n')) {
+      if (line.includes('data-testid')) continue
+      const visible = line.replace(/\.一手/g, '')
+      assert.equal(/予報士|一手/.test(visible), false, `${name}: ${line.trim()}`)
+    }
+  }
+})
+
 test('妻がしんどそうの場面アイコンは天気にしない', () => {
   const source = readFileSync(new URL('./scenes.ts', import.meta.url), 'utf8')
   const start = source.indexOf("id: 'tired'")

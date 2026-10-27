@@ -9,7 +9,7 @@ import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
 import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
-import { createEmpty } from '@/domain/seed.ts'
+import { createEmpty, createPublicDemo } from '@/domain/seed.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
 import { HOTLINE_MESSAGE, isSelfHarm, safetyLevel } from '@/domain/safety.ts'
@@ -105,7 +105,7 @@ type StoreValue = {
   answerFlow: (option: string) => void
   skipLazy: () => void
   sendText: (text: string) => void
-  askForecast: (text: string) => void
+  askForecast: (text: string, chips?: string[]) => void
   retryConsult: (retry: ConsultRetry) => void
   startOwnHome: () => void
   newChat: () => void
@@ -149,7 +149,21 @@ type StoreValue = {
   clearHidden: () => void
   signIn: (email: string) => Promise<void>
   refreshAuth: () => void
-  showToast: (text: string) => void
+  showToast: (text: string, undo?: () => void) => void
+  dismissToast: () => void
+  toastUndo: (() => void) | null
+  panel: 'share' | 'preview' | null
+  shareDraft: string | null
+  openShare: (draft?: string) => void
+  openPreview: () => void
+  closePanel: () => void
+  takeRoutine: (date: string, routineId: string, at: string, partial?: string[]) => void
+  dropRoutine: (date: string, routineId: string) => void
+  toggleCheck: (date: string, routineId: string, stepId: string) => void
+  markShared: (date: string) => void
+  addExtraSteps: (date: string, routineId: string, titles: string[]) => void
+  removeChip: (messageId: string, chip: string) => void
+  markWelcome: (mode: 'sample' | 'own') => void
   ensureHomeSuggestion: (input: HomeSuggestion) => string
 }
 
@@ -377,6 +391,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [flow, setFlow] = useState<Flow | null>(null)
   const [sheet, setSheet] = useState<Sheet | null>(null)
   const [toast, setToast] = useState<string | null>(null)
+  const [toastUndo, setToastUndo] = useState<(() => void) | null>(null)
+  const [panel, setPanel] = useState<'share' | 'preview' | null>(null)
+  const [shareDraft, setShareDraft] = useState<string | null>(null)
   const [ob, setObState] = useState<ObDraft>(initialOb)
   const [pending, setPending] = useState(false)
   const [cal, setCalState] = useState<'week' | 'day'>('week')
@@ -429,11 +446,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!toast) return
-    const handle = window.setTimeout(() => setToast(null), 1800)
+    const handle = window.setTimeout(() => {
+      setToast(null)
+      setToastUndo(null)
+    }, toastUndo ? 6000 : 1800)
     return () => window.clearTimeout(handle)
-  }, [toast])
+  }, [toast, toastUndo])
 
-  const showToast = (text: string) => setToast(text)
+  const showToast = (text: string, undo?: () => void) => {
+    setToast(text)
+    setToastUndo(() => undo ?? null)
+  }
+  const dismissToast = () => {
+    setToast(null)
+    setToastUndo(null)
+  }
 
   const maybeAskNotif = (snapshot: Persisted) => {
     if (snapshot.profile.notif === null) setSheet({ type: 'notif' })
@@ -519,6 +546,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     flow,
     sheet,
     toast,
+    toastUndo,
+    dismissToast,
+    panel,
+    shareDraft,
     ob,
     pending,
     cal,
@@ -541,6 +572,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         hydrated.current = true
         commit(next)
         localStorage.removeItem('tone-app:mode')
+        localStorage.removeItem('tone-app:own-home')
         setModeState('帰宅前')
         setObState(initialOb())
         setFlow(null)
@@ -722,7 +754,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
       setFlow({ scene, answers: [], lazy, care })
     },
-    askForecast: (text) => {
+    askForecast: (text, chips) => {
       const trimmed = text.trim()
       const current = dataRef.current
       if (!trimmed || !current || pending) return
@@ -731,7 +763,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           ...current,
           chat: [
             ...current.chat,
-            { id: uid(), role: 'me', text: trimmed },
             { id: uid(), role: 'bot', text: HOTLINE_MESSAGE, safety: 'stop', selfHarm: isSelfHarm(trimmed) },
           ],
         })
@@ -740,13 +771,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         setFlow(null)
         return
       }
-      const next = { ...current, chat: [...current.chat, { id: uid(), role: 'me' as const, text: trimmed }] }
+      const context = chips?.length ? [{ id: uid(), role: 'context' as const, chips }] : []
+      const next = { ...current, chat: [...current.chat, ...context] }
       commit(next)
       setSheet(null)
+      setPanel(null)
       setTab('consult')
       setFlow(null)
       logUsage('umbrella_tapped')
-      void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: 'オウチ予報' })
+      void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: '今夜の流れ' })
     },
     retryConsult: (retry) => {
       const current = dataRef.current
@@ -757,15 +790,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
     startOwnHome: () => {
-      if (demoOnly) return
       const empty = createEmpty(todayInTokyo())
       localStorage.setItem('tone-app:own-home', '1')
       setOwnHome(true)
-      commit(empty)
+      commit({
+        ...empty,
+        onboarded: true,
+        seenWelcome: true,
+        profile: { ...empty.profile, partner: '', kids: [], home: null, work: null, offDad: null, offPartner: null, pronoun: '俺' },
+      })
       setObState(initialOb())
       setFlow(null)
       setSheet(null)
-      setTab('home')
+      setPanel(null)
+      setTab('profile')
       setLazyLock(null)
     },
     newChat: () => {
@@ -827,6 +865,88 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const accept = { ...(current.accept ?? {}) }
       delete accept[key]
       commit({ ...current, lifted: (current.lifted ?? []).filter((item) => item !== key), accept })
+    },
+    openShare: (draft) => {
+      setShareDraft(draft ?? null)
+      setPanel('share')
+    },
+    openPreview: () => setPanel('preview'),
+    closePanel: () => {
+      setPanel(null)
+      setShareDraft(null)
+    },
+    takeRoutine: (date, routineId, at, partial) => {
+      const current = dataRef.current
+      if (!current) return
+      const list = current.taken?.[date] ?? []
+      const next = list.filter((item) => item.routineId !== routineId)
+      next.push({ routineId, at, checked: [], partial })
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: next } })
+    },
+    dropRoutine: (date, routineId) => {
+      const current = dataRef.current
+      if (!current) return
+      const list = (current.taken?.[date] ?? []).filter((item) => item.routineId !== routineId)
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+    },
+    toggleCheck: (date, routineId, stepId) => {
+      const current = dataRef.current
+      if (!current) return
+      const list = (current.taken?.[date] ?? []).map((item) => {
+        if (item.routineId !== routineId) return item
+        const checked = item.checked.includes(stepId) ? item.checked.filter((id) => id !== stepId) : [...item.checked, stepId]
+        return { ...item, checked }
+      })
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+    },
+    markShared: (date) => {
+      const current = dataRef.current
+      if (!current) return
+      const stamp = new Date().toISOString()
+      const list = (current.taken?.[date] ?? []).map((item) => ({ ...item, sharedAt: stamp }))
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+    },
+    addExtraSteps: (date, routineId, titles) => {
+      const current = dataRef.current
+      if (!current) return
+      const extra = titles.filter(Boolean).map((title) => ({ id: uid(), title, minutes: 3 }))
+      const list = [...(current.taken?.[date] ?? [])]
+      const index = list.findIndex((item) => item.routineId === routineId)
+      if (index < 0) list.push({ routineId, at: '', checked: [], extra })
+      else list[index] = { ...list[index], extra: [...(list[index].extra ?? []), ...extra] }
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+      setTab('do')
+    },
+    removeChip: (messageId, chip) => {
+      const current = dataRef.current
+      if (!current) return
+      commit({
+        ...current,
+        chat: current.chat.map((message) => {
+          if (message.role !== 'context' || message.id !== messageId) return message
+          return { ...message, chips: message.chips.filter((item) => item !== chip) }
+        }),
+      })
+    },
+    markWelcome: (mode) => {
+      if (mode === 'own') {
+        const empty = createEmpty(todayRef.current)
+        localStorage.setItem('tone-app:own-home', '1')
+        setOwnHome(true)
+        commit({
+          ...empty,
+          onboarded: true,
+          seenWelcome: true,
+          profile: { ...empty.profile, partner: '', kids: [], home: null, work: null, offDad: null, offPartner: null, pronoun: '俺' },
+        })
+        setTab('profile')
+        return
+      }
+      const next = createPublicDemo(todayRef.current)
+      localStorage.removeItem('tone-app:own-home')
+      setOwnHome(false)
+      commit({ ...next, seenWelcome: true, onboarded: true })
+      setTab('home')
     },
     openThread: (id) => {
       const current = dataRef.current
@@ -973,7 +1093,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           {
             id: uid(),
             role: 'bot',
-            text: `この日は、予定 ${events}件・一手 ${steps}件・見えない仕事 ${invisible}件です。何が気になりますか？`,
+            text: `この日は、予定 ${events}件・引き受けたこと ${steps}件・見えない家事 ${invisible}件です。何が気になりますか？`,
             scenes: true,
           },
         ],

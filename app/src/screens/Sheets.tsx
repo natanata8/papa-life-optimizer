@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Phrase } from '@/components/Phrase.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
 import { forecastFor } from '@/domain/forecastView.ts'
-import { smallerUmbrella } from '@/domain/forecast.ts'
+import { partialChoices } from '@/domain/routines.ts'
+import type { AgeLabel } from '@/domain/types.ts'
 import { SceneGrid } from '@/components/SceneGrid.tsx'
 import { ChildSheet } from '@/screens/children/ChildSheet.tsx'
 import { dayName } from '@/domain/dates.ts'
@@ -549,39 +549,38 @@ function CantSheet({ date, slotId }: { date: string; slotId: string }) {
   const store = useStore()
   const data = store.data
   if (!data) return null
-  const cast = forecastFor(data, date, store.today)
-  const slot = cast.slots.find((item) => item.id === slotId)
-  if (!slot) return null
-  const smaller = smallerUmbrella(slot.kind)
-  const sendSmall = (line: string) => {
-    store.beginAccept(date, slotId, line, true)
-    store.closeSheet()
-  }
+  const ages = data.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
+  const ensoku = data.childEvents.some((event) => event.title.includes('遠足'))
+  const choices = partialChoices(ages, ensoku)
   return (
     <div data-testid="sheet-cant">
-      <h2 className="text-lg font-bold">大丈夫。小さい一手もあります</h2>
-      <p className="mt-1 text-sm leading-relaxed text-muted">今夜できそうなものを1つ選ぶか、今日はパスでOK。</p>
-      <button type="button" className="mt-3 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall(`今から帰るね。${smaller}`)}>
-        <span className="block text-sm font-bold"><Phrase text={smaller} /></span>
-        <span className="mt-0.5 block text-xs text-muted">1分・送る文あり</span>
-      </button>
-      <button type="button" className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall('今から帰るね。何かいるものある？')}>
-        <span className="block text-sm font-bold">帰りに何かいるか聞く</span>
-        <span className="mt-0.5 block text-xs text-muted">1分・送る文あり</span>
-      </button>
+      <h2 className="text-lg font-bold">大丈夫。小さく引き受けることもできます</h2>
+      <p className="mt-1 text-sm leading-relaxed text-muted">手順の一部だけでも、家の時間は空きます。</p>
+      {choices.map((choice) => (
+        <button
+          key={choice.title}
+          type="button"
+          className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left"
+          onClick={() => {
+            store.takeRoutine(date, choice.routineId, '', choice.stepIds)
+            store.closeSheet()
+            store.showToast('小さく引き受けました')
+          }}
+        >
+          <span className="block text-sm font-bold">{choice.title}</span>
+          <span className="mt-0.5 block text-xs text-muted">{choice.note}</span>
+        </button>
+      ))}
       <button
         type="button"
-        className="mt-2 flex min-h-[60px] w-full items-center rounded-xl bg-white px-3 py-3 text-left"
+        className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left"
         onClick={() => {
-          store.askForecast(`${slot.prompt} 今日は引き受けられない。もっと小さい一手を一つ。`)
           store.closeSheet()
+          store.openShare('今から帰るね。何かいるものある？')
         }}
       >
-        <span className="min-w-0 flex-1">
-          <span className="block text-sm font-bold">予報士に、別の一手を相談</span>
-          <span className="mt-0.5 block text-xs text-muted">今夜の状況は入力済み</span>
-        </span>
-        <span aria-hidden="true" className="text-muted">›</span>
+        <span className="block text-sm font-bold">帰りに何かいるか聞く</span>
+        <span className="mt-0.5 block text-xs text-muted">送る文あり</span>
       </button>
       <button
         type="button"
@@ -593,7 +592,7 @@ function CantSheet({ date, slotId }: { date: string; slotId: string }) {
         }}
       >
         <span className="block text-sm font-bold">今日はパスする</span>
-        <span className="mt-0.5 block text-xs text-muted">記録には残しません</span>
+        <span className="mt-0.5 block text-xs text-muted">記録は残しません</span>
       </button>
     </div>
   )
@@ -610,7 +609,7 @@ function ForecastSheet({ slotId, date }: { slotId: string; date?: string }) {
   const alert = slot.sky === '注意報' || slot.sky === '警報' || slot.lifted
   return (
     <div data-testid="forecast-sheet">
-      <p className="text-xs font-bold text-muted">オウチ予報・予報</p>
+      <p className="text-xs font-bold text-muted">今夜の流れ</p>
       <p className="mt-1 text-base font-bold">
         {slot.lifted ? '解除' : slot.call || `${slot.range} ${slot.sky}`}
       </p>
