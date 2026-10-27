@@ -1,4 +1,5 @@
 import { addDays, formatMd } from '@/domain/dates.ts'
+import { SCENES } from '@/domain/scenes.ts'
 import type { StepKind, ToneAnswer, ToneStep } from '@/domain/types.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
 
@@ -83,12 +84,13 @@ function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.scene === 'me') return noteBlocked(mine(request), blocked)
   if (request.scene === 'late') return noteBlocked(late(request), blocked)
   if (request.scene === 'clash') return noteBlocked(clash(request), blocked)
+  const choices = Object.values(SCENES).map((scene) => scene.title)
   return {
-    状況整理: '受け取りました。近い場面が分かると、残る仕事を1つに絞れます。',
+    状況整理: '近い場面を1つ選ぶと、手順を出せます。',
     気づき: '',
-    一手: [step('近い場面を1つ選ぶ', '場面が分かると、手順と声かけを出せます', '今やる', '今夜', ['近い場面を1つ選ぶ'])],
+    一手: [step('近い場面を選ぶ', '下の場面から1つ', '今やる', '今夜', choices.map((title) => title.slice(0, 24)))],
     声かけ例: '',
-    明日やること: '近い場面をもう一度選ぶ',
+    明日やること: '',
     questions: [],
     safety_flag: false,
   }

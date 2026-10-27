@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { useStore } from '@/app/store.tsx'
-import { plusMinutes, routineById, rowAt, rowTitle, stepLabel, stepsFor, type RoutineId } from '@/domain/routines.ts'
+import { firstUnchecked, plusMinutes, rowAt, rowTitle, shownMinutes, stepLabel, stepsFor, type RoutineId } from '@/domain/routines.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
 
@@ -23,7 +23,17 @@ export function DoScreen() {
         <button type="button" data-testid="do-list" className={`min-h-11 rounded-lg text-sm font-bold ${focus ? '' : 'bg-white'}`} onClick={() => setFocus(false)}>
           リスト
         </button>
-        <button type="button" data-testid="do-focus" className={`min-h-11 rounded-lg text-sm font-bold ${focus ? 'bg-white' : ''}`} onClick={() => { setCursor(0); setFocus(true) }}>
+        <button
+          type="button"
+          data-testid="do-focus"
+          className={`min-h-11 rounded-lg text-sm font-bold ${focus ? 'bg-white' : ''}`}
+          onClick={() => {
+            const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => step.id))
+            const checked = taken.flatMap((item) => item.checked)
+            setCursor(firstUnchecked(flat, checked))
+            setFocus(true)
+          }}
+        >
           1つずつ
         </button>
       </div>
@@ -48,7 +58,7 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-base font-bold">{rowTitle(id, ages, ensoku)}</h2>
         <p className="text-xs whitespace-nowrap text-muted">
-          {at}〜 約{routineById(id).minutes}分
+          {at}〜 約{shownMinutes(id, ages, ensoku, item.partial)}分
           <span className="ml-2 font-bold text-ink">{done}/{steps.length}</span>
         </p>
       </div>
@@ -100,6 +110,15 @@ function Focus({
 }) {
   const store = useStore()
   const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => ({ item, step })))
+  const done = flat.length > 0 && flat.every((row) => row.item.checked.includes(row.step.id))
+  if (done) {
+    return (
+      <article className="mt-4 rounded-[14px] bg-white px-4 py-8 text-center shadow-sm" data-testid="do-finish">
+        <h2 className="text-[26px] font-bold">今夜はこれでOK</h2>
+        <p className="mt-2 text-sm">引き受けた手順は、ここまでです。</p>
+      </article>
+    )
+  }
   const index = Math.min(cursor, Math.max(flat.length - 1, 0))
   const current = flat[index]
   if (!current) return null
@@ -122,16 +141,16 @@ function Focus({
         className="mt-4 inline-flex min-h-[72px] w-full items-center justify-center rounded-xl bg-margin text-lg font-bold text-white"
         onClick={() => {
           if (!current.item.checked.includes(current.step.id)) store.toggleCheck(store.today, id, current.step.id)
-          setCursor(Math.min(index + 1, flat.length - 1))
+          setCursor(index + 1)
         }}
       >
         できた
       </button>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <button type="button" data-testid="do-back" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={() => setCursor(Math.max(index - 1, 0))}>
+        <button type="button" data-testid="do-back" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold disabled:opacity-40" disabled={index === 0} onClick={() => setCursor(Math.max(index - 1, 0))}>
           ひとつ戻る
         </button>
-        <button type="button" data-testid="do-skip" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={() => setCursor(Math.min(index + 1, flat.length - 1))}>
+        <button type="button" data-testid="do-skip" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={() => setCursor(index + 1)}>
           とばす
         </button>
       </div>

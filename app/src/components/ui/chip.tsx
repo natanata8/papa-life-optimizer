@@ -11,7 +11,7 @@ export function Chip({
     <button
       type={type}
       className={cn(
-        'rounded-full border px-3 py-1.5 text-[13px]',
+        'inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border px-3 py-1.5 text-[13px]',
         on ? 'border-accent bg-accent text-white' : 'border-line bg-white text-ink',
         className,
       )}

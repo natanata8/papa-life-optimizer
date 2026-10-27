@@ -49,18 +49,10 @@ export function Welcome() {
         </div>
       ) : (
         <div>
-          <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm">
-            <p className="flex items-center gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink">
-              <SkyMark sky="注意報" size={24} />
-              20〜22時、家のことが重なる
-            </p>
-            <ul className="mt-2 space-y-1 text-sm">
-              <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>19:40 お風呂</span><span>引き受ける</span></li>
-              <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>20:30 寝かしつけ</span><span /></li>
-              <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>21:00 明日の持ち物</span><span>引き受ける</span></li>
-            </ul>
-          </div>
-          <h1 className="mt-6 text-[25px] leading-snug font-bold">{PAGES[page].title}</h1>
+          <Picture page={page} />
+          <h1 className="mt-6 text-[25px] leading-snug font-bold">
+            <Phrase text={PAGES[page].title} />
+          </h1>
           <p className="mt-2 text-sm leading-relaxed">
             <Phrase text={PAGES[page].body} />
           </p>
@@ -69,6 +61,43 @@ export function Welcome() {
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+function Picture({ page }: { page: number }) {
+  if (page === 1) {
+    return (
+      <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
+        <p className="text-xs font-bold text-muted">見本（押せません）</p>
+        <p className="mt-2 text-sm font-bold text-margin">お風呂 3/7</p>
+        <p className="mt-1 text-lg font-bold">下の子を洗う</p>
+        <p className="mt-2 rounded-lg bg-[#fff6e4] px-2 py-2 text-xs">コツ：顔は最後に拭く</p>
+        <p className="mt-2 flex min-h-11 items-center justify-center rounded-xl bg-margin text-sm font-bold text-white">できた</p>
+      </div>
+    )
+  }
+  if (page === 2) {
+    return (
+      <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
+        <p className="text-xs font-bold text-muted">見本（押せません）</p>
+        <p className="mt-2 rounded-xl bg-[#f7f1e8] px-3 py-3 text-sm leading-relaxed">今夜のお風呂は俺がやるね。19:30に帰ります。</p>
+        <p className="mt-2 flex min-h-11 items-center justify-center rounded-xl bg-[#06c755] text-sm font-bold text-white">送る文</p>
+      </div>
+    )
+  }
+  return (
+    <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
+      <p className="text-xs font-bold text-muted">見本（押せません）</p>
+      <p className="mt-2 flex items-center gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink">
+        <SkyMark sky="注意報" size={24} />
+        20〜22時、家のことが重なる
+      </p>
+      <ul className="mt-2 space-y-1 text-sm">
+        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>19:40 お風呂</span><span className="text-muted">見本</span></li>
+        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>20:30 寝かしつけ</span><span /></li>
+        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>21:00 明日の持ち物</span><span className="text-muted">見本</span></li>
+      </ul>
     </div>
   )
 }

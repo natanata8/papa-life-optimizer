@@ -67,7 +67,7 @@ export function Profile() {
       <DemoBar />
       <h1 className="text-lg font-bold">うち</h1>
       <p className="mt-1 text-[13px] leading-relaxed text-muted">
-        相談の答えと、見えない家事に使います。わかるところだけでOK。{data.profile.partner ? `${data.profile.partner}さんの登録は要りません。` : '相手の登録は要りません。'}
+        相談の答えと、見えない家事に使います。わかるところだけでOK。相手の登録は要りません。項目の横は、相談に使うときの扱いです。
       </p>
       {(['gomi', 'school', 'shop'] as const).some((key) => !isSet(data.profile, key)) ? (
         <p className="mt-2 rounded-xl bg-white px-3 py-2 text-[13px] leading-relaxed">
@@ -108,13 +108,13 @@ export function Profile() {
 
       <h2 className="mt-4 text-sm font-bold">通知</h2>
       <div className="mt-2 flex items-center justify-between rounded-[14px] bg-white px-3 py-2.5">
-        <span className="text-sm">{data.profile.notif === null ? 'まだ聞いていません' : data.profile.notif ? 'オン' : 'オフ'}</span>
+        <span className="text-sm">{data.profile.notif === null ? 'まだ聞いていません' : data.profile.notif ? '朝の画面に出す' : '出さない'}</span>
         <div className="flex gap-1.5">
           <Chip on={data.profile.notif === true} onClick={() => store.setNotif(true)}>
-            オン
+            朝に出す
           </Chip>
           <Chip on={data.profile.notif === false} onClick={() => store.setNotif(false)}>
-            オフ
+            出さない
           </Chip>
         </div>
       </div>
@@ -146,7 +146,7 @@ export function Profile() {
           <button
             key={id || 'none'}
             type="button"
-            className={`inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === id ? 'bg-accent-deep text-white' : 'bg-white'}`}
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === id ? 'bg-accent-deep text-white' : 'bg-white'}`}
             onClick={() => store.patchProfile((profile) => ({ ...profile, pronoun: id }))}
           >
             {id || '名前なし'}
@@ -204,7 +204,7 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
           <div key={kid.id} className="rounded-xl bg-paper p-2">
             <div className="flex items-center gap-2">
               <input
-                className="w-24 rounded-lg border border-line bg-white px-2 py-1 text-sm"
+                className="min-h-11 w-24 rounded-lg border border-line bg-white px-2 text-sm"
                 value={kid.name}
                 aria-label={`${kid.name}の呼び名`}
                 onChange={(event) =>
@@ -221,7 +221,7 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
             <label className="mt-2 block text-[12px] text-muted">
               誕生日（任意）
               <input
-                className="mt-1 w-full rounded-lg border border-line bg-white px-2 py-1 text-sm"
+                className="mt-1 min-h-11 w-full rounded-lg border border-line bg-white px-2 text-sm"
                 type="date"
                 value={kid.birthday ?? ''}
                 onChange={(event) =>
@@ -263,7 +263,7 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
           <div key={kid.id}>
             <p className="text-xs text-muted">{kid.name}</p>
             <input
-              className="mt-1 w-full rounded-lg border border-line bg-white px-2 py-1 text-sm"
+              className="mt-1 min-h-11 w-full rounded-lg border border-line bg-white px-2 text-sm"
               placeholder="園・学校の名前（任意）"
               aria-label={`${kid.name}の園・学校`}
               value={kid.schoolName}

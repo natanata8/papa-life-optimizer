@@ -533,7 +533,7 @@ function ResetSheet() {
     <div data-testid="sheet-reset">
       <p className="text-base font-bold">この端末のデータを消しますか？</p>
       <p className="mt-1 text-sm leading-relaxed text-muted">
-        {store.demo ? 'サンプルの家族に戻します。相談の記録と、入れた一手も消えます。' : '空の状態に戻します。'}
+        {store.demo ? 'サンプルの家族に戻します。相談の記録と、入れた予定も消えます。' : '空の状態に戻します。'}
       </p>
       <Button className="mt-3" size="lg" data-testid="confirm-reset" onClick={store.reset}>
         消して最初から
@@ -576,7 +576,7 @@ function CantSheet({ date, slotId }: { date: string; slotId: string }) {
         className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left"
         onClick={() => {
           store.closeSheet()
-          store.openShare('今から帰るね。何かいるものある？')
+          store.openShare('今から帰るね。何かいるものある？', '帰りに何かいるか聞く')
         }}
       >
         <span className="block text-sm font-bold">帰りに何かいるか聞く</span>
@@ -589,6 +589,7 @@ function CantSheet({ date, slotId }: { date: string; slotId: string }) {
         onClick={() => {
           store.passAccept(date, slotId)
           store.closeSheet()
+          store.showToast('今日はパスしました。記録は残していません')
         }}
       >
         <span className="block text-sm font-bold">今日はパスする</span>

@@ -157,7 +157,7 @@ function ReadAloud({ text }: { text: string }) {
   return (
     <button
       type="button"
-      className="mb-2 inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep"
+      className="inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep"
       data-testid="read-aloud"
       onClick={() => {
         const utterance = new SpeechSynthesisUtterance(text)
@@ -184,29 +184,49 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
     <div data-testid={latest ? 'latest-answer' : undefined}>
       {message.care ? <CareCard /> : null}
       <LastGood />
-      <ReadAloud text={`${message.answer.状況整理}${message.answer.声かけ例 ? `。${message.answer.声かけ例}` : ''}`} />
-      {message.sample ? (
-        <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent-deep">サンプル回答</p>
-      ) : null}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <ReadAloud text={`${message.answer.状況整理}${message.answer.声かけ例 ? `。${message.answer.声かけ例}` : ''}`} />
+        {message.sample ? (
+          <p className="inline-flex min-h-11 items-center rounded-full bg-accent-soft px-3 text-xs font-bold text-accent-deep">サンプル回答</p>
+        ) : null}
+      </div>
       <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm">{message.answer.状況整理}</div>
       {message.answer.気づき ? <p className="mt-2 text-[13px] leading-relaxed text-muted">{message.answer.気づき}</p> : null}
       <p className="mt-3 text-xs font-bold text-accent">まずこれ</p>
       <div className="mt-1 rounded-xl border-l-4 border-accent bg-white px-3 py-2.5 shadow-sm">
         <p className="text-[16px] font-bold">{first.タイトル}</p>
         <p className="mt-1 text-xs text-muted">
-          {suggestion ? `${dayName(suggestion.date, store.today)} ${suggestion.time}` : first.タイミング} {first.なぜ今}
+          {first.タイトル === '近い場面を選ぶ'
+            ? first.なぜ今
+            : `${suggestion ? `${dayName(suggestion.date, store.today)} ${suggestion.time}` : first.タイミング} ${first.なぜ今}`}
         </p>
-        <div className="mt-2">
-          <AddButton suggestionId={firstId} />
-        </div>
-        {first.タスク分解ステップ.length > 0 ? (
+        {first.タイトル === '近い場面を選ぶ' ? null : (
+          <div className="mt-2">
+            <AddButton suggestionId={firstId} />
+          </div>
+        )}
+        {first.タイトル === '近い場面を選ぶ' ? (
+          <div className="mt-2 flex flex-col gap-2">
+            {first.タスク分解ステップ.map((step) => (
+              <button
+                key={step}
+                type="button"
+                data-testid="scene-choice"
+                className="inline-flex min-h-11 items-center rounded-xl bg-[#f7f1e8] px-3 text-left text-sm font-bold"
+                onClick={() => store.sendText(step)}
+              >
+                {step}
+              </button>
+            ))}
+          </div>
+        ) : first.タスク分解ステップ.length > 0 ? (
           <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm leading-relaxed">
             {first.タスク分解ステップ.map((step) => (
               <li key={step}>{step}</li>
             ))}
           </ol>
         ) : null}
-        {first.タスク分解ステップ.length > 0 ? (
+        {first.タスク分解ステップ.length > 0 && first.タイトル !== '近い場面を選ぶ' ? (
           <button
             type="button"
             data-testid="add-to-routine"
@@ -270,6 +290,15 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
         </details>
       ) : null}
       {message.used.length > 0 ? <p className="mt-3 text-left text-xs text-muted">使った家庭の情報：{message.used.join(' ／ ')}</p> : null}
+      {message.answer.questions.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {message.answer.questions.map((question) => (
+            <button key={question} type="button" className="inline-flex min-h-11 items-center rounded-full bg-white px-3 text-sm font-bold" onClick={() => store.sendText(question)}>
+              {question}
+            </button>
+          ))}
+        </div>
+      ) : null}
       {message.sample ? <p className="mt-1 text-xs text-muted">サンプル回答です。OpenAI には送っていません。</p> : null}
     </div>
   )

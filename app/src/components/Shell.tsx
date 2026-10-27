@@ -1,7 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { CalendarDays, House, ListChecks, MessageCircle, UserRound } from 'lucide-react'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { demoOnly } from '@/domain/demo.ts'
+import { openRoutineCount } from '@/domain/routines.ts'
+import type { AgeLabel } from '@/domain/types.ts'
+import { Setup } from '@/screens/Setup.tsx'
 import { Onboarding } from '@/screens/Onboarding.tsx'
 import { Welcome } from '@/screens/Welcome.tsx'
 import { Home } from '@/screens/Home.tsx'
@@ -55,11 +59,13 @@ export function Shell() {
     )
   }
   const tab = store.tab
-  const takenCount = store.data.taken?.[store.today]?.length ?? 0
+  const ages = store.data.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
+  const ensoku = store.data.childEvents.some((event) => event.title.includes('遠足'))
+  const takenCount = openRoutineCount(store.data.taken?.[store.today] ?? [], ages, ensoku)
   return (
     <Frame>
       {store.panel === 'preview' ? <PartnerPreview /> : store.panel === 'share' ? <ShareScreen /> : null}
-      {store.panel ? null : tab === 'home' || tab === 'review' ? tab === 'review' ? <Review /> : <Home /> : null}
+      {store.panel ? null : store.needsSetup && tab === 'home' ? <Setup /> : tab === 'home' || tab === 'review' ? tab === 'review' ? <Review /> : <Home /> : null}
       {store.panel ? null : tab === 'do' ? <DoScreen /> : null}
       {store.panel ? null : tab === 'consult' ? <Consult /> : null}
       {store.panel ? null : tab === 'cal' ? <Calendar /> : null}
@@ -99,7 +105,7 @@ export function Shell() {
 function Frame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-sand">
-      <div className="relative mx-auto min-h-dvh max-w-[430px] bg-paper">{children}</div>
+      <div className="relative mx-auto min-h-dvh max-w-[430px] overflow-x-hidden bg-paper">{children}</div>
     </div>
   )
 }
@@ -108,8 +114,8 @@ function Toast() {
   const store = useStore()
   if (!store.toast) return null
   return (
-    <div className="fixed bottom-20 left-1/2 z-50 flex max-w-[360px] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg" data-testid="toast">
-      <p>{store.toast}</p>
+    <div className="fixed top-3 left-1/2 z-[60] flex w-[min(360px,calc(100%-24px))] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg" data-testid="toast">
+      <p className="min-w-0 flex-1"><Phrase text={store.toast} /></p>
       {store.toastUndo ? (
         <button type="button" data-testid="toast-undo" className="inline-flex min-h-11 items-center font-bold whitespace-nowrap" onClick={() => { store.toastUndo?.(); store.dismissToast() }}>
           元に戻す

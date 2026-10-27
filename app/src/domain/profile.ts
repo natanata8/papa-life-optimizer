@@ -111,21 +111,21 @@ export const FIELDS: FieldSpec[] = [
 ]
 
 export const PRIVACY_LABEL: Record<Privacy, string> = {
-  低: '🔓 低',
-  中: '🔒 中',
-  高: '🔐 高',
+  低: '相談に使う',
+  中: 'この端末だけ',
+  高: '外に出さない',
 }
 
 export const LAZY_WHY: Record<string, string> = {
   school: '週明けの持ち物や行事の段取りを出すため',
   gomi: '前の夜に「明日はゴミの日」を出すため',
   shop: 'その日に日用品の残りチェックを出すため',
-  home: '帰宅前の一手と通知の時刻を合わせるため',
-  support: '抜ける日に頼れる先を一手に入れるため',
+  home: '帰宅前の手順と、知らせる時刻を合わせるため',
+  support: '抜ける日に、頼れる先を手順へ入れるため',
   car: '週末の行き先を、移動手段に合わせるため',
   area: '近場の行き先を出すため',
-  kids: '一手を年齢に合わせるため',
-  pstate: '無理のない一手にするため（答えなくてOK）',
+  kids: '手順を年齢に合わせるため',
+  pstate: '無理のない手順にするため（答えなくてOK）',
 }
 
 export const HOME_LAZY: Record<Mode, string[]> = {

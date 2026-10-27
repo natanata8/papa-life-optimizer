@@ -9,6 +9,7 @@ import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
 import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
+import { dropUsedChip } from '@/domain/routines.ts'
 import { createEmpty, createPublicDemo } from '@/domain/seed.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
@@ -28,6 +29,7 @@ import type {
   Step,
   Suggestion,
   Tab,
+  TakenRoutine,
   ToneAnswer,
 } from '@/domain/types.ts'
 import { logUsage } from '@/data/usage.ts'
@@ -154,11 +156,15 @@ type StoreValue = {
   toastUndo: (() => void) | null
   panel: 'share' | 'preview' | null
   shareDraft: string | null
-  openShare: (draft?: string) => void
+  shareHeading: string | null
+  needsSetup: boolean
+  finishSetup: (ages: AgeLabel[], home: string | null) => void
+  openShare: (draft?: string, heading?: string) => void
   openPreview: () => void
   closePanel: () => void
   takeRoutine: (date: string, routineId: string, at: string, partial?: string[]) => void
   dropRoutine: (date: string, routineId: string) => void
+  restoreTaken: (date: string, item: TakenRoutine) => void
   toggleCheck: (date: string, routineId: string, stepId: string) => void
   markShared: (date: string) => void
   addExtraSteps: (date: string, routineId: string, titles: string[]) => void
@@ -394,6 +400,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [toastUndo, setToastUndo] = useState<(() => void) | null>(null)
   const [panel, setPanel] = useState<'share' | 'preview' | null>(null)
   const [shareDraft, setShareDraft] = useState<string | null>(null)
+  const [shareHeading, setShareHeading] = useState<string | null>(null)
+  const [needsSetup, setNeedsSetup] = useState(() => localStorage.getItem('tone-app:needs-setup') === '1')
   const [ob, setObState] = useState<ObDraft>(initialOb)
   const [pending, setPending] = useState(false)
   const [cal, setCalState] = useState<'week' | 'day'>('week')
@@ -427,6 +435,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       }
       hydrated.current = true
       commit(result.state)
+      if (localStorage.getItem('tone-app:await-share') === '1') setPanel('share')
       setReady(true)
     })
     return () => {
@@ -492,8 +501,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         ? behindFor(scene, request.sceneDate, todayRef.current, snapshot.profile, snapshot.events, snapshot.hidden)
         : { why: '', lines: [] as string[] }
       const used = usedLabels(snapshot.profile, scene)
-      const estimate = request.partnerEstimate.flatMap((day) => day.blocks.map((block) => block.title))
-      if (estimate.length > 0) used.push(`推定（事実ではない）：${[...new Set(estimate)].slice(0, 4).join('、')}`)
       const base = dataRef.current ?? snapshot
       commit(
         attachAnswer(base, {
@@ -550,6 +557,19 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     dismissToast,
     panel,
     shareDraft,
+    shareHeading,
+    needsSetup,
+    finishSetup: (ages, home) => {
+      const current = dataRef.current
+      if (!current) return
+      localStorage.removeItem('tone-app:needs-setup')
+      setNeedsSetup(false)
+      commit({
+        ...current,
+        profile: { ...current.profile, kids: ages.length ? kidsFromAges(ages) : [], home },
+      })
+      setTab('home')
+    },
     ob,
     pending,
     cal,
@@ -803,7 +823,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setFlow(null)
       setSheet(null)
       setPanel(null)
-      setTab('profile')
+      localStorage.setItem('tone-app:needs-setup', '1')
+      setNeedsSetup(true)
+      setTab('home')
       setLazyLock(null)
     },
     newChat: () => {
@@ -866,14 +888,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       delete accept[key]
       commit({ ...current, lifted: (current.lifted ?? []).filter((item) => item !== key), accept })
     },
-    openShare: (draft) => {
+    openShare: (draft, heading) => {
       setShareDraft(draft ?? null)
+      setShareHeading(heading ?? null)
       setPanel('share')
     },
     openPreview: () => setPanel('preview'),
     closePanel: () => {
       setPanel(null)
       setShareDraft(null)
+      setShareHeading(null)
     },
     takeRoutine: (date, routineId, at, partial) => {
       const current = dataRef.current
@@ -888,6 +912,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!current) return
       const list = (current.taken?.[date] ?? []).filter((item) => item.routineId !== routineId)
       commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+    },
+    restoreTaken: (date, item) => {
+      const current = dataRef.current
+      if (!current) return
+      const list = (current.taken?.[date] ?? []).filter((row) => row.routineId !== item.routineId)
+      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: [...list, item] } })
     },
     toggleCheck: (date, routineId, stepId) => {
       const current = dataRef.current
@@ -920,13 +950,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     removeChip: (messageId, chip) => {
       const current = dataRef.current
       if (!current) return
-      commit({
-        ...current,
-        chat: current.chat.map((message) => {
-          if (message.role !== 'context' || message.id !== messageId) return message
-          return { ...message, chips: message.chips.filter((item) => item !== chip) }
-        }),
+      const chat = current.chat.map((message) => {
+        if (message.role !== 'context' || message.id !== messageId) return message
+        return { ...message, chips: message.chips.filter((item) => item !== chip) }
       })
+      const index = chat.findIndex((message) => message.role === 'context' && message.id === messageId)
+      const next = chat[index + 1]
+      if (next && next.role === 'answer') chat[index + 1] = { ...next, used: dropUsedChip(next.used, chip) }
+      commit({ ...current, chat })
     },
     markWelcome: (mode) => {
       if (mode === 'own') {
@@ -939,11 +970,15 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           seenWelcome: true,
           profile: { ...empty.profile, partner: '', kids: [], home: null, work: null, offDad: null, offPartner: null, pronoun: '俺' },
         })
-        setTab('profile')
+        localStorage.setItem('tone-app:needs-setup', '1')
+        setNeedsSetup(true)
+        setTab('home')
         return
       }
       const next = createPublicDemo(todayRef.current)
       localStorage.removeItem('tone-app:own-home')
+      localStorage.removeItem('tone-app:needs-setup')
+      setNeedsSetup(false)
       setOwnHome(false)
       commit({ ...next, seenWelcome: true, onboarded: true })
       setTab('home')
@@ -1257,7 +1292,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (!current) return
       commit({ ...current, profile: { ...current.profile, notif: value } })
       setSheet(null)
-      if (value) showToast('通知をオンにしました')
+      if (value) showToast('朝の画面に出すようにしました。スマホへの通知は準備中です')
+      else showToast('朝の画面には出さないようにしました')
     },
     deleteMemory: (id) => {
       const current = dataRef.current

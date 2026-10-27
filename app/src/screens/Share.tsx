@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
+import { formatMd } from '@/domain/dates.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import { rowTitle, shareLine, stepLabel, stepsFor, type RoutineId } from '@/domain/routines.ts'
-import type { AgeLabel, Pronoun } from '@/domain/types.ts'
+import type { AgeLabel, Mode, Pronoun } from '@/domain/types.ts'
 import { copyText } from '@/lib/utils.ts'
+
+function demoStamp(today: string, mode: Mode, home: string | null): string {
+  const info = returnInfo(home)
+  const time = mode === '帰宅前' ? info?.open ?? info?.back ?? '' : info?.back ?? ''
+  return `${formatMd(today)} ${time}`.trim()
+}
 
 const PRONOUNS: { id: Pronoun; label: string }[] = [
   { id: '俺', label: '俺' },
@@ -23,23 +31,21 @@ export function ShareScreen() {
   const generated = shareLine({ titles, pronoun: data?.profile.pronoun ?? '俺', back })
   const [text, setText] = useState(store.shareDraft || generated)
   const [dirty, setDirty] = useState(Boolean(store.shareDraft))
-  const [link, setLink] = useState(true)
-  const [ask, setAsk] = useState(false)
+  const [ask, setAsk] = useState(() => localStorage.getItem('tone-app:await-share') === '1')
   useEffect(() => {
     if (!dirty) setText(store.shareDraft || generated)
   }, [generated, dirty, store.shareDraft])
   useEffect(() => {
     const onVis = () => {
       if (document.visibilityState !== 'visible') return
-      if (sessionStorage.getItem('tone-app:await-share') !== '1') return
-      sessionStorage.removeItem('tone-app:await-share')
-      setAsk(true)
+      if (localStorage.getItem('tone-app:await-share') === '1') setAsk(true)
     }
     document.addEventListener('visibilitychange', onVis)
     return () => document.removeEventListener('visibilitychange', onVis)
   }, [])
   if (!data) return null
-  const body = link ? `${text}\n進み具合は、この画面で見られます。` : text
+  const body = text
+  const heading = store.shareHeading || '引き受けることを伝えよう'
   return (
     <div className="px-3.5 pt-3.5 pb-28">
       <div className="flex min-h-11 items-center">
@@ -49,7 +55,7 @@ export function ShareScreen() {
         <h1 className="flex-1 text-center text-base font-bold">{data.profile.partner || '家族'}に共有</h1>
         <span className="w-11" />
       </div>
-      <h2 className="mt-3 text-[25px] leading-snug font-bold">引き受けることを伝えよう</h2>
+      <h2 className="mt-3 text-[25px] leading-snug font-bold">{heading}</h2>
       <label className="mt-3 block text-xs text-muted" htmlFor="share-line">
         送る文（編集できます）
       </label>
@@ -69,7 +75,7 @@ export function ShareScreen() {
           <button
             key={item.label}
             type="button"
-            className={`inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === item.id ? 'bg-accent-deep text-white' : 'bg-white'}`}
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === item.id ? 'bg-accent-deep text-white' : 'bg-white'}`}
             onClick={() => {
               store.patchProfile((profile) => ({ ...profile, pronoun: item.id }))
               setDirty(false)
@@ -79,20 +85,14 @@ export function ShareScreen() {
           </button>
         ))}
       </div>
-      <label className="mt-3 flex min-h-11 items-center gap-2 text-sm">
-        <input type="checkbox" checked={link} onChange={(event) => setLink(event.target.checked)} />
-        やることの進み具合も見られるようにする
-      </label>
-      {link ? (
-        <button type="button" data-testid="open-preview" className="mt-1 text-sm font-bold text-margin" onClick={store.openPreview}>
-          相手にはこう見えます
-        </button>
-      ) : null}
+      <button type="button" data-testid="open-preview" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-margin" onClick={store.openPreview}>
+        相手にはこう見えます
+      </button>
       <a
         data-testid="share-send"
         className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-[#06c755] text-base font-bold text-white no-underline"
         href={lineShareUrl(body)}
-        onClick={() => sessionStorage.setItem('tone-app:await-share', '1')}
+        onClick={() => localStorage.setItem('tone-app:await-share', '1')}
       >
         LINEで送る
       </a>
@@ -121,6 +121,7 @@ export function ShareScreen() {
               data-testid="sent-yes"
               className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-margin text-base font-bold text-white"
               onClick={() => {
+                localStorage.removeItem('tone-app:await-share')
                 store.markShared(store.today)
                 setAsk(false)
                 store.closePanel()
@@ -129,7 +130,10 @@ export function ShareScreen() {
             >
               送った
             </button>
-            <button type="button" data-testid="sent-later" className="mt-2 inline-flex min-h-11 w-full items-center justify-center text-sm font-bold" onClick={() => setAsk(false)}>
+            <button type="button" data-testid="sent-later" className="mt-2 inline-flex min-h-11 w-full items-center justify-center text-sm font-bold" onClick={() => {
+                localStorage.removeItem('tone-app:await-share')
+                setAsk(false)
+              }}>
               まだ（あとで送る）
             </button>
           </div>
@@ -152,8 +156,10 @@ export function PartnerPreview() {
       <button type="button" className="mt-2 min-h-11 text-sm font-bold" onClick={() => store.openShare()}>
         戻る
       </button>
-      <h1 className="mt-2 text-[25px] leading-snug font-bold">今夜、パパが引き受けていること</h1>
-      <p className="mt-1 text-xs text-muted">{new Date().toLocaleString('ja-JP', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit', minute: '2-digit' })} 更新</p>
+      <h1 className="mt-2 text-[25px] leading-snug font-bold">
+        <Phrase text="今夜、パパが引き受けていること" />
+      </h1>
+      <p className="mt-1 text-xs text-muted">{demoStamp(store.today, store.mode, data.profile.home)} 更新</p>
       {taken.map((item) => {
         const id = item.routineId as RoutineId
         const steps = item.partial?.length ? stepsFor(id, ages, ensoku).filter((step) => item.partial?.includes(step.id)) : stepsFor(id, ages, ensoku)

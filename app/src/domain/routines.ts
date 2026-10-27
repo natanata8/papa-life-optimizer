@@ -23,6 +23,7 @@ export type Routine = {
 }
 
 const YOUNG: AgeLabel[] = ['0〜5か月', '6〜11か月', '1歳', '2歳']
+const OLDER: AgeLabel[] = ['3歳', '4歳', '5歳', '小1〜2', '小3〜4', '小5〜6']
 
 export const ROUTINES: Routine[] = [
   {
@@ -32,13 +33,14 @@ export const ROUTINES: Routine[] = [
     minutes: 30,
     freedKind: 'bath',
     steps: [
-      { id: 'bath-1', title: 'お湯をためて温度を見る', minutes: 3, offsetMin: 0, tip: '40℃前後', taskId: 'yu-106' },
-      { id: 'bath-2', title: 'パジャマ・おむつ・タオルを脱衣所に出す', minutes: 3, offsetMin: 3, taskId: 'yu-105' },
-      { id: 'bath-3', title: '下の子から洗う：頭→体', minutes: 10, offsetMin: 6, tip: '顔は最後にガーゼで拭くと泣きにくい', taskId: 'yu-109', forAges: YOUNG },
-      { id: 'bath-4', title: '湯船で温まる', minutes: 8, offsetMin: 16, tip: '5〜10分。上の子は湯船で待ってもらう', taskId: 'yu-110' },
-      { id: 'bath-5', title: '上がったら保湿・着替え', minutes: 5, offsetMin: 24, tip: '体がしっとりしているうち（3分以内）に', taskId: 'yu-111' },
-      { id: 'bath-6', title: '髪を乾かす', minutes: 5, offsetMin: 29, taskId: 'yu-112' },
-      { id: 'bath-7', title: '歯みがきの仕上げ', minutes: 5, offsetMin: 34, taskId: 'yu-117' },
+      { id: 'bath-1', title: 'お湯をためて温度を見る', minutes: 2, offsetMin: 0, tip: '40℃前後', taskId: 'yu-106' },
+      { id: 'bath-2', title: 'パジャマ・おむつ・タオルを脱衣所に出す', minutes: 2, offsetMin: 2, taskId: 'yu-105' },
+      { id: 'bath-3', title: '下の子を洗う：頭→体', minutes: 5, offsetMin: 4, tip: '顔は最後にガーゼで拭くと泣きにくい', taskId: 'yu-109', forAges: YOUNG },
+      { id: 'bath-up', title: '上の子を洗う：頭→体', minutes: 5, offsetMin: 9, tip: '下の子のあと。湯船は交代で', taskId: 'yu-110', forAges: OLDER },
+      { id: 'bath-4', title: '湯船で温まる', minutes: 4, offsetMin: 14, tip: '5分前後。交代で待ってもらう', taskId: 'yu-110' },
+      { id: 'bath-5', title: '上がったら保湿・着替え', minutes: 5, offsetMin: 18, tip: '体がしっとりしているうち（3分以内）に', taskId: 'yu-111' },
+      { id: 'bath-6', title: '髪を乾かす', minutes: 2, offsetMin: 23, taskId: 'yu-112' },
+      { id: 'bath-7', title: '歯みがきの仕上げ', minutes: 5, offsetMin: 25, taskId: 'yu-117' },
     ],
   },
   {
@@ -155,8 +157,18 @@ export function stepsFor(id: RoutineId, ages: AgeLabel[], ensoku = false): Routi
 }
 
 export function stepLabel(step: RoutineStep, ages: AgeLabel[]): string {
-  if (step.id === 'bath-3' && ages.includes('1歳')) return '下の子（1歳）から洗う：頭→体'
+  if (step.id === 'bath-3' && ages.includes('1歳')) return '下の子（1歳）を洗う：頭→体'
+  if (step.id === 'bath-up') {
+    const older = ages.filter((age) => OLDER.includes(age))
+    if (older.length === 1) return `上の子（${older[0]}）を洗う：頭→体`
+  }
   return step.title
+}
+
+export function shownMinutes(id: RoutineId, ages: AgeLabel[], ensoku = false, partial?: string[]): number {
+  const steps = stepsFor(id, ages, ensoku)
+  const picked = partial?.length ? steps.filter((step) => partial.includes(step.id)) : steps
+  return picked.reduce((sum, step) => sum + step.minutes, 0)
 }
 
 export function rowTitle(id: RoutineId, ages: AgeLabel[], ensoku = false): string {
@@ -166,11 +178,12 @@ export function rowTitle(id: RoutineId, ages: AgeLabel[], ensoku = false): strin
   return routineById(id).title
 }
 
-export function rowNote(id: RoutineId, ages: AgeLabel[], ensoku = false): string {
-  const routine = routineById(id)
+export function rowNote(id: RoutineId, ages: AgeLabel[], ensoku = false, partial?: string[]): string {
   const steps = stepsFor(id, ages, ensoku)
-  if (id === 'bedtime' && ages.length >= 2) return `約${routine.minutes}分・2人いっしょ`
-  return `約${routine.minutes}分・${steps.length}つの手順`
+  const count = partial?.length ? steps.filter((step) => partial.includes(step.id)).length : steps.length
+  const minutes = shownMinutes(id, ages, ensoku, partial)
+  if (id === 'bedtime' && ages.length >= 2 && !partial?.length) return `約${minutes}分・2人いっしょ`
+  return `約${minutes}分・${count}つの手順`
 }
 
 const EVENING: RoutineId[] = ['bath', 'bedtime', 'tomorrow', 'dinnerClean']
@@ -210,19 +223,67 @@ export function routineForPeak(noun: string, kind: string): RoutineId {
 }
 
 export function freedFor(routineId: RoutineId, partial: string[] | undefined, ages: AgeLabel[], ensoku = false): number {
-  if (partial && partial.length > 0) {
-    const steps = stepsFor(routineId, ages, ensoku)
-    return partial.reduce((sum, id) => sum + (steps.find((step) => step.id === id)?.minutes ?? 0), 0)
-  }
-  return FREED_MIN[routineById(routineId).freedKind]
+  const sum = shownMinutes(routineId, ages, ensoku, partial)
+  if (partial && partial.length > 0) return sum
+  return sum || FREED_MIN[routineById(routineId).freedKind]
+}
+
+/** その時間に自分の予定があるか。重なる家の仕事は提案しない。 */
+export function dadBusy(events: { time: string; who: string; kind?: string }[], range: string): boolean {
+  const hours = range.match(/\d+/g)
+  if (!hours || hours.length < 2) return false
+  const start = Number(hours[0])
+  const end = Number(hours[1])
+  return events.some((event) => {
+    const mine = event.who === '自分' || event.kind === 'nomikai'
+    if (!mine || !event.time) return false
+    const hour = Number(event.time.slice(0, 2))
+    return hour >= start && hour < end
+  })
+}
+
+/** 1つずつモードの開始位置。リストのチェックと同じ配列を見る。 */
+export function firstUnchecked(stepIds: string[], checked: string[]): number {
+  const index = stepIds.findIndex((id) => !checked.includes(id))
+  return index < 0 ? stepIds.length : index
+}
+
+export function allStepsChecked(
+  taken: { routineId: string; checked: string[]; partial?: string[]; extra?: { id: string }[] }[],
+  ages: AgeLabel[],
+  ensoku: boolean,
+): boolean {
+  if (taken.length === 0) return false
+  return taken.every((item) => {
+    const steps = stepsFor(item.routineId as RoutineId, ages, ensoku)
+    const picked = item.partial?.length ? steps.filter((step) => item.partial?.includes(step.id)) : steps
+    const ids = [...picked.map((step) => step.id), ...(item.extra ?? []).map((step) => step.id)]
+    return ids.length > 0 && ids.every((id) => item.checked.includes(id))
+  })
+}
+
+export function openRoutineCount(
+  taken: { routineId: string; checked: string[]; partial?: string[]; sharedAt?: string; extra?: { id: string }[] }[],
+  ages: AgeLabel[],
+  ensoku: boolean,
+): number {
+  if (taken.some((item) => item.sharedAt)) return 0
+  if (allStepsChecked(taken, ages, ensoku)) return 0
+  return taken.filter((item) => {
+    const steps = stepsFor(item.routineId as RoutineId, ages, ensoku)
+    const picked = item.partial?.length ? steps.filter((step) => item.partial?.includes(step.id)) : steps
+    const ids = [...picked.map((step) => step.id), ...(item.extra ?? []).map((step) => step.id)]
+    return ids.some((id) => !item.checked.includes(id))
+  }).length
 }
 
 export function shareLine(input: { titles: string[]; pronoun: Pronoun; back: string | null }): string {
   const back = input.back ? `${input.back}に帰ります。` : ''
   if (input.titles.length === 0) return back || '今夜の家のことは、帰ってから話すね。'
-  const list = input.titles.join('と、')
+  const list = input.titles.join('と')
   const who = input.pronoun ? `${input.pronoun}が` : ''
-  return `今夜は${list}は${who}やるね。${back}`
+  const line = `今夜の${list}は${who}やるね。${back}`
+  return line.replace('はやるね', 'をやるね')
 }
 
 export function contextChips(input: { dateLabel: string; back: string | null; titles: string[]; overlap: string; ages: string[] }): string[] {
@@ -256,6 +317,16 @@ export function partialChoices(ages: AgeLabel[], ensoku: boolean): { routineId: 
     })
   }
   return choices
+}
+
+/** 相談チップを外したとき、使った家庭の情報からも同じ内容を外す。 */
+export function dropUsedChip(used: string[], chip: string): string[] {
+  const parts = chip.split('・').map((part) => part.trim()).filter(Boolean)
+  return used.filter((label) => {
+    if (label.startsWith('子ども') && parts.some((part) => label.includes(part))) return false
+    if (chip && label.includes(chip)) return false
+    return true
+  })
 }
 
 /** 今夜の流れの1画面目。下のナビは数えない。 */
