@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon, type IconName } from '@/components/icons.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -22,6 +23,25 @@ import {
 import { AGES, GOMI_KINDS, type GomiKind, type Pronoun, type School } from '@/domain/types.ts'
 
 const GROUPS = ['家族', '子ども', 'くらし', '頼れる先', 'パートナー']
+
+const FIELD_ICON: Record<string, IconName> = {
+  kids: 'child',
+  work: 'clock',
+  offDad: 'me',
+  offPartner: 'people',
+  school: 'bag',
+  lesson: 'plan',
+  allergy: 'cross',
+  gomi: 'tidy',
+  shop: 'bag',
+  home: 'clock',
+  car: 'car',
+  area: 'pin',
+  support: 'people',
+  outsource: 'share',
+  pstate: 'me',
+  partner: 'talk',
+}
 
 function iosSafariHint(): boolean {
   if (typeof navigator === 'undefined') return false
@@ -66,7 +86,25 @@ export function Profile() {
     <div className="px-3.5 pt-3.5 pb-28" data-testid="profile">
       <DemoBar />
       <h1 className="text-lg font-bold">うち</h1>
-      <p className="mt-1 text-[13px] leading-relaxed text-muted">
+      {data.profile.kids.length > 0 ? (
+        <div className="mt-3 flex gap-2 overflow-x-auto">
+          {data.profile.kids.map((kid) => (
+            <span key={kid.id} className="hare-card inline-flex min-h-11 shrink-0 items-center gap-2 px-2 pr-3">
+              <span aria-hidden="true" className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-child text-sm font-bold text-child-ink">
+                {(kid.name || '子').slice(0, 1)}
+              </span>
+              <span className="text-sm font-bold">{kid.name || '子ども'}</span>
+              {kid.ageLabel ? <span className="text-xs text-muted">{kid.ageLabel}</span> : null}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <div className="hare-card mt-3 flex items-center gap-3 px-3 py-3">
+          <Icon name="child" size={28} className="text-accent" />
+          <p className="text-sm">子どもは、下の項目から追加できます。</p>
+        </div>
+      )}
+      <p className="mt-3 text-[13px] leading-relaxed text-muted">
         相談の答えと、見えない家事に使います。わかるところだけでOK。相手の登録は要りません。項目の横は、相談に使うときの扱いです。
       </p>
       {(['gomi', 'school', 'shop'] as const).some((key) => !isSet(data.profile, key)) ? (
@@ -79,9 +117,12 @@ export function Profile() {
           <h2 className="mt-4 text-sm font-bold">{group}</h2>
           <div className="mt-2 space-y-3">
             {FIELDS.filter((field) => field.group === group).map((field) => (
-              <div key={field.key} className="rounded-[14px] bg-white p-3">
+              <div key={field.key} className="hare-card p-3">
                 <div className="flex items-start justify-between gap-2">
-                  <p className="text-sm font-bold">{field.title}</p>
+                  <p className="flex items-center gap-2 text-sm font-bold">
+                    <Icon name={FIELD_ICON[field.key] ?? 'house'} size={16} className="shrink-0 text-accent" />
+                    {field.title}
+                  </p>
                   <span className="shrink-0 text-xs text-muted">{PRIVACY_LABEL[field.privacy]}</span>
                 </div>
                 <div className="mt-2">
@@ -94,8 +135,11 @@ export function Profile() {
       ))}
 
       <h2 className="mt-4 text-sm font-bold">見えない家事</h2>
-      <div className="mt-2 flex items-center justify-between rounded-[14px] bg-white px-3 py-2.5">
-        <span className="text-sm">表示する</span>
+      <div className="hare-card mt-2 flex items-center justify-between px-3 py-2.5">
+        <span className="flex items-center gap-2 text-sm">
+          <Icon name="hidden" size={16} className="text-accent" />
+          表示する
+        </span>
         <Chip on={data.profile.showInv} onClick={() => store.patchProfile((profile) => ({ ...profile, showInv: !profile.showInv }))}>
           {data.profile.showInv ? 'オン' : 'オフ'}
         </Chip>
@@ -107,8 +151,11 @@ export function Profile() {
       ) : null}
 
       <h2 className="mt-4 text-sm font-bold">通知</h2>
-      <div className="mt-2 flex items-center justify-between rounded-[14px] bg-white px-3 py-2.5">
-        <span className="text-sm">{data.profile.notif === null ? 'まだ聞いていません' : data.profile.notif ? '朝の画面に出す' : '出さない'}</span>
+      <div className="hare-card mt-2 flex items-center justify-between px-3 py-2.5">
+        <span className="flex items-center gap-2 text-sm">
+          <Icon name="plan" size={16} className="text-accent" />
+          {data.profile.notif === null ? 'まだ聞いていません' : data.profile.notif ? '朝の画面に出す' : '出さない'}
+        </span>
         <div className="flex gap-1.5">
           <Chip on={data.profile.notif === true} onClick={() => store.setNotif(true)}>
             朝に出す
@@ -122,7 +169,10 @@ export function Profile() {
 
       <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       {data.memories.length === 0 ? (
-        <p className="mt-2 text-[13px] text-muted">まだありません。</p>
+        <div className="hare-card mt-2 flex items-center gap-3 px-3 py-3">
+          <Icon name="thought" size={28} className="text-faint" />
+          <p className="text-[13px] text-muted">まだありません。</p>
+        </div>
       ) : (
         <div className="mt-2 space-y-2">
           {data.memories.map((memory) => (
@@ -159,6 +209,7 @@ export function Profile() {
         <p className="mt-4 text-[13px] leading-relaxed text-muted">ホーム画面に追加すると、アプリのように開けます（共有ボタン →「ホーム画面に追加」）。</p>
       ) : null}
       <Button className="mt-6" size="lg" variant="quiet" data-testid="profile-reset" onClick={() => store.openSheet({ type: 'reset' })}>
+        <Icon name="cross" size={16} />
         この端末のデータを消す
       </Button>
     </div>
@@ -203,6 +254,9 @@ function FieldBody({ fieldKey }: { fieldKey: string }) {
         {profile.kids.map((kid, index) => (
           <div key={kid.id} className="rounded-xl bg-paper p-2">
             <div className="flex items-center gap-2">
+              <span aria-hidden="true" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-child text-sm font-bold text-child-ink">
+                {(kid.name || '子').slice(0, 1)}
+              </span>
               <input
                 className="min-h-11 w-24 rounded-lg border border-line bg-white px-2 text-sm"
                 value={kid.name}

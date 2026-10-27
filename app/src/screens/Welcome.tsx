@@ -1,6 +1,6 @@
 import { useState } from 'react'
+import { BubbleSketch, FlowSketch, Icon, StepSketch } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
-import { SkyMark } from '@/components/SkyMark.tsx'
 import { useStore } from '@/app/store.tsx'
 
 const PAGES = [
@@ -35,12 +35,18 @@ export function Welcome() {
       {last ? (
         <div>
           <h1 className="mt-6 text-[25px] leading-snug font-bold">まずは、どちらで見ますか？</h1>
-          <button type="button" data-testid="welcome-sample" className="mt-4 w-full rounded-xl border-2 border-accent-deep bg-white px-3 py-3 text-left" onClick={() => store.markWelcome('sample')}>
-            <span className="block text-base font-bold">サンプルの家族で試す</span>
+          <button type="button" data-testid="welcome-sample" className="hare-card mt-4 w-full border-2 border-accent-deep px-3 py-3 text-left" onClick={() => store.markWelcome('sample')}>
+            <span className="flex items-center gap-2 text-base font-bold">
+              <Icon name="people" size={18} className="text-accent" />
+              サンプルの家族で試す
+            </span>
             <span className="mt-1 block text-sm leading-relaxed">4歳と1歳、共働き、帰宅19:30の家族です。あとから自分の家族に切り替えられます。</span>
           </button>
-          <button type="button" data-testid="welcome-own" className="mt-2 w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => store.markWelcome('own')}>
-            <span className="block text-base font-bold">自分の家族で始める</span>
+          <button type="button" data-testid="welcome-own" className="hare-card mt-2 w-full px-3 py-3 text-left" onClick={() => store.markWelcome('own')}>
+            <span className="flex items-center gap-2 text-base font-bold">
+              <Icon name="house" size={18} className="text-accent" />
+              自分の家族で始める
+            </span>
             <span className="mt-1 block text-sm leading-relaxed">子どもの年齢と帰宅時刻だけでOK。入力はこの端末の中だけに保存します。</span>
           </button>
           <p className="mt-4 text-sm leading-relaxed">
@@ -56,8 +62,9 @@ export function Welcome() {
           <p className="mt-2 text-sm leading-relaxed">
             <Phrase text={PAGES[page].body} />
           </p>
-          <button type="button" data-testid="welcome-next" className="fixed bottom-6 left-1/2 inline-flex min-h-[52px] w-[calc(100%-2rem)] max-w-[398px] -translate-x-1/2 items-center justify-center rounded-xl bg-accent-deep text-base font-bold text-white" onClick={() => setPage(page + 1)}>
+          <button type="button" data-testid="welcome-next" className="fixed bottom-6 left-1/2 inline-flex min-h-[52px] w-[calc(100%-2rem)] max-w-[398px] -translate-x-1/2 items-center justify-center gap-1.5 rounded-xl bg-accent-deep text-base font-bold text-white" onClick={() => setPage(page + 1)}>
             次へ
+            <Icon name="chevron" size={18} />
           </button>
         </div>
       )}
@@ -66,38 +73,11 @@ export function Welcome() {
 }
 
 function Picture({ page }: { page: number }) {
-  if (page === 1) {
-    return (
-      <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
-        <p className="text-xs font-bold text-muted">見本（押せません）</p>
-        <p className="mt-2 text-sm font-bold text-margin">お風呂 3/7</p>
-        <p className="mt-1 text-lg font-bold">下の子を洗う</p>
-        <p className="mt-2 rounded-lg bg-[#fff6e4] px-2 py-2 text-xs">コツ：顔は最後に拭く</p>
-        <p className="mt-2 flex min-h-11 items-center justify-center rounded-xl bg-margin text-sm font-bold text-white">できた</p>
-      </div>
-    )
-  }
-  if (page === 2) {
-    return (
-      <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
-        <p className="text-xs font-bold text-muted">見本（押せません）</p>
-        <p className="mt-2 rounded-xl bg-[#f7f1e8] px-3 py-3 text-sm leading-relaxed">今夜のお風呂は俺がやるね。19:30に帰ります。</p>
-        <p className="mt-2 flex min-h-11 items-center justify-center rounded-xl bg-[#06c755] text-sm font-bold text-white">送る文</p>
-      </div>
-    )
-  }
+  const art = page === 1 ? <StepSketch /> : page === 2 ? <BubbleSketch /> : <FlowSketch />
   return (
-    <div className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" aria-hidden="true">
-      <p className="text-xs font-bold text-muted">見本（押せません）</p>
-      <p className="mt-2 flex items-center gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink">
-        <SkyMark sky="注意報" size={24} />
-        20〜22時、家のことが重なる
-      </p>
-      <ul className="mt-2 space-y-1 text-sm">
-        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>19:40 お風呂</span><span className="text-muted">見本</span></li>
-        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>20:30 寝かしつけ</span><span /></li>
-        <li className="flex justify-between rounded-lg bg-sand px-2 py-2"><span>21:00 明日の持ち物</span><span className="text-muted">見本</span></li>
-      </ul>
+    <div className="mt-4" aria-hidden="true">
+      {art}
+      <p className="mt-2 text-center text-xs font-bold text-muted">見本（押せません）</p>
     </div>
   )
 }

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon } from '@/components/icons.tsx'
 import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
+import { chipIcon } from '@/domain/taskIcon.ts'
 import { dayName } from '@/domain/dates.ts'
 import { lineShareUrl } from '@/domain/export.ts'
 import { fieldOptions, lazyTitle } from '@/domain/profile.ts'
@@ -30,6 +32,7 @@ export function Consult() {
         <h1 className="text-lg font-bold">相談</h1>
         {data.chat.length > 0 ? (
           <Button size="sm" variant="ghost" onClick={store.newChat}>
+            <Icon name="plus" size={14} />
             新しい相談
           </Button>
         ) : null}
@@ -68,7 +71,8 @@ function Message({ message, latest = false }: { message: ChatMessage; latest?: b
         <p className="text-xs font-bold text-muted">この内容で相談します（タップで外せます）</p>
         <div className="mt-1 flex flex-wrap gap-1.5">
           {message.chips.map((chip) => (
-            <button key={chip} type="button" className="inline-flex min-h-11 items-center rounded-full bg-sand px-3 text-xs font-bold" onClick={() => store.removeChip(message.id, chip)}>
+            <button key={chip} type="button" className="inline-flex min-h-11 items-center gap-1 rounded-full bg-sand px-3 text-xs font-bold" onClick={() => store.removeChip(message.id, chip)}>
+              <Icon name={chipIcon(chip)} size={14} />
               {chip}
             </button>
           ))}
@@ -230,9 +234,10 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           <button
             type="button"
             data-testid="add-to-routine"
-            className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
+            className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[#f3eee6] text-sm font-bold"
             onClick={() => store.addExtraSteps(store.today, /風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'bath' : 'tomorrow', first.タスク分解ステップ)}
           >
+            <Icon name="plus" size={16} />
             {/風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'お風呂の手順に追加' : 'やることの手順に追加'}
           </button>
         ) : null}
@@ -245,7 +250,8 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
             <div className="mt-2 flex gap-1.5">
               <CopyButton text={message.answer.声かけ例} />
               <a className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'no-underline')} href={lineShareUrl(message.answer.声かけ例)} target="_blank" rel="noreferrer">
-                💬 LINEで送る
+                <Icon name="line" size={14} />
+                LINEで送る
               </a>
             </div>
             <p className="mt-1 text-xs text-muted">自分の言葉に少し直して送るのがおすすめです。</p>
@@ -307,10 +313,18 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
 function AddButton({ suggestionId }: { suggestionId: string }) {
   const store = useStore()
   const saved = store.data?.steps.some((step) => step.suggestionId === suggestionId)
-  if (saved) return <Button size="sm" variant="good">✓ 入れました</Button>
+  if (saved) {
+    return (
+      <Button size="sm" variant="good">
+        <Icon name="check" size={14} />
+        入れました
+      </Button>
+    )
+  }
   return (
     <Button size="sm" onClick={() => store.openSheet({ type: 'add', suggestionId })}>
-      📅 カレンダーに入れる
+      <Icon name="plan" size={14} />
+      カレンダーに入れる
     </Button>
   )
 }
@@ -325,6 +339,7 @@ function CopyButton({ text }: { text: string }) {
         void copyText(text).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
       }}
     >
+      <Icon name="copy" size={14} />
       コピー
     </Button>
   )
@@ -366,7 +381,8 @@ function Composer() {
     <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-[#f0e8df] bg-paper px-3 py-2">
       <div className="mb-2 flex gap-2 overflow-x-auto">
         {QUICK.map((chip) => (
-          <button key={chip} type="button" className="inline-flex min-h-11 shrink-0 items-center rounded-full bg-white px-3 text-xs font-bold" onClick={() => store.sendText(chip)}>
+          <button key={chip} type="button" className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-xs font-bold" onClick={() => store.sendText(chip)}>
+            <Icon name={chipIcon(chip)} size={14} />
             {chip}
           </button>
         ))}
@@ -386,6 +402,7 @@ function Composer() {
           className="min-w-0 flex-1 rounded-lg border border-[#ddd] bg-white px-2 py-2 text-[15px]"
         />
         <Button size="sm" type="submit">
+          <Icon name="share" size={14} />
           送る
         </Button>
       </form>

@@ -1,3 +1,4 @@
+import { Icon } from '@/components/icons.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -14,9 +15,14 @@ export function WeekendCard() {
   const wide = dow === 0 || dow >= 4
 
   return (
-    <section className="mt-4 rounded-[14px] bg-white p-3 shadow-sm" data-testid="weekend-card">
+    <section className="hare-card mt-4 p-3" data-testid="weekend-card">
       <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-bold">今週末の提案</h3>
+        <h3 className="flex items-center gap-2 text-sm font-bold">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+            <Icon name="outing" size={16} />
+          </span>
+          今週末の提案
+        </h3>
         <span className="text-xs font-bold text-muted">週末</span>
       </div>
       <p className="mt-1 text-[12px] leading-relaxed text-muted">
@@ -39,6 +45,7 @@ export function WeekendCard() {
                 void copyText(idea.phrase).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
               }}
             >
+              <Icon name="copy" size={14} />
               提案をコピー
             </Button>
           </li>

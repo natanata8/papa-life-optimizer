@@ -1,6 +1,6 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
-import { SkyMark } from '@/components/SkyMark.tsx'
 import { useStore } from '@/app/store.tsx'
 import { formatMd } from '@/domain/dates.ts'
 import { slotClock } from '@/domain/forecast.ts'
@@ -21,6 +21,7 @@ import {
   tonightIds,
   type RoutineId,
 } from '@/domain/routines.ts'
+import { taskIcon } from '@/domain/taskIcon.ts'
 import type { AgeLabel } from '@/domain/types.ts'
 
 export function Home() {
@@ -72,48 +73,74 @@ export function Home() {
       {finished ? <p className="mt-2 text-sm font-bold" data-testid="tonight-done">終わった</p> : null}
       {shared ? <p className="mt-1 text-sm font-bold text-margin" data-testid="tonight-shared">共有済み</p> : null}
       {warning && peak && overlap ? (
-        <p className="mt-3 flex min-w-0 items-start gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-fold="warning">
-          <SkyMark sky={peak.sky} size={24} />
+        <p className={`mt-3 flex min-w-0 items-start gap-2 rounded-2xl px-3 py-2 text-sm font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="warning">
+          <Icon name={peak.sky === '警報' ? 'alert' : 'warning'} size={18} className="mt-0.5 shrink-0" />
           <span className="min-w-0 flex-1">
             <span className="mr-1 whitespace-nowrap">{peak.sky}</span>
             <Phrase text={overlap} />
           </span>
         </p>
       ) : cast.quiet ? (
-        <p className="mt-3 text-base font-bold" data-fold="warning">
+        <p className="mt-3 flex items-center gap-2 text-base font-bold" data-fold="warning">
+          <Icon name="sun" size={16} className="text-[#e0a04a]" />
           今日は晴れ。余白はそのまま使おう
         </p>
       ) : null}
       <div className="mt-3 space-y-2">
         {rows.map((row, index) => {
           const on = Boolean(row.item)
+          const finishedRow = Boolean(on && row.item && routineDone(row.item, ages, ensoku))
+          const band = hot.has(row.id)
+          const bandColor = peak?.sky === '警報' ? 'bg-alert-line' : 'bg-watch-line'
           return (
-            <article key={row.id} data-fold={`row-${index}`} className={`flex items-center gap-2 rounded-[14px] bg-white p-3 shadow-sm ${hot.has(row.id) ? 'border-l-4 border-watch-line' : ''}`}>
-              <p className="w-12 shrink-0 text-sm font-bold whitespace-nowrap">{row.start}</p>
-              <div className="min-w-0 flex-1">
-                <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
-                  <span className="whitespace-nowrap">{rowTitle(row.id, ages, ensoku)}</span>
-                  {row.id === recommended ? <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
-                </p>
-                <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)}</p>
+            <div key={row.id} className="flex items-stretch gap-2" data-fold={`row-${index}`}>
+              <div className="relative w-11 shrink-0">
+                {index < rows.length - 1 ? (
+                  <span aria-hidden="true" className={`absolute top-7 -bottom-2 left-1/2 w-1 -translate-x-1/2 ${band ? bandColor : 'bg-line'}`} />
+                ) : null}
+                <p className="relative z-10 text-center text-xs font-bold whitespace-nowrap">{row.start}</p>
+                <span
+                  aria-hidden="true"
+                  className={`relative z-10 mx-auto mt-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 ${finishedRow ? 'border-margin bg-margin text-white' : on ? 'border-accent-deep bg-accent-deep' : 'border-faint bg-paper'}`}
+                >
+                  {finishedRow ? <Icon name="check" size={10} /> : null}
+                </span>
+                {band && (index === 0 || !hot.has(rows[index - 1].id)) ? (
+                  <span aria-hidden="true" className={`absolute top-6 -right-1 z-10 flex h-4 w-4 items-center justify-center rounded-full ${peak?.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`}>
+                    <Icon name={peak?.sky === '警報' ? 'alert' : 'warning'} size={11} />
+                  </span>
+                ) : null}
               </div>
-              <button
-                type="button"
-                data-testid={`tonight-take-${row.id}`}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-xl px-3 text-sm font-bold whitespace-nowrap ${on ? 'bg-accent-deep text-white' : 'bg-[#f3eee6]'}`}
-                onClick={() => {
-                  if (!on || !row.item) {
-                    store.takeRoutine(store.today, row.id, row.at)
-                    return
-                  }
-                  const snapshot = row.item
-                  store.dropRoutine(store.today, row.id)
-                  store.showToast('引き受けを外しました', () => store.restoreTaken(store.today, snapshot))
-                }}
-              >
-                {on && row.item && routineDone(row.item, ages, ensoku) ? '終わった' : on ? '✓ 引き受けた' : '引き受ける'}
-              </button>
-            </article>
+              <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${band ? 'ring-1 ring-watch-line/70' : ''}`}>
+                <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${on ? 'bg-accent-deep text-white' : 'bg-sand text-ink'}`}>
+                  <Icon name={taskIcon(row.id)} size={20} />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
+                    <span>{rowTitle(row.id, ages, ensoku)}</span>
+                    {row.id === recommended ? <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
+                  </p>
+                  <p className="text-xs text-muted">{rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)}</p>
+                </div>
+                <button
+                  type="button"
+                  data-testid={`tonight-take-${row.id}`}
+                  className={`inline-flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2.5 text-sm font-bold whitespace-nowrap ${on ? 'bg-accent-deep text-white' : 'bg-[#f3eee6]'}`}
+                  onClick={() => {
+                    if (!on || !row.item) {
+                      store.takeRoutine(store.today, row.id, row.at)
+                      return
+                    }
+                    const snapshot = row.item
+                    store.dropRoutine(store.today, row.id)
+                    store.showToast('引き受けを外しました', () => store.restoreTaken(store.today, snapshot))
+                  }}
+                >
+                  <Icon name={on ? 'check' : 'plus'} size={16} />
+                  {finishedRow ? '終わった' : on ? '引き受けた' : '引き受ける'}
+                </button>
+              </article>
+            </div>
           )
         })}
       </div>
@@ -121,7 +148,7 @@ export function Home() {
         type="button"
         data-testid="tonight-consult"
         data-fold="consult"
-        className="mt-3 flex min-h-11 w-full items-center gap-2 rounded-[14px] bg-white px-3 text-left text-sm font-bold shadow-sm"
+        className="hare-card mt-3 flex min-h-11 w-full items-center gap-2 px-3 text-left text-sm font-bold"
         onClick={() => {
           const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
           store.askForecast(peak?.prompt || '今夜の流れについて、次の手順を一つ。', contextChips({
@@ -133,20 +160,27 @@ export function Home() {
           }))
         }}
       >
+        <Icon name="consult" size={18} className="shrink-0 text-accent" />
         <span className="min-w-0 flex-1">迷ったら相談（今夜の流れは入力済み）</span>
-        <span aria-hidden="true">›</span>
+        <Icon name="chevron" size={16} className="shrink-0 text-muted" />
       </button>
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pt-2 pb-2">
-        <p className="text-center text-sm" data-fold="margin">
-          <Phrase text={footerLine(taken.length, doneCount, margin)} />
-        </p>
+        <div className="flex items-center gap-2" data-fold="margin">
+          <div className="h-2 w-16 shrink-0 overflow-hidden rounded-full bg-sand" aria-hidden="true">
+            <div className="h-full rounded-full bg-margin" style={{ width: `${margin <= 0 ? 0 : Math.max(12, Math.min(100, (margin / 90) * 100))}%` }} />
+          </div>
+          <p className="min-w-0 flex-1 text-sm">
+            <Phrase text={footerLine(taken.length, doneCount, margin)} />
+          </p>
+        </div>
         <button
           type="button"
           data-testid="tonight-share"
           data-fold="share"
-          className="mt-2 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-accent-deep text-base font-bold text-white"
+          className="mt-2 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl bg-accent-deep text-base font-bold text-white"
           onClick={() => store.openShare()}
         >
+          <Icon name="share" size={18} />
           {shared ? '共有済み' : `${partner}に共有する`}
         </button>
         <button

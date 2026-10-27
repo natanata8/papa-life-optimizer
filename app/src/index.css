@@ -101,6 +101,14 @@
   animation: tone-sheet 180ms ease-out;
 }
 
+@layer components {
+  .hare-card {
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(44, 42, 40, 0.06), 0 8px 18px rgba(44, 42, 40, 0.04);
+  }
+}
+
 @keyframes cloud-drift {
   0%,
   100% {

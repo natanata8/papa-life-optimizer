@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { phraseChunks } from './freed.ts'
+import { TASK_ICONS, taskIcon, titleIcon } from './taskIcon.ts'
 import { FREED_MIN } from './freed.ts'
 import { fallbackScenes } from './scenes.ts'
 import {
@@ -81,6 +82,18 @@ test('相談の使用情報は送った時点のチップで決まり、前の�
   const next = usedFromChips(labels, sent.filter((chip) => chip !== '4歳・1歳'))
   assert.deepEqual(next, ['両方フルタイム'])
   assert.deepEqual(first, kept)
+})
+
+test('家の仕事には、それぞれ一つの印がある', () => {
+  const seen = new Set(ROUTINES.map((routine) => taskIcon(routine.id)))
+  for (const name of ['bath', 'bed', 'bag', 'tidy', 'laundry', 'dropoff', 'pickup', 'morning'] as const) {
+    assert.equal(seen.has(name), true, name)
+  }
+  assert.equal(titleIcon('お風呂'), 'bath')
+  assert.equal(titleIcon('夕食の片付け'), 'tidy')
+  assert.equal(titleIcon('夕食'), 'dinner')
+  assert.equal(titleIcon('見えない家事'), 'hidden')
+  assert.equal(TASK_ICONS.includes(taskIcon('bath')), true)
 })
 
 test('表示の分数は見える手順の合計で、開始は最初の手順', () => {

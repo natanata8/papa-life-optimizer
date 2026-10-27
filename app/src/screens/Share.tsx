@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Icon } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
 import { formatMd } from '@/domain/dates.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import { rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
+import { taskIcon } from '@/domain/taskIcon.ts'
 import type { AgeLabel, Mode, Pronoun } from '@/domain/types.ts'
 import { copyText } from '@/lib/utils.ts'
 
@@ -56,6 +58,11 @@ export function ShareScreen() {
         <span className="w-11" />
       </div>
       <h2 className="mt-3 text-[25px] leading-snug font-bold">{heading}</h2>
+      <div className="mt-3 rounded-2xl bg-[#dfe7ea] px-3 py-4">
+        <div className="ml-8 rounded-2xl rounded-tr-md bg-[#d9fdd3] px-3 py-2 text-sm leading-relaxed shadow-sm">
+          <Phrase text={text || '送る文がここに出ます'} />
+        </div>
+      </div>
       <label className="mt-3 block text-xs text-muted" htmlFor="share-line">
         送る文（編集できます）
       </label>
@@ -90,21 +97,23 @@ export function ShareScreen() {
       </button>
       <a
         data-testid="share-send"
-        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-[#06c755] text-base font-bold text-white no-underline"
+        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#06c755] text-base font-bold text-white no-underline"
         href={lineShareUrl(body)}
         onClick={() => localStorage.setItem('tone-app:await-share', '1')}
       >
+        <Icon name="line" size={18} />
         LINEで送る
       </a>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <button
           type="button"
           data-testid="share-copy"
-          className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold"
+          className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl bg-[#f3eee6] text-sm font-bold"
           onClick={() => {
             void copyText(body).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
           }}
         >
+          <Icon name="copy" size={16} />
           コピー
         </button>
         <button type="button" data-testid="share-later" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={store.closePanel}>
@@ -119,7 +128,7 @@ export function ShareScreen() {
             <button
               type="button"
               data-testid="sent-yes"
-              className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-margin text-base font-bold text-white"
+              className="mt-3 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl bg-margin text-base font-bold text-white"
               onClick={() => {
                 localStorage.removeItem('tone-app:await-share')
                 store.markShared(store.today)
@@ -128,6 +137,7 @@ export function ShareScreen() {
                 store.showToast('共有しました')
               }}
             >
+              <Icon name="sent" size={18} />
               送った
             </button>
             <button type="button" data-testid="sent-later" className="mt-2 inline-flex min-h-11 w-full items-center justify-center text-sm font-bold" onClick={() => {
@@ -166,15 +176,20 @@ export function PartnerPreview() {
         const withExtra = stepsInTime([...steps.map((step) => ({ ...step, title: stepLabel(step, ages) })), ...(item.extra ?? []).map((step) => ({ ...step, offsetMin: step.offsetMin ?? 0 }))])
         const done = withExtra.filter((step) => item.checked.includes(step.id)).length
         return (
-          <section key={item.routineId} className="mt-3 rounded-[14px] bg-white p-3 shadow-sm">
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="text-sm font-bold">{rowTitle(id, ages, ensoku)}</h2>
+          <section key={item.routineId} className="hare-card mt-3 p-3">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="flex items-center gap-2 text-sm font-bold">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+                  <Icon name={taskIcon(id)} size={16} />
+                </span>
+                {rowTitle(id, ages, ensoku)}
+              </h2>
               <p className="text-xs whitespace-nowrap text-margin">{withExtra.length}つの手順のうち{done}つ完了</p>
             </div>
             <ul className="mt-2 space-y-2">
               {withExtra.map((step) => (
                 <li key={step.id} className="flex items-center gap-2 text-sm">
-                  <span className={`inline-flex h-5 w-5 items-center justify-center rounded-full border ${item.checked.includes(step.id) ? 'border-margin bg-margin text-xs text-white' : 'border-[#c8bfb4]'}`}>{item.checked.includes(step.id) ? '✓' : ''}</span>
+                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${item.checked.includes(step.id) ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4]'}`}>{item.checked.includes(step.id) ? <Icon name="check" size={12} /> : ''}</span>
                   {step.title}
                 </li>
               ))}

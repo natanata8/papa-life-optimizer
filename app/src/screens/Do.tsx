@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon, ProgressRing } from '@/components/icons.tsx'
 import { useStore } from '@/app/store.tsx'
 import { firstUnchecked, listLabel, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
+import { taskIcon } from '@/domain/taskIcon.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
 
@@ -37,7 +39,12 @@ export function DoScreen() {
           1つずつ
         </button>
       </div>
-      {taken.length === 0 ? <p className="mt-4 text-sm leading-relaxed">今夜の流れから、引き受けるものを選べます。</p> : null}
+      {taken.length === 0 ? (
+        <div className="hare-card mt-4 px-4 py-8 text-center">
+          <Icon name="do" size={40} className="mx-auto text-accent" />
+          <p className="mt-3 text-sm leading-relaxed">今夜の流れから、引き受けるものを選べます。</p>
+        </div>
+      ) : null}
       {focus ? <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} /> : taken.map((item) => <ListBlock key={item.routineId} item={item} ages={ages} ensoku={ensoku} back={back} />)}
     </div>
   )
@@ -53,28 +60,35 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
   const label = listLabel(steps, at)
   return (
     <section className="mt-4">
-      <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-sand">
-        <div className="h-full bg-margin" style={{ width: `${steps.length ? (done / steps.length) * 100 : 0}%` }} />
+      <div className="mb-2 h-2 overflow-hidden rounded-full bg-sand" aria-hidden="true">
+        <div className="h-full rounded-full bg-margin" style={{ width: `${steps.length ? (done / steps.length) * 100 : 0}%` }} />
       </div>
-      <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-base font-bold">{rowTitle(id, ages, ensoku)}</h2>
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="flex min-w-0 items-center gap-2 text-base font-bold">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+            <Icon name={taskIcon(id)} size={22} />
+          </span>
+          <span className="min-w-0">{rowTitle(id, ages, ensoku)}</span>
+        </h2>
         <p className="text-xs whitespace-nowrap text-muted">
           {label.start}〜 約{label.minutes}分
           <span className="ml-2 font-bold text-ink">{done}/{steps.length}</span>
         </p>
       </div>
       <div className="mt-2 space-y-2">
-        {steps.map((step) => {
+        {steps.map((step, index) => {
           const on = item.checked.includes(step.id)
           const here = step.id === current
           return (
             <button
               key={step.id}
               type="button"
-              className={`flex min-h-11 w-full items-start gap-2 rounded-xl px-3 py-2 text-left ${here ? 'bg-margin-soft' : 'bg-white'}`}
+              className={`hare-card flex min-h-11 w-full items-start gap-2 px-3 py-2 text-left ${here ? 'bg-margin-soft' : ''}`}
               onClick={() => store.toggleCheck(store.today, id, step.id)}
             >
-              <span className={`mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border-2 ${on ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4]'}`}>{on ? '✓' : ''}</span>
+              <span className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${on ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4] bg-white text-ink'}`}>
+                {on ? <Icon name="check" size={16} /> : index + 1}
+              </span>
               <span className="min-w-0">
                 <span className={`block text-sm font-bold ${on ? 'text-muted line-through' : ''}`}>
                   {plusMinutes(at, step.offsetMin ?? 0)} {stepLabel(step, ages)}
@@ -87,8 +101,10 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
         })}
       </div>
       {done === steps.length && steps.length > 0 ? <p className="mt-3 text-base font-bold">今夜はこれでOK</p> : null}
-      <button type="button" className="mt-3 flex min-h-11 w-full items-center text-left text-sm font-bold" onClick={() => store.askForecast(`${rowTitle(id, ages, ensoku)}の手順について、一つ短く。`)}>
-        この手順について相談 <span className="ml-auto">›</span>
+      <button type="button" className="mt-3 flex min-h-11 w-full items-center gap-2 text-left text-sm font-bold" onClick={() => store.askForecast(`${rowTitle(id, ages, ensoku)}の手順について、一つ短く。`)}>
+        <Icon name="consult" size={18} className="text-accent" />
+        この手順について相談
+        <Icon name="chevron" size={16} className="ml-auto text-muted" />
       </button>
     </section>
   )
@@ -111,11 +127,15 @@ function Focus({
 }) {
   const store = useStore()
   const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => ({ item, step })))
-  const done = flat.length > 0 && flat.every((row) => row.item.checked.includes(row.step.id))
+  const doneCount = flat.filter((row) => row.item.checked.includes(row.step.id)).length
+  const done = flat.length > 0 && doneCount === flat.length
   if (done) {
     return (
-      <article className="mt-4 rounded-[14px] bg-white px-4 py-8 text-center shadow-sm" data-testid="do-finish">
-        <h2 className="text-[26px] font-bold">今夜はこれでOK</h2>
+      <article className="hare-card mt-4 px-4 py-8 text-center" data-testid="do-finish">
+        <ProgressRing value={flat.length} total={flat.length}>
+          <Icon name="check" size={36} className="text-margin" />
+        </ProgressRing>
+        <h2 className="mt-3 text-[26px] font-bold">今夜はこれでOK</h2>
         <p className="mt-2 text-sm">引き受けた手順は、ここまでです。</p>
       </article>
     )
@@ -127,8 +147,11 @@ function Focus({
   const at = current.item.at || rowAt(id, back)
   const next = flat[index + 1]
   return (
-    <article className="mt-4 rounded-[14px] bg-white px-4 py-5 text-center shadow-sm">
-      <p className="text-sm font-bold text-margin">
+    <article className="hare-card mt-4 px-4 py-5 text-center">
+      <ProgressRing value={doneCount} total={flat.length}>
+        <Icon name={taskIcon(id)} size={36} />
+      </ProgressRing>
+      <p className="mt-3 text-sm font-bold text-margin">
         {rowTitle(id, ages, ensoku)} {index + 1}/{flat.length}
       </p>
       <h2 className="mt-2 text-[26px] leading-snug font-bold">{stepLabel(current.step, ages)}</h2>
@@ -139,12 +162,13 @@ function Focus({
       <button
         type="button"
         data-testid="do-done"
-        className="mt-4 inline-flex min-h-[72px] w-full items-center justify-center rounded-xl bg-margin text-lg font-bold text-white"
+        className="mt-4 inline-flex min-h-[72px] w-full items-center justify-center gap-1.5 rounded-xl bg-margin text-lg font-bold text-white"
         onClick={() => {
           if (!current.item.checked.includes(current.step.id)) store.toggleCheck(store.today, id, current.step.id)
           setCursor(index + 1)
         }}
       >
+        <Icon name="check" size={20} />
         できた
       </button>
       <div className="mt-2 grid grid-cols-2 gap-2">

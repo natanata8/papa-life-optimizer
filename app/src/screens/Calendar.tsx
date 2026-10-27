@@ -1,4 +1,5 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon, WeatherDot } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -10,6 +11,7 @@ import { DAILY_TASKS, adoptedKeys, invisibleOn, type InvItem } from '@/domain/in
 import { partnerDay, type PartnerBlock } from '@/domain/partnerDay.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import { dadBusy, routineForPeak, rowAt } from '@/domain/routines.ts'
+import { titleIcon } from '@/domain/taskIcon.ts'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
 import { childName } from '@/domain/childEvents.ts'
 import type { ChildEvent, FamEvent, Step } from '@/domain/types.ts'
@@ -45,10 +47,12 @@ export function Calendar() {
       {store.cal === 'week' ? <Week /> : <Day />}
       <div className="mt-3 flex gap-2">
         <Button className="flex-1" size="lg" variant="ghost" onClick={() => store.openSheet({ type: 'addEvent' })}>
-          ＋ 家族の予定
+          <Icon name="plus" size={16} />
+          家族の予定
         </Button>
         <Button className="flex-1" size="lg" variant="ghost" data-testid="cal-children" onClick={() => store.openSheet({ type: 'children' })}>
-          ＋ 子どもの予定
+          <Icon name="plus" size={16} />
+          子どもの予定
         </Button>
       </div>
         <p className="mt-2 text-xs leading-relaxed text-muted">
@@ -78,7 +82,8 @@ function FilterChip({
     wife: on ? 'bg-[#f3f0ea] text-muted' : 'bg-white text-faint',
   }
   return (
-    <button type="button" className={`inline-flex min-h-11 items-center rounded-full border border-line px-2.5 ${colors[tone]}`} onClick={onClick}>
+    <button type="button" className={`inline-flex min-h-11 items-center gap-1 rounded-full border border-line px-2.5 ${colors[tone]}`} onClick={onClick}>
+      <Icon name={tone === 'inv' ? 'hidden' : tone === 'child' ? 'child' : tone === 'step' ? 'check' : tone === 'wife' ? 'me' : 'people'} size={14} />
       {children}
     </button>
   )
@@ -128,8 +133,8 @@ function Week() {
             >
               <span className="text-xs">{DOW_CHARS[dow]}</span>
               <span className="text-base leading-none font-bold">{Number(row.date.slice(8))}</span>
-              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-6 items-center justify-center">
-                {known ? <SkyMark sky={sky} size={24} lifted={Boolean(peak?.lifted)} /> : <span className="h-1.5 w-1.5 rounded-full bg-muted" />}
+              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-4 items-center justify-center">
+                {known && !peak?.lifted ? <WeatherDot sky={sky} /> : <span className="h-1.5 w-1.5 rounded-full bg-faint" />}
               </span>
             </button>
           )
@@ -145,13 +150,18 @@ function Week() {
           const at = rowAt(routineId, back)
           const taken = (data.taken?.[row.date] ?? []).some((item) => item.routineId === routineId)
           return (
-            <article key={row.date} className="rounded-[14px] bg-white p-3 shadow-sm">
+            <article key={row.date} className="hare-card p-3">
               <p className="flex flex-wrap items-center gap-1 text-xs font-bold">
                 <span className="whitespace-nowrap">{row.date === store.today ? `今日 ${formatMd(row.date)}` : formatMd(row.date)}</span>
                 <span className="whitespace-nowrap">{slotClock(peak)}</span>
                 <span className={`rounded-full px-2 py-0.5 whitespace-nowrap ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`}>{peak.sky}</span>
               </p>
-              <p className="mt-2 text-base font-bold">{peak.noun}</p>
+              <p className="mt-2 flex items-center gap-2 text-base font-bold">
+                <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+                  <Icon name={titleIcon(peak.noun)} size={16} />
+                </span>
+                {peak.noun}
+              </p>
               {taken ? (
                 <p className="mt-1 text-sm">✓ 引き受けた・やるに入っています</p>
               ) : peak.freedMin > 0 ? (
@@ -161,19 +171,21 @@ function Week() {
               ) : null}
               <div className="mt-2 flex justify-end">
                 {taken ? (
-                  <button type="button" className="inline-flex min-h-11 items-center rounded-xl bg-[#f3eee6] px-4 text-sm font-bold" onClick={() => store.setTab('do')}>
+                  <button type="button" className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-[#f3eee6] px-4 text-sm font-bold" onClick={() => store.setTab('do')}>
+                    <Icon name="chevron" size={14} />
                     開く
                   </button>
                 ) : (
                   <button
                     type="button"
                     data-testid={`week-accept-${row.date}`}
-                    className="inline-flex min-h-11 items-center rounded-xl bg-accent-deep px-4 text-sm font-bold text-white"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-accent-deep px-4 text-sm font-bold text-white"
                     onClick={() => {
                       store.takeRoutine(row.date, routineId, at)
                       store.showToast('引き受けました。「やる」に追加', () => store.dropRoutine(row.date, routineId))
                     }}
                   >
+                    <Icon name="plus" size={14} />
                     引き受ける
                   </button>
                 )}
@@ -211,16 +223,16 @@ function Day() {
     <div className="min-w-0" data-testid="day-view">
       <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
         <FilterChip on={store.filters.ev} tone="event" onClick={() => store.toggleFilter('ev')}>
-          ■ 家族の予定
+          家族の予定
         </FilterChip>
         <FilterChip on={store.filters.step} tone="step" onClick={() => store.toggleFilter('step')}>
-          ■ 引き受けたこと
+          引き受けたこと
         </FilterChip>
         <FilterChip on={store.filters.inv} tone="inv" onClick={() => store.toggleFilter('inv')}>
           見えない家事
         </FilterChip>
         <FilterChip on={store.filters.child} tone="child" onClick={() => store.toggleFilter('child')}>
-          ■ 子どもの予定
+          子どもの予定
         </FilterChip>
         <FilterChip on={store.filters.wife} tone="wife" onClick={() => store.toggleFilter('wife')}>
           推定 妻の1日
@@ -248,7 +260,7 @@ function Day() {
                 className="flex min-h-11 w-full min-w-0 items-center gap-2 rounded-lg bg-white/70 px-2 text-left text-[13px]"
                 onClick={() => store.openSheet({ type: 'daily', taskId: task.id })}
               >
-                <span>👀</span>
+                <Icon name="hidden" size={16} className="shrink-0" />
                 <span className="min-w-0 flex-1">
                   <Phrase text={task.title} />
                 </span>
@@ -332,7 +344,8 @@ function Day() {
         </p>
       ) : null}
       <Button className="mt-3" size="lg" onClick={() => store.askDay(store.day)}>
-        💬 この日のことをAIに相談
+        <Icon name="consult" size={16} />
+        この日のことを相談
       </Button>
     </div>
   )
@@ -359,12 +372,12 @@ function DateBar({
 }) {
   return (
     <div className="my-2 flex items-center justify-between">
-      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2 text-lg" onClick={onPrev} aria-label={prevLabel}>
-        ‹
+      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2" onClick={onPrev} aria-label={prevLabel}>
+        <Icon name="back" size={18} />
       </button>
       <b className="text-sm">{label}</b>
-      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2 text-lg" onClick={onNext} aria-label={nextLabel}>
-        ›
+      <button type="button" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg px-2 py-2" onClick={onNext} aria-label={nextLabel}>
+        <Icon name="chevron" size={18} />
       </button>
     </div>
   )
@@ -379,7 +392,7 @@ function EventPill({ event }: { event: FamEvent }) {
       className="flex min-h-11 w-full min-w-0 items-center gap-1.5 rounded-lg bg-event px-2 text-left text-[13px] text-event-ink"
       onClick={() => store.openSheet({ type: 'event', id: event.id })}
     >
-      <span>{event.who === '自分' ? '🙋' : '👪'}</span>
+      <Icon name={event.who === '自分' ? 'me' : 'people'} size={16} className="shrink-0" />
       <span className="shrink-0 text-xs whitespace-nowrap">{event.time || '終日'}</span>
       <span className="min-w-0 flex-1">
         <Phrase text={event.title} />
@@ -399,6 +412,7 @@ function ChildPill({ event, name }: { event: ChildEvent; name: string }) {
       className="flex min-h-11 w-full min-w-0 flex-wrap items-center gap-1.5 rounded-lg bg-child px-2 text-left text-[13px] text-child-ink"
       onClick={() => store.openSheet({ type: 'children', editId: event.id })}
     >
+      <Icon name="child" size={16} className="shrink-0" />
       <span className="shrink-0 text-xs whitespace-nowrap">{when}</span>
       <span className="min-w-0 basis-full">
         <Phrase text={`${name ? `${name} ` : ''}${event.title}${event.items.length > 0 ? `（${event.items.join('、')}）` : ''}`} />
@@ -416,7 +430,7 @@ function StepPill({ step }: { step: Step }) {
       className="flex min-h-11 w-full min-w-0 items-center gap-1.5 rounded-lg bg-step px-2 text-left text-[13px] text-step-ink"
       onClick={() => store.openSheet({ type: 'step', id: step.id })}
     >
-      <span>{step.status === 'good' ? '😊' : step.status === 'meh' ? '😐' : '👉'}</span>
+      <Icon name={step.status === 'good' ? 'check' : 'plan'} size={16} className="shrink-0" />
       {step.time ? <span className="text-xs">{step.time}</span> : null}
       <span className="min-w-0 flex-1">
         <Phrase text={`やること：${step.title}`} />
@@ -453,7 +467,7 @@ function InvisiblePill({ item, adopted }: { item: InvItem; adopted: boolean }) {
       className={`flex min-h-11 w-full min-w-0 items-start gap-1.5 rounded-lg border border-dashed px-2 py-2 text-left text-[13px] text-inv-ink ${adopted ? 'border-accent bg-accent-soft' : 'border-inv-line bg-inv'}`}
       onClick={() => store.openSheet({ type: 'invisible', date: item.date, key: item.key })}
     >
-      <span className="shrink-0">👀</span>
+      <Icon name="hidden" size={16} className="shrink-0" />
       <span className="min-w-0 flex-1">
         <Phrase text={adopted ? `${item.title}（引き受けた）` : item.title} />
       </span>

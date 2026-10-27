@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { CalendarDays, House, ListChecks, MessageCircle, UserRound } from 'lucide-react'
+import { Icon, type IconName } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { demoOnly } from '@/domain/demo.ts'
@@ -19,12 +19,12 @@ import { Sheets } from '@/screens/Sheets.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import type { Tab } from '@/domain/types.ts'
 
-const NAV: { tab: Tab; label: string; icon: typeof House }[] = [
-  { tab: 'home', label: '今日', icon: House },
-  { tab: 'do', label: 'やる', icon: ListChecks },
-  { tab: 'consult', label: '相談', icon: MessageCircle },
-  { tab: 'cal', label: '予定', icon: CalendarDays },
-  { tab: 'profile', label: 'うち', icon: UserRound },
+const NAV: { tab: Tab; label: string; icon: IconName }[] = [
+  { tab: 'home', label: '今日', icon: 'today' },
+  { tab: 'do', label: 'やる', icon: 'do' },
+  { tab: 'consult', label: '相談', icon: 'consult' },
+  { tab: 'cal', label: '予定', icon: 'plan' },
+  { tab: 'profile', label: 'うち', icon: 'house' },
 ]
 
 export function Shell() {
@@ -72,7 +72,6 @@ export function Shell() {
       {store.panel ? null : tab === 'profile' ? <Profile /> : null}
       <nav className="fixed bottom-0 left-1/2 z-30 flex w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         {NAV.map((item) => {
-          const Icon = item.icon
           const active = !store.panel && (item.tab === 'home' ? tab === 'home' || tab === 'review' : tab === item.tab)
           return (
             <button
@@ -86,7 +85,7 @@ export function Shell() {
               }}
             >
               <span className="relative">
-                <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
+                <Icon name={item.icon} size={20} />
                 {item.tab === 'do' && takenCount > 0 ? (
                   <span className="absolute -top-1.5 -right-2.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-margin px-1 text-[12px] leading-none font-bold text-white">{takenCount}</span>
                 ) : null}

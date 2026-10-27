@@ -1,4 +1,6 @@
+import { Icon } from '@/components/icons.tsx'
 import { SCENE_LIST } from '@/domain/scenes.ts'
+import { sceneIcon } from '@/domain/taskIcon.ts'
 import type { SceneId } from '@/domain/types.ts'
 
 export function SceneGrid({ onPick, testPrefix }: { onPick: (id: SceneId) => void; testPrefix: string }) {
@@ -9,11 +11,11 @@ export function SceneGrid({ onPick, testPrefix }: { onPick: (id: SceneId) => voi
           key={scene.id}
           type="button"
           data-testid={`${testPrefix}${scene.id}`}
-          className="flex h-full min-h-14 items-center gap-1.5 rounded-[14px] border border-[#eadfd3] bg-white px-3 py-2 text-left text-[13px] leading-snug font-bold"
+          className="hare-card flex h-full min-h-[88px] flex-col items-center justify-center gap-1.5 px-3 py-2 text-center text-[13px] leading-snug font-bold"
           onClick={() => onPick(scene.id)}
         >
-          <span className="shrink-0 text-lg" aria-hidden>
-            {scene.icon}
+          <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+            <Icon name={sceneIcon(scene.id)} size={20} />
           </span>
           <span className="line-clamp-2">{scene.title}</span>
         </button>
