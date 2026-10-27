@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { FREED_MIN, marginAfter, marginLine, weekActionLine, weekSummaryLine } from './freed.ts'
+import { FREED_MIN, marginAfter, marginLine, phraseChunks, weekActionLine, weekSummaryLine } from './freed.ts'
 import { forecast, noticeBody, type ForecastInput } from './forecast.ts'
 
 const banned = /妻|雷|機嫌|家は雨|家族は|気分/
@@ -178,7 +178,12 @@ test('余白の文は家が主語で、目安が付く', () => {
   for (const text of [line, marginAfter('お風呂', 30), weekSummaryLine(2, 50)]) {
     assert.match(text, /目安/)
     assert.equal(/妻|嫁|パートナー/.test(text), false)
+    const chunks = phraseChunks(text)
+    assert.equal(chunks.at(-1)?.startsWith('家に'), true)
+    assert.equal(chunks.at(-1)?.endsWith('（目安）'), true)
   }
+  assert.deepEqual(phraseChunks(line), ['お風呂を引き受ければ、', '家に30分の余白（目安）'])
+  assert.deepEqual(phraseChunks('予報は採点じゃなくて、備えるためのもの。'), ['予報は採点じゃなくて、', '備えるためのもの。'])
   const result = forecast(base({ returnAt: '20:00', overtime: true }))
   const evening = result.slots.find((slot) => slot.id === '夕方')
   assert.equal(evening?.freedMin, FREED_MIN.bath)

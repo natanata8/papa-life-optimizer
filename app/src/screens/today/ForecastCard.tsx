@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '@/app/store.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { logUsage } from '@/data/usage.ts'
@@ -34,7 +35,9 @@ export function ForecastCard() {
     <section className="mt-3" data-testid="forecast-card">
       {intro ? (
         <div className="mb-2 flex items-start justify-between gap-2 rounded-xl bg-sun px-3 py-2" data-testid="forecast-intro">
-          <p className="text-sm leading-relaxed">予報は採点じゃなくて、備えるためのもの。</p>
+          <p className="text-sm leading-relaxed">
+            <Phrase text="予報は採点じゃなくて、備えるためのもの。" />
+          </p>
           <button
             type="button"
             className="inline-flex min-h-11 shrink-0 items-center px-2 text-sm font-bold text-accent-deep"
@@ -62,7 +65,9 @@ export function ForecastCard() {
       {review ? (
         <div id="forecast-review" className="mt-4" data-testid="forecast-review">
           <p className="text-sm font-bold">昨日の一手、どうだった？</p>
-          <p className="mt-1 text-sm leading-snug">{review.title}</p>
+          <p className="mt-1 text-sm leading-snug">
+            <Phrase text={review.title} />
+          </p>
           <div className="mt-2 flex w-full gap-2">
             <Button className="min-h-11 flex-1" variant="good" onClick={() => store.setReview(review.id, 'good')}>
               よかった
@@ -107,20 +112,22 @@ function Busy({
           }`}
         >
           <LevelBadge sky={peak.lifted ? '注意報' : peak.sky} call={peak.lifted ? '解除' : peak.sky} lifted={peak.lifted} />
-          <p className="break-keep font-bold">{peak.lifted ? `${peak.call}は解除。この調子で大丈夫` : `${peak.call} ${clock}。備えておけば大丈夫`}</p>
+          <p className="min-w-0 font-bold">
+            <Phrase text={peak.lifted ? `${peak.call}は解除。この調子で大丈夫` : `${peak.call} ${clock}。備えておけば大丈夫`} />
+          </p>
         </div>
       ) : null}
       <div className="mt-3 flex items-center gap-2">
         <SkyMark sky={peak.lifted ? 'くもり' : peak.sky} size={44} lifted={false} />
-        <p className="text-sm leading-snug" data-testid="forecast-headline">
-          {glance}
+        <p className="min-w-0 text-sm leading-snug" data-testid="forecast-headline">
+          <Phrase text={glance} />
         </p>
       </div>
-      <h1 className="mt-2 break-keep text-[26px] leading-snug font-bold">
-        {peak.lifted ? `${when}の山場、ひとつ減りました` : `${when}は ${clock}が山場`}
+      <h1 className="mt-2 text-[26px] leading-snug font-bold">
+        <Phrase text={peak.lifted ? `${when}の山場、ひとつ減りました` : `${when}は ${clock}が山場`} />
       </h1>
-      <h2 className="mt-1 break-keep text-[17px] leading-snug font-bold">
-        {peak.lifted ? marginAfter(peak.noun, peak.freedMin) : marginLine(peak.noun, peak.freedMin)}
+      <h2 className="mt-1 text-[17px] leading-snug font-bold">
+        <Phrase text={peak.lifted ? marginAfter(peak.noun, peak.freedMin) : marginLine(peak.noun, peak.freedMin)} />
       </h2>
       <p className="mt-1 flex flex-wrap gap-x-3 text-sm text-muted">
         {back ? <span>帰宅の目安 {back}</span> : null}
@@ -128,7 +135,9 @@ function Busy({
       </p>
       <article className={`mt-3 rounded-[14px] px-3 py-3 shadow-sm ${peak.lifted ? 'bg-margin-wash' : 'bg-white'}`}>
         <p className="text-sm font-bold text-margin">{peak.lifted ? '引き受けました' : '今日の一手（これだけでOK）'}</p>
-        <p className="mt-1 break-keep text-[20px] leading-snug font-bold">{when}の{peak.noun}は自分がやる</p>
+        <p className="mt-1 text-[20px] leading-snug font-bold">
+          <Phrase text={`${when}の${peak.noun}は自分がやる`} />
+        </p>
         <div className="mt-2 flex items-center justify-between gap-2 text-sm">
           <span className="inline-flex items-center gap-1 font-bold">
             {peak.lifted ? (
@@ -152,9 +161,13 @@ function Busy({
           </span>
         </div>
         <p className="mt-2 text-sm leading-relaxed" data-testid={`forecast-why-${peak.id}`}>
-          なぜ {peak.reason.split('／')[0]}
+          <Phrase text={`なぜ ${peak.reason.split('／')[0]}`} />
         </p>
-        {peak.lifted || showLine ? <p className="mt-2 text-sm leading-relaxed">送る文：「{line}」</p> : null}
+        {peak.lifted || showLine ? (
+          <p className="mt-2 text-sm leading-relaxed">
+            <Phrase text={`送る文：「${line}」`} />
+          </p>
+        ) : null}
         {peak.lifted ? (
           <>
             <a className="mt-3 flex min-h-[52px] items-center justify-center rounded-xl bg-margin text-[15px] font-bold text-white no-underline" href={lineShareUrl(line)}>
@@ -212,8 +225,12 @@ function Quiet({
         <SkyMark sky="晴れ" size={44} />
         <p className="text-sm">一日晴れ</p>
       </div>
-      <h1 className="mt-2 break-keep text-[26px] leading-snug font-bold">今日は晴れ。余白はそのまま使おう</h1>
-      <h2 className="mt-1 text-[17px] leading-snug font-bold">重なる家のことはありません。</h2>
+      <h1 className="mt-2 text-[26px] leading-snug font-bold">
+        <Phrase text="今日は晴れ。余白はそのまま使おう" />
+      </h1>
+      <h2 className="mt-1 text-[17px] leading-snug font-bold">
+        <Phrase text="重なる家のことはありません。" />
+      </h2>
       {back ? <p className="mt-1 text-sm text-muted">帰宅の目安 {back}</p> : null}
       <div className="mt-4">
         <p className="text-sm font-bold">あす {formatMd(date)}</p>
@@ -248,7 +265,7 @@ function SlotStrip({ cast, peakId }: { cast: Forecast; peakId: string | null }) 
               <span>{slot.label}</span>
               <span className="font-normal text-muted">{slotClock(slot)}</span>
               <SkyMark sky={slot.lifted ? 'くもり' : slot.sky} size={26} />
-              <span className={slot.lifted ? 'text-margin' : ''}>
+              <span className={`whitespace-nowrap ${slot.lifted ? 'text-margin' : ''}`}>
                 {slot.sky === '晴れ' && !slot.lifted ? '晴れ' : slot.lifted ? `${count}つに減った` : `${count}つ重なる`}
               </span>
             </button>
@@ -265,7 +282,11 @@ function PeakLine({ slot }: { slot: ForecastSlot }) {
   const body = slot.lifted
     ? `${clock}：家のこと${bits.length}つ（${bits.join('・')}）。${slot.noun}は自分。`
     : `${clock}：家のこと${slot.stack}つが重なる（${bits.join('・')}）`
-  return <p className="mt-2 text-sm leading-relaxed">{body}</p>
+  return (
+    <p className="mt-2 text-sm leading-relaxed">
+      <Phrase text={body} />
+    </p>
+  )
 }
 
 function glanceLine(cast: Forecast): string {

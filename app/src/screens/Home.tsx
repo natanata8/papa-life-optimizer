@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -316,7 +317,7 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun text-sm text-accent-deep" aria-hidden="true">☀</span>
       <span className="text-[13px] leading-snug">
         <span className="block text-xs text-muted">ハレゴト・{notice.time} 〈通知の見本・準備中〉</span>
-        {notice.body}
+        <Phrase text={notice.body} />
       </span>
     </button>
   )

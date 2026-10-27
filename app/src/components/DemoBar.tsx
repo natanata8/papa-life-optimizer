@@ -16,15 +16,15 @@ export function DemoBar() {
           data-testid={`mode-${mode}`}
           className={
             mode === store.mode
-              ? 'inline-flex min-h-11 items-center rounded-lg bg-ink px-2 text-xs text-white'
-              : 'inline-flex min-h-11 items-center rounded-lg bg-white px-2 text-xs text-[#6b625a]'
+              ? 'inline-flex min-h-11 items-center rounded-lg bg-ink px-1.5 text-xs text-white'
+              : 'inline-flex min-h-11 items-center rounded-lg bg-white px-1.5 text-xs text-[#6b625a]'
           }
           onClick={() => store.setMode(mode)}
         >
           {mode}
         </button>
       ))}
-      <button type="button" data-testid="demo-reset" className="inline-flex min-h-11 items-center rounded-lg bg-white px-2 text-xs text-[#6b625a]" onClick={store.reset}>
+      <button type="button" data-testid="demo-reset" className="inline-flex min-h-11 items-center rounded-lg bg-white px-1.5 text-xs text-[#6b625a]" onClick={store.reset}>
         最初から
       </button>
       {demoOnly || store.ownHome ? null : (

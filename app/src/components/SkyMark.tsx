@@ -78,21 +78,21 @@ function Triangle({ fill }: { fill: string }) {
 export function LevelBadge({ sky, call, lifted }: { sky: ForecastSky; call: string; lifted: boolean }) {
   if (lifted) {
     return (
-      <span className="inline-flex min-h-7 items-center rounded-full bg-lift px-2 text-xs font-bold text-lift-ink" data-testid="badge-lifted">
+      <span className="inline-flex min-h-7 shrink-0 items-center rounded-full bg-lift px-2 text-xs font-bold whitespace-nowrap text-lift-ink" data-testid="badge-lifted">
         解除
       </span>
     )
   }
   if (sky === '注意報') {
     return (
-      <span className="inline-flex min-h-7 items-center rounded-full border-2 border-watch-line bg-watch-tag px-2 text-xs font-bold text-watch-ink" data-testid="badge-watch">
+      <span className="inline-flex min-h-7 shrink-0 items-center rounded-full border-2 border-watch-line bg-watch-tag px-2 text-xs font-bold whitespace-nowrap text-watch-ink" data-testid="badge-watch">
         {call}
       </span>
     )
   }
   if (sky === '警報') {
     return (
-      <span className="inline-flex min-h-7 items-center rounded-full border-2 border-alert-line bg-alert px-2 text-xs font-bold text-alert-ink" data-testid="badge-alert">
+      <span className="inline-flex min-h-7 shrink-0 items-center rounded-full border-2 border-alert-line bg-alert px-2 text-xs font-bold whitespace-nowrap text-alert-ink" data-testid="badge-alert">
         {call}
       </span>
     )

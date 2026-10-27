@@ -47,3 +47,28 @@ export function weekSummaryLine(count: number, total: number): string {
 export function sendLine(noun: string): string {
   return `今から帰るね。${noun}は任せて。残りも帰ってからやるよ`
 }
+
+const BREAK_AFTER = new Set(['、', '。', '：', '・', ' '])
+
+/** 画面ではこの区切りのあいだでだけ折る。家に…（目安）は一塊。 */
+export function phraseChunks(text: string): string[] {
+  const at = text.indexOf('家に')
+  const head = at >= 0 ? text.slice(0, at) : text
+  const tail = at >= 0 ? text.slice(at) : ''
+  const chunks: string[] = []
+  let buf = ''
+  for (const ch of head) {
+    if (ch === '（' && buf) {
+      chunks.push(buf)
+      buf = ''
+    }
+    buf += ch
+    if (BREAK_AFTER.has(ch)) {
+      chunks.push(buf)
+      buf = ''
+    }
+  }
+  if (buf) chunks.push(buf)
+  if (tail) chunks.push(tail)
+  return chunks.filter((chunk) => chunk.length > 0)
+}

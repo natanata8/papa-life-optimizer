@@ -1,4 +1,5 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -54,7 +55,11 @@ export function Calendar() {
           className="mt-2 w-full rounded-xl border border-inv-line bg-inv px-3 py-2 text-left text-[13px] leading-relaxed text-inv-ink"
           onClick={() => store.setTab('profile')}
         >
-          👀 いまは予定から分かる段取りだけ出ています。<b>{missing.join('・')}</b>を入れると、裏で回っている仕事がもっと見えます →
+          <Phrase text="👀 いまは予定から分かる段取りだけ出ています。" />
+          <b>
+            <Phrase text={missing.join('・')} />
+          </b>
+          <Phrase text="を入れると、裏で回っている仕事がもっと見えます。" />
         </button>
       ) : null}
       {store.cal === 'week' ? <Week /> : <Day />}
@@ -67,7 +72,8 @@ export function Calendar() {
         </Button>
       </div>
         <p className="mt-2 text-xs leading-relaxed text-muted">
-        👀 は家庭プロフィールと「家事・育児タスク一覧」から自動で出ます。チェックや採点はしません。妻の1日は推定で、編集もチェックもできません。
+        <Phrase text="👀 は家庭プロフィールと、「家事・育児タスク一覧」から出ます。チェックや採点はしません。" />
+        <Phrase text="妻の1日は推定です。編集もチェックもできません。" />
       </p>
     </div>
   )
@@ -133,8 +139,14 @@ function Week() {
         onNext={() => store.shiftWeek(1)}
       />
       <div className="rounded-xl bg-margin-wash px-3 py-2 text-sm leading-relaxed">
-        <p className="break-keep font-bold">{yamaLabel ? `今週の山場は ${yamaLabel}` : '今週の山場はありません'}</p>
-        {SHOW_WEEKLY_MARGIN && yamaRows.length > 0 ? <p className="mt-1">{weekSummaryLine(yamaRows.length, marginTotal)}</p> : null}
+        <p className="font-bold">
+          <Phrase text={yamaLabel ? `今週の山場は ${yamaLabel}` : '今週の山場はありません'} />
+        </p>
+        {SHOW_WEEKLY_MARGIN && yamaRows.length > 0 ? (
+          <p className="mt-1">
+            <Phrase text={weekSummaryLine(yamaRows.length, marginTotal)} />
+          </p>
+        ) : null}
       </div>
       <div className="mt-2 divide-y divide-line overflow-hidden rounded-xl bg-white">
         {rows.map((row) => {
@@ -178,10 +190,16 @@ function Week() {
               </button>
               <button type="button" className="min-w-0 flex-1 py-1 text-left" onClick={() => store.setCal('day', row.date)}>
                 <p className="flex flex-wrap items-center gap-1 text-[15px] leading-snug font-bold">
-                  <span className="break-keep">{heading}</span>
+                  <span>
+                    <Phrase text={heading} />
+                  </span>
                   {row.yama && peak ? <LevelBadge sky={peak.sky} call={peak.sky} lifted={false} /> : null}
                 </p>
-                {second ? <p className="mt-0.5 text-sm leading-snug text-margin">{second}</p> : null}
+                {second ? (
+                  <p className="mt-0.5 text-sm leading-snug text-margin">
+                    <Phrase text={second} />
+                  </p>
+                ) : null}
                 {row.main ? <p className="mt-0.5 truncate text-[13px] leading-snug text-muted">{row.main}</p> : null}
               </button>
             </div>
@@ -270,7 +288,11 @@ function Day() {
           <p className="text-muted">妻の1日・推定</p>
         </div>
       ) : null}
-      {lane && !lane.workday ? <p className="mt-1 text-[12px] leading-relaxed text-muted">{lane.note}</p> : null}
+      {lane && !lane.workday ? (
+        <p className="mt-1 text-xs leading-relaxed text-muted">
+          <Phrase text={lane.note} />
+        </p>
+      ) : null}
       {SLOTS.map((slot) => {
         const slotEvents = store.filters.ev ? events.filter((event) => slotOf(event.time) === slot) : []
         const slotChild = store.filters.child ? childEvents.filter((event) => slotOf(event.allDay ? '' : event.startTime) === slot) : []
@@ -330,8 +352,7 @@ function Day() {
       })}
       {lane?.workday ? (
         <p className="mt-2 text-xs leading-relaxed text-muted">
-          {lane.note}
-          {lane.windowLabel}
+          <Phrase text={`${lane.note}${lane.windowLabel}`} />
         </p>
       ) : null}
       <Button className="mt-3" size="lg" onClick={() => store.askDay(store.day)}>
@@ -432,8 +453,8 @@ function WifeBlock({ date, block }: { date: string; block: PartnerBlock }) {
       className="w-full rounded-lg border border-dashed border-line bg-[#f7f4ef]/90 px-1.5 py-1 text-left text-xs leading-snug text-muted"
       onClick={() => store.openSheet({ type: 'wife', date, blockId: block.id })}
     >
-      <span className="block text-xs">推定 {block.time}</span>
-      {block.line}
+      <span className="block text-xs whitespace-nowrap">推定 {block.time}</span>
+      <Phrase text={block.line} />
     </button>
   )
 }
@@ -449,8 +470,7 @@ function InvisiblePill({ item, adopted }: { item: InvItem; adopted: boolean }) {
     >
       <span>👀</span>
       <span>
-        {item.title}
-        {adopted ? '（一手にした）' : ''}
+        <Phrase text={adopted ? `${item.title}（一手にした）` : item.title} />
       </span>
     </button>
   )

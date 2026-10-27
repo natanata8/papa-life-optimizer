@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { careHint, niceSummary, upcomingNice } from '@/domain/nice.ts'
 import { copyText } from '@/lib/utils.ts'
@@ -17,7 +18,9 @@ export function NiceEvents() {
           入れる
         </Button>
       </div>
-      <p className="mt-1 text-[12px] leading-relaxed text-muted">誕生日や記念日、美容院・ネイルなど、帰ってから一言触れておきたい日。</p>
+      <p className="mt-1 text-xs leading-relaxed text-muted">
+        <Phrase text="誕生日や記念日、美容院・ネイルなど、帰ってから一言触れておきたい日。" />
+      </p>
       {items.length === 0 ? (
         <button
           type="button"

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { dowIndex } from '@/domain/dates.ts'
 import { weekendIdeas } from '@/domain/outings.ts'
@@ -28,7 +29,9 @@ export function WeekendCard() {
           <li key={idea.id} className="rounded-xl bg-paper px-3 py-2">
             <p className="text-[14px] font-bold">{idea.title}</p>
             <p className="mt-0.5 text-[12px] leading-relaxed text-muted">{idea.detail}</p>
-            <p className="mt-1 text-[13px] leading-relaxed">「{idea.phrase}」</p>
+            <p className="mt-1 text-[13px] leading-relaxed">
+              <Phrase text={`「${idea.phrase}」`} />
+            </p>
             <Button
               size="sm"
               variant="ghost"
