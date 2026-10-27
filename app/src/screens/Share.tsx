@@ -5,7 +5,7 @@ import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
 import { formatMd } from '@/domain/dates.ts'
 import { returnInfo } from '@/domain/profile.ts'
-import { rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
+import { rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, swapPronoun, type RoutineId } from '@/domain/routines.ts'
 import { taskIcon } from '@/domain/taskIcon.ts'
 import type { AgeLabel, Mode, Pronoun } from '@/domain/types.ts'
 import { copyText } from '@/lib/utils.ts'
@@ -81,8 +81,12 @@ export function ShareScreen() {
             type="button"
             className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-3 text-sm font-bold ${data.profile.pronoun === item.id ? 'bg-accent-deep text-white' : 'bg-white'}`}
             onClick={() => {
-              store.patchProfile((profile) => ({ ...profile, pronoun: item.id }))
-              setDirty(false)
+              const from = data.profile.pronoun
+              const to = item.id
+              store.patchProfile((profile) => ({ ...profile, pronoun: to }))
+              if (!dirty || from === to) return
+              const swapped = swapPronoun(text, from, to)
+              if (swapped !== null) setText(swapped)
             }}
           >
             {item.label}

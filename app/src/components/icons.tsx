@@ -34,7 +34,7 @@ export type IconName =
   | 'back'
 
 const PATHS: Record<IconName, string[]> = {
-  today: ['M12 12.8a6.5 6.5 0 1 0 .01 0', 'M12 9.2V12.5l2.8 1.8'],
+  today: ['M7 4v16', 'M7 6.2a1.5 1.5 0 1 0 .01 0', 'M7 12a1.5 1.5 0 1 0 .01 0', 'M7 17.8a1.5 1.5 0 1 0 .01 0', 'M11 6.2h8', 'M11 12h6', 'M11 17.8h7'],
   do: ['M8 6h11', 'M8 12h11', 'M8 18h11', 'M4 6l1.2 1.2L7.2 4.8', 'M4 12l1.2 1.2L7.2 10.8', 'M4 18h2.4'],
   consult: ['M5 6h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z'],
   plan: ['M6 5h12a1 1 0 0 1 1 1v13H5V6a1 1 0 0 1 1-1z', 'M8 3.5v3', 'M16 3.5v3', 'M5 9h14', 'M9 13h2', 'M13 13h2', 'M9 16h2'],
@@ -97,11 +97,29 @@ export function Icon({ name, size = 20, className }: { name: IconName; size?: nu
 }
 
 export function WeatherDot({ sky }: { sky: string }) {
-  if (sky === '晴れ') return <Icon name="sun" size={16} className="text-accent-deep" />
-  if (sky === 'くもり') return <Icon name="cloud" size={16} className="text-cloud-ink" />
-  if (sky === 'にわか雨') return <Icon name="cloud" size={16} className="text-rain-ink" />
   if (sky === '注意報') return <span className="inline-block h-4 w-4 rounded-full border-2 border-watch-ink bg-watch-tag" />
   if (sky === '警報') return <span className="inline-block h-4 w-4 rounded-full border-2 border-alert-ink bg-alert-line" />
+  if (sky === '晴れ' || sky === 'くもり' || sky === 'にわか雨') {
+    const tone = sky === '晴れ' ? 'text-accent-deep' : sky === 'にわか雨' ? 'text-rain-ink' : 'text-cloud-ink'
+    return (
+      <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" className={tone}>
+        {sky === '晴れ' ? (
+          <>
+            <circle cx="8" cy="8" r="3.1" fill="currentColor" />
+            <g stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+              <path d="M8 1.1v2M8 12.9v2M1.1 8h2M12.9 8h2M3.1 3.1l1.5 1.5M11.4 11.4l1.5 1.5M12.9 3.1l-1.5 1.5M4.6 11.4l-1.5 1.5" />
+            </g>
+          </>
+        ) : (
+          <>
+            <circle cx="5" cy="11" r="4.6" fill="currentColor" />
+            <circle cx="11" cy="11" r="4.6" fill="currentColor" />
+            <circle cx="8" cy="6.2" r="4.4" fill="currentColor" />
+          </>
+        )}
+      </svg>
+    )
+  }
   return <span className="inline-block h-4 w-4 rounded-full border-2 border-dashed border-muted" />
 }
 

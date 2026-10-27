@@ -140,6 +140,20 @@ function Week() {
           )
         })}
       </div>
+      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted" data-testid="week-legend">
+        <span className="inline-flex items-center gap-1">
+          <WeatherDot sky="注意報" />
+          注意報
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <WeatherDot sky="警報" />
+          警報
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <WeatherDot sky="none" />
+          予定ありなど
+        </span>
+      </p>
       <h2 className="mt-4 text-sm font-bold">今週、先回りできること {openRows.length}つ</h2>
       <div className="mt-2 space-y-2">
         {openRows.map((row) => {

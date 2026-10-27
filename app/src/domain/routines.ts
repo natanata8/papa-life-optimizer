@@ -346,6 +346,23 @@ export function shareLine(input: { titles: string[]; pronoun: Pronoun; back: str
   return line.replace('はやるね', 'をやるね')
 }
 
+function pronounToken(id: Pronoun): string {
+  return id ? `${id}が` : ''
+}
+
+/** 一人称の印だけを入れ替える。文の中に見当たらなければ null。 */
+export function swapPronoun(text: string, from: Pronoun, to: Pronoun): string | null {
+  if (from === to) return text
+  const fromToken = pronounToken(from)
+  const toToken = pronounToken(to)
+  if (fromToken && text.includes(fromToken)) {
+    if (toToken) return text.replace(fromToken, toToken)
+    return text.replace(`は${fromToken}`, 'を').replace(fromToken, '')
+  }
+  if (!fromToken && toToken && text.includes('をやる')) return text.replace('をやる', `は${toToken}やる`)
+  return null
+}
+
 export function contextChips(input: { dateLabel: string; back: string | null; titles: string[]; overlap: string; ages: string[] }): string[] {
   const chips = [input.dateLabel]
   if (input.back) chips.push(`帰宅 ${input.back}`)

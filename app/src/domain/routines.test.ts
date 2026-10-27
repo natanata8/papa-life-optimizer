@@ -23,6 +23,7 @@ import {
   routineDone,
   rowAt,
   shareLine,
+  swapPronoun,
   shownMinutes,
   stepsFor,
   stepsInTime,
@@ -60,6 +61,17 @@ test('送る文は何を誰がいつやるかを書く', () => {
   assert.equal(shareLine({ titles: ['お風呂（2人とも）'], pronoun: '俺', back: '19:30' }), '今夜のお風呂（2人とも）は俺がやるね。19:30に帰ります。')
   assert.equal(line.includes('任せて'), false)
   assert.equal(line.includes('は俺が') && line.indexOf('は') !== line.lastIndexOf('は'), false)
+})
+
+test('一人称を変えても、直した文は一人称だけ替わる', () => {
+  const base = '今夜のお風呂は俺がやるね。19:30に帰ります。'
+  assert.equal(swapPronoun(base, '俺', '僕'), '今夜のお風呂は僕がやるね。19:30に帰ります。')
+  assert.equal(swapPronoun(base, '俺', '自分'), '今夜のお風呂は自分がやるね。19:30に帰ります。')
+  assert.equal(swapPronoun(base, '俺', ''), '今夜のお風呂をやるね。19:30に帰ります。')
+  assert.equal(swapPronoun('お風呂は俺が先に入る。子どもは19:50。', '俺', '僕'), 'お風呂は僕が先に入る。子どもは19:50。')
+  assert.equal(swapPronoun('今夜のお風呂をやるね。19:30に帰ります。', '', '僕'), '今夜のお風呂は僕がやるね。19:30に帰ります。')
+  assert.equal(swapPronoun('今夜は任せるね。', '俺', '僕'), null)
+  assert.equal(swapPronoun('今夜は任せるね。', '', '俺'), null)
 })
 
 test('1つずつはリストと同じチェックの、最初の未了から始まる', () => {
