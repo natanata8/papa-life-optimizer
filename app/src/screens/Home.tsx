@@ -7,10 +7,11 @@ import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import {
-  allStepsChecked,
   contextChips,
+  footerLine,
   freedFor,
   overlapLine,
+  routineDone,
   routineForPeak,
   rowAt,
   rowNote,
@@ -44,7 +45,8 @@ export function Home() {
   const margin = taken.reduce((sum, item) => sum + freedFor(item.routineId as RoutineId, item.partial, ages, ensoku), 0)
   const passed = Object.entries(data.accept ?? {}).some(([key, value]) => key.startsWith(`${store.today}|`) && value.phase === 'passed')
   const shared = taken.some((item) => item.sharedAt)
-  const finished = allStepsChecked(taken, ages, ensoku)
+  const doneCount = taken.filter((item) => routineDone(item, ages, ensoku)).length
+  const finished = doneCount > 0 && doneCount === taken.length
   const clock = store.mode === '帰宅前' && info ? info.open : back ?? ''
   const partner = data.profile.partner || '家族'
 
@@ -66,9 +68,9 @@ export function Home() {
       {finished ? <p className="mt-2 text-sm font-bold" data-testid="tonight-done">終わった</p> : null}
       {shared ? <p className="mt-1 text-sm font-bold text-margin" data-testid="tonight-shared">共有済み</p> : null}
       {warning && peak && overlap ? (
-        <p className="mt-3 flex items-center gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-fold="warning">
+        <p className="mt-3 flex min-w-0 items-start gap-2 rounded-xl bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-fold="warning">
           <SkyMark sky={peak.sky} size={24} />
-          <span>
+          <span className="min-w-0 flex-1">
             <span className="mr-1 whitespace-nowrap">{peak.sky}</span>
             <Phrase text={overlap} />
           </span>
@@ -105,7 +107,7 @@ export function Home() {
                   store.showToast('引き受けを外しました', () => store.restoreTaken(store.today, snapshot))
                 }}
               >
-                {on ? '✓ 引き受けた' : '引き受ける'}
+                {on && row.item && routineDone(row.item, ages, ensoku) ? '終わった' : on ? '✓ 引き受けた' : '引き受ける'}
               </button>
             </article>
           )
@@ -132,7 +134,7 @@ export function Home() {
       </button>
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pt-2 pb-2">
         <p className="text-center text-sm" data-fold="margin">
-          <Phrase text={taken.length ? `${taken.length}つ引き受け中 → 家に${margin}分の余白（目安）` : '引き受けると、家に余白が戻ります（目安）'} />
+          <Phrase text={footerLine(taken.length, doneCount, margin)} />
         </p>
         <button
           type="button"

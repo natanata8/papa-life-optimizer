@@ -262,19 +262,47 @@ export function allStepsChecked(
   })
 }
 
+export function routineDone(
+  item: { routineId: string; checked: string[]; partial?: string[]; extra?: { id: string }[] },
+  ages: AgeLabel[],
+  ensoku: boolean,
+): boolean {
+  return allStepsChecked([item], ages, ensoku)
+}
+
+/** やるの件数は、まだ終わっていない手順があるものだけ。共有済みでは消さない。 */
 export function openRoutineCount(
   taken: { routineId: string; checked: string[]; partial?: string[]; sharedAt?: string; extra?: { id: string }[] }[],
   ages: AgeLabel[],
   ensoku: boolean,
 ): number {
-  if (taken.some((item) => item.sharedAt)) return 0
-  if (allStepsChecked(taken, ages, ensoku)) return 0
-  return taken.filter((item) => {
-    const steps = stepsFor(item.routineId as RoutineId, ages, ensoku)
-    const picked = item.partial?.length ? steps.filter((step) => item.partial?.includes(step.id)) : steps
-    const ids = [...picked.map((step) => step.id), ...(item.extra ?? []).map((step) => step.id)]
-    return ids.some((id) => !item.checked.includes(id))
-  }).length
+  return taken.filter((item) => !routineDone(item, ages, ensoku)).length
+}
+
+export function footerLine(takenCount: number, doneCount: number, minutes: number): string {
+  if (takenCount === 0) return '引き受けると、家に余白が戻ります（目安）'
+  if (doneCount > 0 && doneCount === takenCount) return `${doneCount}つ終わった → 家に${minutes}分の余白（目安）`
+  return `${takenCount}つ引き受け中 → 家に${minutes}分の余白（目安）`
+}
+
+/** 見出しの開始は、見える最初の手順の時刻。 */
+export function firstStepAt(at: string, steps: { offsetMin?: number }[]): string {
+  if (!at || steps.length === 0) return at
+  const offset = Math.min(...steps.map((step) => step.offsetMin ?? 0))
+  return plusMinutes(at, offset)
+}
+
+export function extraOffsets(steps: { offsetMin?: number; minutes: number }[], count: number, minutes = 3): number[] {
+  const end = steps.reduce((max, step) => Math.max(max, (step.offsetMin ?? 0) + step.minutes), 0)
+  return Array.from({ length: count }, (_, index) => end + index * minutes)
+}
+
+export function stepsInTime<T extends { offsetMin?: number }>(steps: T[]): T[] {
+  return [...steps].sort((a, b) => (a.offsetMin ?? 0) - (b.offsetMin ?? 0))
+}
+
+export function withoutPassed<T extends { phase: string }>(accept: Record<string, T>, date: string): Record<string, T> {
+  return Object.fromEntries(Object.entries(accept).filter(([key, value]) => !(key.startsWith(`${date}|`) && value.phase === 'passed')))
 }
 
 export function shareLine(input: { titles: string[]; pronoun: Pronoun; back: string | null }): string {
@@ -319,13 +347,16 @@ export function partialChoices(ages: AgeLabel[], ensoku: boolean): { routineId: 
   return choices
 }
 
-/** 相談チップを外したとき、使った家庭の情報からも同じ内容を外す。 */
-export function dropUsedChip(used: string[], chip: string): string[] {
-  const parts = chip.split('・').map((part) => part.trim()).filter(Boolean)
-  return used.filter((label) => {
-    if (label.startsWith('子ども') && parts.some((part) => label.includes(part))) return false
-    if (chip && label.includes(chip)) return false
-    return true
+/**
+ * 答えの「使った家庭の情報」は、送った時点のチップの写し。
+ * 年齢チップが残っているときだけ、子どもの行を載せる。
+ */
+export function usedFromChips(labels: string[], chips: string[] | undefined): string[] {
+  if (!chips) return [...labels]
+  return labels.filter((label) => {
+    if (!label.startsWith('子ども：')) return true
+    const ages = label.slice('子ども：'.length).split('・').filter(Boolean)
+    return ages.some((age) => chips.some((chip) => chip.includes(age)))
   })
 }
 

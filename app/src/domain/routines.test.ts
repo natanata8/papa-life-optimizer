@@ -1,7 +1,26 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { phraseChunks } from './freed.ts'
 import { FREED_MIN } from './freed.ts'
-import { dadBusy, dropUsedChip, firstUnchecked, freedFor, overlapLine, shareLine, shownMinutes, stepsFor, tonightFold } from './routines.ts'
+import { fallbackScenes } from './scenes.ts'
+import {
+  dadBusy,
+  extraOffsets,
+  firstStepAt,
+  firstUnchecked,
+  footerLine,
+  freedFor,
+  openRoutineCount,
+  overlapLine,
+  routineDone,
+  shareLine,
+  shownMinutes,
+  stepsFor,
+  stepsInTime,
+  tonightFold,
+  usedFromChips,
+  withoutPassed,
+} from './routines.ts'
 
 test('重なる理由は、時刻と名前を1文にする', () => {
   const line = overlapLine('20〜22時', ['寝かしつけ', 'お弁当の準備'])
@@ -47,9 +66,85 @@ test('自分の予定と重なる時間には家の仕事を提案しない', ()
   assert.equal(dadBusy([], '18〜20時'), false)
 })
 
-test('年齢チップを外すと使った情報から年齢が消える', () => {
-  const used = ['子ども：4歳・1歳', '両方フルタイム']
-  assert.deepEqual(dropUsedChip(used, '4歳・1歳'), ['両方フルタイム'])
+test('相談の使用情報は送った時点のチップで決まり、前の答えは変わらない', () => {
+  const labels = ['子ども：4歳・1歳', '両方フルタイム']
+  const sent = ['10/27 今夜', '4歳・1歳', '帰宅 19:30']
+  const first = usedFromChips(labels, sent)
+  assert.deepEqual(first, labels)
+  const kept = [...first]
+  const next = usedFromChips(labels, sent.filter((chip) => chip !== '4歳・1歳'))
+  assert.deepEqual(next, ['両方フルタイム'])
+  assert.deepEqual(first, kept)
+})
+
+test('小さいお風呂の見出しは、最初の手順の時刻から始まる', () => {
+  assert.equal(firstStepAt('19:40', [{ offsetMin: 18 }, { offsetMin: 25 }]), '19:58')
+  assert.equal(firstStepAt('19:40', [{ offsetMin: 0 }, { offsetMin: 2 }]), '19:40')
+})
+
+test('手順が全部終わると、行と余白の文は終わったになる', () => {
+  const ages = ['4歳', '1歳'] as const
+  const ids = stepsFor('bath', [...ages], false).map((step) => step.id)
+  const open = { routineId: 'bath', checked: ids.slice(0, 1) }
+  const done = { routineId: 'bath', checked: ids }
+  assert.equal(routineDone(open, [...ages], false), false)
+  assert.equal(routineDone(done, [...ages], false), true)
+  assert.equal(footerLine(1, 0, 30), '1つ引き受け中 → 家に30分の余白（目安）')
+  assert.equal(footerLine(1, 1, 30), '1つ終わった → 家に30分の余白（目安）')
+})
+
+test('パスした日に引き受けると、パスは残らない', () => {
+  const accept = { '2026-10-27|夜': { phase: 'passed' }, '2026-10-27|夕方': { phase: 'done' }, '2026-10-28|夜': { phase: 'passed' } }
+  const next = withoutPassed(accept, '2026-10-27')
+  assert.equal(next['2026-10-27|夜'], undefined)
+  assert.equal(next['2026-10-27|夕方']?.phase, 'done')
+  assert.equal(next['2026-10-28|夜']?.phase, 'passed')
+})
+
+test('共有しても、終わっていない手順の件数は残る', () => {
+  const ages = ['4歳', '1歳'] as const
+  const ids = stepsFor('bath', [...ages], false).map((step) => step.id)
+  const shared = [{ routineId: 'bath', checked: [], sharedAt: '2026-10-27T10:00:00.000Z' }]
+  assert.equal(openRoutineCount(shared, [...ages], false), 1)
+  assert.equal(openRoutineCount([{ routineId: 'bath', checked: ids, sharedAt: '2026-10-27T10:00:00.000Z' }], [...ages], false), 0)
+})
+
+test('足した手順は最後の時刻のあとで、時刻順に並ぶ', () => {
+  const base = [
+    { id: 'a', offsetMin: 0, minutes: 8 },
+    { id: 'b', offsetMin: 13, minutes: 2 },
+  ]
+  const offsets = extraOffsets(base, 2)
+  assert.deepEqual(offsets, [15, 18])
+  const merged = stepsInTime([
+    { id: 'b', offsetMin: 13 },
+    { id: 'x', offsetMin: offsets[0] },
+    { id: 'a', offsetMin: 0 },
+    { id: 'y', offsetMin: offsets[1] },
+  ])
+  assert.deepEqual(merged.map((step) => step.id), ['a', 'b', 'x', 'y'])
+})
+
+test('日表示と重なりの文は、語の途中で割れない', () => {
+  const child = '上の子 遠足（お弁当の日）（お弁当、水筒、レジャーシート）'
+  const estimate = 'この時間の見立ては「インフルエンザ予防接種の予約を確認」。'
+  const banner = overlapLine('20〜22時', ['寝かしつけ', '明日の遠足の持ち物'])
+  for (const text of [child, estimate, banner]) {
+    const chunks = phraseChunks(text)
+    assert.equal(chunks.join(''), text)
+    assert.ok(chunks.length > 1)
+  }
+  assert.ok(phraseChunks(child).some((chunk) => chunk.includes('お弁当の日')))
+  assert.ok(phraseChunks(child).some((chunk) => chunk.includes('レジャーシート')))
+  assert.ok(phraseChunks(estimate).some((chunk) => chunk.includes('予約を確認')))
+  assert.ok(phraseChunks(banner).every((chunk) => chunk.length <= 16))
+})
+
+test('お風呂の質問には、お風呂の場面だけを出す', () => {
+  const scenes = fallbackScenes('下の子がお風呂を嫌がる')
+  assert.deepEqual(scenes, ['お風呂を短くする'])
+  assert.equal(scenes.includes('飲み会に行きたい'), false)
+  assert.equal(scenes.includes('残業で遅くなる'), false)
 })
 
 test('今夜の流れの1画面目は12個まで', () => {

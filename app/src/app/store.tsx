@@ -9,7 +9,7 @@ import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts
 import { INV_DEFS, SLOT_TIME, invisibleOn } from '@/domain/invisible.ts'
 import { LAZY_WHY, SCENE_LAZY, isSet, kidsFromAges, lazyTitle, removeKid, usedLabels } from '@/domain/profile.ts'
 import { partnerDay } from '@/domain/partnerDay.ts'
-import { dropUsedChip } from '@/domain/routines.ts'
+import { extraOffsets, stepsFor, usedFromChips, withoutPassed, type RoutineId } from '@/domain/routines.ts'
 import { createEmpty, createPublicDemo } from '@/domain/seed.ts'
 import { placeTiming, sceneDateFor } from '@/domain/place.ts'
 import { SCENES, sceneFromText } from '@/domain/scenes.ts'
@@ -228,6 +228,14 @@ function applyLazyChoice(profile: Profile, key: string, option: string): Profile
     return { ...profile, [key]: option }
   }
   return profile
+}
+
+function latestChips(chat: ChatMessage[]): string[] | undefined {
+  for (let index = chat.length - 1; index >= 0; index -= 1) {
+    const message = chat[index]
+    if (message.role === 'context') return message.chips
+  }
+  return undefined
 }
 
 function attachAnswer(
@@ -458,7 +466,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const handle = window.setTimeout(() => {
       setToast(null)
       setToastUndo(null)
-    }, toastUndo ? 6000 : 1800)
+    }, 3000)
     return () => window.clearTimeout(handle)
   }, [toast, toastUndo])
 
@@ -489,6 +497,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       source?: string
       sceneTitle?: string
       care?: boolean
+      chips?: string[]
     },
   ) => {
     setPending(true)
@@ -500,7 +509,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const behind = scene
         ? behindFor(scene, request.sceneDate, todayRef.current, snapshot.profile, snapshot.events, snapshot.hidden)
         : { why: '', lines: [] as string[] }
-      const used = usedLabels(snapshot.profile, scene)
+      const chips = extra?.chips ?? latestChips(snapshot.chat)
+      const used = usedFromChips(usedLabels(snapshot.profile, scene), chips)
       const base = dataRef.current ?? snapshot
       commit(
         attachAnswer(base, {
@@ -799,7 +809,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setTab('consult')
       setFlow(null)
       logUsage('umbrella_tapped')
-      void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: '今夜の流れ' })
+      void runConsult(next, null, [], trimmed, trimmed, { sceneTitle: '今夜の流れ', chips })
     },
     retryConsult: (retry) => {
       const current = dataRef.current
@@ -905,7 +915,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const list = current.taken?.[date] ?? []
       const next = list.filter((item) => item.routineId !== routineId)
       next.push({ routineId, at, checked: [], partial })
-      commit({ ...current, taken: { ...(current.taken ?? {}), [date]: next } })
+      commit({ ...current, accept: withoutPassed(current.accept ?? {}, date), taken: { ...(current.taken ?? {}), [date]: next } })
     },
     dropRoutine: (date, routineId) => {
       const current = dataRef.current
@@ -939,12 +949,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     addExtraSteps: (date, routineId, titles) => {
       const current = dataRef.current
       if (!current) return
-      const extra = titles.filter(Boolean).map((title) => ({ id: uid(), title, minutes: 3 }))
+      const names = titles.filter(Boolean)
+      if (names.length === 0) return
+      const ages = current.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
+      const ensoku = current.childEvents.some((event) => event.title.includes('遠足'))
       const list = [...(current.taken?.[date] ?? [])]
       const index = list.findIndex((item) => item.routineId === routineId)
-      if (index < 0) list.push({ routineId, at: '', checked: [], extra })
-      else list[index] = { ...list[index], extra: [...(list[index].extra ?? []), ...extra] }
+      const item = index >= 0 ? list[index] : undefined
+      const base = stepsFor(routineId as RoutineId, ages, ensoku)
+      const picked = item?.partial?.length ? base.filter((step) => item.partial?.includes(step.id)) : base
+      const placed = [...picked, ...(item?.extra ?? [])]
+      const offsets = extraOffsets(placed, names.length)
+      const extra = names.map((title, stepIndex) => ({ id: uid(), title, minutes: 3, offsetMin: offsets[stepIndex] }))
+      if (!item) list.push({ routineId, at: '', checked: [], extra })
+      else list[index] = { ...item, extra: [...(item.extra ?? []), ...extra] }
       commit({ ...current, taken: { ...(current.taken ?? {}), [date]: list } })
+      showToast('手順に追加しました')
       setTab('do')
     },
     removeChip: (messageId, chip) => {
@@ -954,9 +974,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (message.role !== 'context' || message.id !== messageId) return message
         return { ...message, chips: message.chips.filter((item) => item !== chip) }
       })
-      const index = chat.findIndex((message) => message.role === 'context' && message.id === messageId)
-      const next = chat[index + 1]
-      if (next && next.role === 'answer') chat[index + 1] = { ...next, used: dropUsedChip(next.used, chip) }
       commit({ ...current, chat })
     },
     markWelcome: (mode) => {

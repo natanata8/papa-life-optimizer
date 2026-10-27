@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { useStore } from '@/app/store.tsx'
-import { firstUnchecked, plusMinutes, rowAt, rowTitle, shownMinutes, stepLabel, stepsFor, type RoutineId } from '@/domain/routines.ts'
+import { firstStepAt, firstUnchecked, plusMinutes, rowAt, rowTitle, shownMinutes, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
 
@@ -58,7 +58,7 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-base font-bold">{rowTitle(id, ages, ensoku)}</h2>
         <p className="text-xs whitespace-nowrap text-muted">
-          {at}〜 約{shownMinutes(id, ages, ensoku, item.partial)}分
+          {firstStepAt(at, steps)}〜 約{shownMinutes(id, ages, ensoku, item.partial)}分
           <span className="ml-2 font-bold text-ink">{done}/{steps.length}</span>
         </p>
       </div>
@@ -163,6 +163,6 @@ function visibleSteps(item: TakenRoutine, ages: AgeLabel[], ensoku: boolean) {
   const id = item.routineId as RoutineId
   const steps = stepsFor(id, ages, ensoku)
   const picked = item.partial?.length ? steps.filter((step) => item.partial?.includes(step.id)) : steps
-  const extra = (item.extra ?? []).map((step) => ({ ...step, offsetMin: 0 }))
-  return [...picked, ...extra]
+  const extra = (item.extra ?? []).map((step) => ({ ...step, offsetMin: step.offsetMin ?? 0 }))
+  return stepsInTime([...picked, ...extra])
 }

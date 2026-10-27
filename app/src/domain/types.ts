@@ -188,7 +188,7 @@ export type TakenRoutine = {
   checked: string[]
   sharedAt?: string
   partial?: string[]
-  extra?: { id: string; title: string; minutes: number; tip?: string }[]
+  extra?: { id: string; title: string; minutes: number; tip?: string; offsetMin?: number }[]
 }
 
 export type ChatMessage =

@@ -1,5 +1,5 @@
 import { addDays, formatMd } from '@/domain/dates.ts'
-import { SCENES } from '@/domain/scenes.ts'
+import { fallbackScenes } from '@/domain/scenes.ts'
 import type { StepKind, ToneAnswer, ToneStep } from '@/domain/types.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
 
@@ -84,7 +84,19 @@ function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.scene === 'me') return noteBlocked(mine(request), blocked)
   if (request.scene === 'late') return noteBlocked(late(request), blocked)
   if (request.scene === 'clash') return noteBlocked(clash(request), blocked)
-  const choices = Object.values(SCENES).map((scene) => scene.title)
+  if (request.userText.includes('お風呂を短く')) return bathBoat()
+  const choices = fallbackScenes(request.userText)
+  if (choices.length === 0) {
+    return {
+      状況整理: 'この文に近い場面は、まだありません。',
+      気づき: 'お風呂、残業、週末、のどれかに言い換えると手順を出せます。',
+      一手: [step('言い換えてもう一度', '近い言葉にすると手順が出ます', '今やる', '今夜', [])],
+      声かけ例: '',
+      明日やること: '',
+      questions: [],
+      safety_flag: false,
+    }
+  }
   return {
     状況整理: '近い場面を1つ選ぶと、手順を出せます。',
     気づき: '',

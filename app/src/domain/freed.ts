@@ -48,7 +48,8 @@ export function sendLine(noun: string): string {
   return `今から帰るね。${noun}は任せて。残りも帰ってからやるよ`
 }
 
-const BREAK_AFTER = new Set(['、', '。', '：', '・', ' '])
+const BREAK_AFTER = new Set(['、', '。', '：', '・', ' ', '）', '」'])
+const SOFT_BREAK = new Set(['は', 'と'])
 
 /** 画面ではこの区切りのあいだでだけ折る。家に…（目安）は一塊。 */
 export function phraseChunks(text: string): string[] {
@@ -58,12 +59,12 @@ export function phraseChunks(text: string): string[] {
   const chunks: string[] = []
   let buf = ''
   for (const ch of head) {
-    if (ch === '（' && buf) {
+    if ((ch === '（' || ch === '「') && buf) {
       chunks.push(buf)
       buf = ''
     }
     buf += ch
-    if (BREAK_AFTER.has(ch)) {
+    if (BREAK_AFTER.has(ch) || (SOFT_BREAK.has(ch) && buf.length >= 6)) {
       chunks.push(buf)
       buf = ''
     }

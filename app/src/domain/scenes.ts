@@ -1,4 +1,4 @@
-import type { SceneId } from '@/domain/types.ts'
+import type { SceneId } from './types.ts'
 
 export type SceneDef = {
   id: SceneId
@@ -75,4 +75,24 @@ const ROUTES: { pattern: RegExp; scene: SceneId }[] = [
 
 export function sceneFromText(text: string): SceneId | null {
   return ROUTES.find((route) => route.pattern.test(text))?.scene ?? null
+}
+
+const FALLBACK_CHOICES: { title: string; keywords: string[] }[] = [
+  { title: 'お風呂を短くする', keywords: ['風呂', '湯船', '保湿', '入浴'] },
+  { title: SCENES.late.title, keywords: ['残業', '遅い', '帰り', '遅くな'] },
+  { title: SCENES.nomi.title, keywords: ['飲', 'のみ', '送別会', '忘年'] },
+  { title: SCENES.week.title, keywords: ['週末', '土曜', '日曜', '土日', '出かけ'] },
+  { title: SCENES.me.title, keywords: ['自分の時間', 'ゲーム', '趣味', 'ジム', 'ひとり'] },
+  { title: SCENES.tired.title, keywords: ['しんど', '機嫌', '疲れ', 'イライラ', 'ため息'] },
+  { title: SCENES.clash.title, keywords: ['怒', '怒鳴', 'どうしたら'] },
+]
+
+/** 入力に含まれる語だけで場面を並べる。関係のない場面は出さない。 */
+export function fallbackScenes(text: string): string[] {
+  const ranked = FALLBACK_CHOICES.map((choice) => ({
+    title: choice.title,
+    score: choice.keywords.reduce((sum, word) => sum + (text.includes(word) ? word.length : 0), 0),
+  })).filter((choice) => choice.score > 0)
+  ranked.sort((a, b) => b.score - a.score)
+  return ranked.map((choice) => choice.title)
 }

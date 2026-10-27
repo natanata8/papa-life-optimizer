@@ -249,7 +249,9 @@ function Day() {
                 onClick={() => store.openSheet({ type: 'daily', taskId: task.id })}
               >
                 <span>👀</span>
-                <span className="min-w-0 flex-1 break-words">{task.title}</span>
+                <span className="min-w-0 flex-1">
+                  <Phrase text={task.title} />
+                </span>
                 <span className="text-xs text-muted">{task.frequency}</span>
               </button>
             ))}
@@ -257,9 +259,9 @@ function Day() {
         </details>
       ) : null}
       {lane ? (
-        <div className="mt-2 grid grid-cols-2 gap-2 text-xs font-bold" data-testid="wife-lane">
-          <p>自分</p>
-          <p className="text-muted">妻の1日・推定</p>
+        <div className="mt-2 text-xs font-bold" data-testid="wife-lane">
+          <p>自分の予定</p>
+          <p className="text-muted">妻の1日・推定（点線）</p>
         </div>
       ) : null}
       {lane && !lane.workday ? (
@@ -296,7 +298,7 @@ function Day() {
                 </button>
               ) : null}
             </div>
-            <div className={lane ? 'mt-1 grid min-w-0 grid-cols-2 items-start gap-1' : 'mt-1 space-y-1'}>
+            <div className="mt-1 min-w-0 space-y-1">
               <div className="min-w-0 space-y-1">
                 {slotEvents.map((event) => (
                   <EventPill key={event.id} event={event} />
@@ -379,7 +381,9 @@ function EventPill({ event }: { event: FamEvent }) {
     >
       <span>{event.who === '自分' ? '🙋' : '👪'}</span>
       <span className="shrink-0 text-xs whitespace-nowrap">{event.time || '終日'}</span>
-      <span className="min-w-0 flex-1 break-words">{event.title}</span>
+      <span className="min-w-0 flex-1">
+        <Phrase text={event.title} />
+      </span>
     </button>
   )
 }
@@ -392,14 +396,12 @@ function ChildPill({ event, name }: { event: ChildEvent; name: string }) {
       type="button"
       data-testid={`child-${event.id}`}
       aria-label={`${when} ${name} ${event.title}`}
-      className="flex min-h-11 w-full min-w-0 items-center gap-1.5 rounded-lg bg-child px-2 text-left text-[13px] text-child-ink"
+      className="flex min-h-11 w-full min-w-0 flex-wrap items-center gap-1.5 rounded-lg bg-child px-2 text-left text-[13px] text-child-ink"
       onClick={() => store.openSheet({ type: 'children', editId: event.id })}
     >
       <span className="shrink-0 text-xs whitespace-nowrap">{when}</span>
-      <span className="min-w-0 flex-1 break-words">
-        {name ? `${name} ` : ''}
-        {event.title}
-        {event.items.length > 0 ? `（${event.items.join('、')}）` : ''}
+      <span className="min-w-0 basis-full">
+        <Phrase text={`${name ? `${name} ` : ''}${event.title}${event.items.length > 0 ? `（${event.items.join('、')}）` : ''}`} />
       </span>
     </button>
   )
@@ -416,7 +418,9 @@ function StepPill({ step }: { step: Step }) {
     >
       <span>{step.status === 'good' ? '😊' : step.status === 'meh' ? '😐' : '👉'}</span>
       {step.time ? <span className="text-xs">{step.time}</span> : null}
-      <span className="min-w-0 flex-1 break-words">やること：{step.title}</span>
+      <span className="min-w-0 flex-1">
+        <Phrase text={`やること：${step.title}`} />
+      </span>
     </button>
   )
 }
@@ -428,11 +432,13 @@ function WifeBlock({ date, block }: { date: string; block: PartnerBlock }) {
       type="button"
       data-testid={`wife-block-${block.id}`}
       aria-label={block.line}
-      className="min-h-11 w-full min-w-0 rounded-lg border border-dashed border-line bg-[#f7f4ef]/90 px-1.5 py-2 text-left text-xs leading-snug break-words text-muted"
+      className="min-h-11 w-full min-w-0 rounded-lg border border-dashed border-line bg-[#f7f4ef]/90 px-1.5 py-2 text-left text-xs leading-snug text-muted"
       onClick={() => store.openSheet({ type: 'wife', date, blockId: block.id })}
     >
       <span className="block text-xs">推定 {block.time}</span>
-      <span className="block">{block.line}</span>
+      <span className="block">
+        <Phrase text={block.line} />
+      </span>
     </button>
   )
 }
@@ -448,7 +454,9 @@ function InvisiblePill({ item, adopted }: { item: InvItem; adopted: boolean }) {
       onClick={() => store.openSheet({ type: 'invisible', date: item.date, key: item.key })}
     >
       <span className="shrink-0">👀</span>
-      <span className="min-w-0 flex-1 break-words">{adopted ? `${item.title}（引き受けた）` : item.title}</span>
+      <span className="min-w-0 flex-1">
+        <Phrase text={adopted ? `${item.title}（引き受けた）` : item.title} />
+      </span>
     </button>
   )
 }

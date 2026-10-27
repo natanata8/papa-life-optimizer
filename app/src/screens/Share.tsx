@@ -4,7 +4,7 @@ import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
 import { formatMd } from '@/domain/dates.ts'
 import { returnInfo } from '@/domain/profile.ts'
-import { rowTitle, shareLine, stepLabel, stepsFor, type RoutineId } from '@/domain/routines.ts'
+import { rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
 import type { AgeLabel, Mode, Pronoun } from '@/domain/types.ts'
 import { copyText } from '@/lib/utils.ts'
 
@@ -163,7 +163,7 @@ export function PartnerPreview() {
       {taken.map((item) => {
         const id = item.routineId as RoutineId
         const steps = item.partial?.length ? stepsFor(id, ages, ensoku).filter((step) => item.partial?.includes(step.id)) : stepsFor(id, ages, ensoku)
-        const withExtra = [...steps.map((step) => ({ ...step, title: stepLabel(step, ages) })), ...(item.extra ?? [])]
+        const withExtra = stepsInTime([...steps.map((step) => ({ ...step, title: stepLabel(step, ages) })), ...(item.extra ?? []).map((step) => ({ ...step, offsetMin: step.offsetMin ?? 0 }))])
         const done = withExtra.filter((step) => item.checked.includes(step.id)).length
         return (
           <section key={item.routineId} className="mt-3 rounded-[14px] bg-white p-3 shadow-sm">
