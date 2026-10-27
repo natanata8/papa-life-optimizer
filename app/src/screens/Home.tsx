@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
@@ -26,6 +26,7 @@ import { ChildToday } from '@/screens/today/ChildToday.tsx'
 import { MessageComposer } from '@/screens/today/MessageComposer.tsx'
 import { NiceEvents } from '@/screens/today/NiceEvents.tsx'
 import { ForecastCard } from '@/screens/today/ForecastCard.tsx'
+import { moreSection } from '@/domain/todayFold.ts'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
 
 const TASK_IDS: Record<InvItem['def'], string> = {
@@ -74,13 +75,41 @@ export function Home() {
     hidden: data.hidden,
   }).slice(0, 3)
   const line = cards.find((card) => card.line)?.line
+  const section = moreSection([
+    ...cards.map((card) => card.title),
+    '子どもの予定',
+    'あったらいいこと',
+    '声かけ',
+    '今週末の提案',
+  ])
 
   return (
     <div className="px-3.5 pt-3.5 pb-28">
       <DemoBar title="ハレゴト" meta={`${formatMd(store.today)} ${clock}`} fold />
       <ForecastCard />
-      <details className="mt-4" data-testid="today-more" data-fold="more">
-        <summary className="min-h-11 py-2 text-sm font-bold">ほかにできること</summary>
+      {section ? <MoreSection entries={section.entries} cards={cards} line={line} /> : null}
+    </div>
+  )
+}
+
+function MoreSection({ entries, cards, line }: { entries: string[]; cards: CardModel[]; line?: string }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-4" data-testid="today-more" data-fold="more" data-count={entries.length}>
+      <button
+        type="button"
+        className="flex min-h-11 w-full items-center gap-2 py-2 text-left text-sm font-bold"
+        aria-expanded={open}
+        aria-controls="today-more-panel"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span>ほかにできること</span>
+        <span className="font-normal text-muted">{entries.length}</span>
+        <span aria-hidden="true" className="ml-auto">
+          {open ? '▲' : '▼'}
+        </span>
+      </button>
+      <div id="today-more-panel" data-testid="today-more-panel" inert={open ? undefined : true} aria-hidden={open ? undefined : true} className={open ? '' : 'h-0 overflow-hidden'}>
         {cards.length > 0 ? (
           <div className="mt-2 space-y-2">
             {cards.map((card) => (
@@ -108,7 +137,7 @@ export function Home() {
         <MessageComposer />
         <WeekendCard />
         <LazyQuestion />
-      </details>
+      </div>
     </div>
   )
 }
