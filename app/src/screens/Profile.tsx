@@ -75,7 +75,7 @@ export function Profile() {
               <div key={field.key} className="rounded-[14px] bg-white p-3">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-sm font-bold">{field.title}</p>
-                  <span className="shrink-0 text-[11px] text-muted">{PRIVACY_LABEL[field.privacy]}</span>
+                  <span className="shrink-0 text-xs text-muted">{PRIVACY_LABEL[field.privacy]}</span>
                 </div>
                 <div className="mt-2">
                   <FieldBody fieldKey={field.key} />
@@ -111,7 +111,7 @@ export function Profile() {
           </Chip>
         </div>
       </div>
-      <p className="mt-1 text-[11px] leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
+      <p className="mt-1 text-xs leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
 
       <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       {data.memories.length === 0 ? (

@@ -3,7 +3,6 @@ import { DemoBar } from '@/components/DemoBar.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
-import { demoOnly } from '@/domain/demo.ts'
 import { addDays, dayName, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import { beforeLeaving, invisibleOn, SLOT_TIME, type InvItem } from '@/domain/invisible.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
@@ -66,7 +65,7 @@ export function Home() {
   const meta = MODE_META[store.mode]
   const info = returnInfo(data.profile.home)
   const clock = store.mode === '帰宅前' && info ? info.open : meta.time
-  const where = store.mode === '帰宅前' && info ? `${meta.where}（帰宅の目安 ${info.back}）` : meta.where
+  const where = meta.where
   const todaySteps = data.steps.filter((step) => step.date === store.today)
   const todayInvisible = invisibleOn(store.today, data.profile, data.events, data.hidden, store.today)
   const cast = forecastFor(data, store.today)
@@ -80,32 +79,41 @@ export function Home() {
     profile: data.profile,
     hidden: data.hidden,
   }).slice(0, 3)
-  const line = cards.find((card) => card.line)?.line
+  const peak = cast.slots.find((slot) => slot.id === cast.peak)
+  const shownCards = cards
+    .filter((card) => {
+      if (cast.quiet) return true
+      if (card.key === 'before') return false
+      if (card.key === 'steps' && peak && /風呂|寝かしつけ/.test(card.title)) return false
+      return true
+    })
+    .slice(0, 2)
+  const line = shownCards.find((card) => card.line)?.line
 
   return (
     <div className="px-3.5 pt-3.5 pb-28">
       <DemoBar />
-      <SampleBanner />
-      <Notice notice={notice} />
-      <p className="mt-1 text-xs text-muted">
-        {formatMd(store.today)} {clock}・{where}
-        <b className="mt-0.5 block text-[19px] leading-snug font-bold text-ink">
-          {meta.hi}
-          {meta.sub}
-        </b>
-      </p>
+      <div className="mt-1 flex items-baseline justify-between gap-2">
+        <p className="text-base font-bold">ハレゴト</p>
+        <p className="text-right text-xs leading-snug text-muted">
+          {formatMd(store.today)} {clock}・{where}
+        </p>
+      </div>
       <ForecastCard />
-      <h2 className="mt-3 text-sm font-bold" data-testid="today-tasks">
-        やること
-      </h2>
+      <Notice notice={notice} />
+      {shownCards.length > 0 ? (
+        <h2 className="mt-4 text-sm font-bold" data-testid="today-tasks">
+          やること
+        </h2>
+      ) : null}
       <div className="mt-2 space-y-2">
-        {cards.map((card) => (
+        {shownCards.map((card) => (
           <article
             key={card.key}
             id={card.anchor}
             className={`rounded-[14px] p-3 shadow-sm ${card.tone === 'inv' ? 'border-[1.5px] border-dashed border-inv-line bg-inv' : 'bg-white'}`}
           >
-            <p className={`text-[11px] font-bold ${card.tone === 'inv' ? 'text-inv-ink' : 'text-accent'}`}>{card.kicker}</p>
+            <p className={`text-xs font-bold ${card.tone === 'inv' ? 'text-inv-ink' : 'text-accent'}`}>{card.kicker}</p>
             <p className="mt-0.5 text-[15px] leading-snug font-bold whitespace-pre-line">{card.title}</p>
             {card.meta ? <p className="mt-1 text-xs leading-relaxed text-muted">{card.meta}</p> : null}
             {card.actions ? <div className="mt-2 flex flex-wrap gap-1.5">{card.actions}</div> : null}
@@ -290,30 +298,11 @@ function compact(cards: (CardModel | null)[]): CardModel[] {
   return cards.filter((card): card is CardModel => Boolean(card))
 }
 
-function SampleBanner() {
-  const store = useStore()
-  if (!store.demo || store.ownHome) return null
-  return (
-    <div className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-accent-soft px-3 py-2" data-testid="sample-banner">
-      <p className="text-[13px] leading-snug font-bold text-accent-deep">サンプルの家族で表示しています</p>
-      {demoOnly ? null : (
-        <button
-          type="button"
-          data-testid="start-own"
-          className="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-accent-deep px-3 text-[13px] font-bold text-white"
-          onClick={store.startOwnHome}
-        >
-          自分の家で始める
-        </button>
-      )}
-    </div>
-  )
-}
-
 function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
+  if (notice.kind === 'card' && notice.body === '昨日の夕方、晴れにできた？') return null
   if (notice.kind === 'off') {
     if (notice.text === '今日は通知しません') return null
-    return <p className="mb-2 text-center text-[11px] text-muted">🔕 {notice.text}</p>
+    return <p className="mb-2 text-center text-xs text-muted">🔕 {notice.text}</p>
   }
   return (
     <button
@@ -326,7 +315,7 @@ function Notice({ notice }: { notice: ReturnType<typeof noticeFor> }) {
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun text-sm text-accent-deep" aria-hidden="true">☀</span>
       <span className="text-[13px] leading-snug">
-        <span className="block text-[10.5px] text-muted">ハレゴト・{notice.time} 〈通知の見本・準備中〉</span>
+        <span className="block text-xs text-muted">ハレゴト・{notice.time} 〈通知の見本・準備中〉</span>
         {notice.body}
       </span>
     </button>

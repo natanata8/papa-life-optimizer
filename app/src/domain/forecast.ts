@@ -3,6 +3,8 @@
  * AI は呼ばない。入力はすでに揃った事実だけ。
  */
 
+import { FREED_MIN, acceptNoun, type UmbrellaKind } from './freed.ts'
+
 export type ForecastSlotId = '朝' | '昼' | '夕方' | '夜'
 
 export type ForecastSky = '晴れ' | 'くもり' | 'にわか雨' | '注意報' | '警報'
@@ -65,6 +67,12 @@ export type ForecastSlot = {
   stack: number
   lifted: boolean
   note: string
+  /** 目安・要調整。FREED_MIN の固定値。 */
+  freedMin: number
+  /** 「お風呂を引き受ければ」の名詞。 */
+  noun: string
+  /** 重なっている家の仕事の短い名前。 */
+  bits: string[]
 }
 
 export type Forecast = {
@@ -76,6 +84,10 @@ export type Forecast = {
   headline: string
   slots: ForecastSlot[]
   cleared: number
+  /** 一番重い、晴れ以外の枠。 */
+  peak: ForecastSlotId | null
+  /** 帰宅後で晴れの枠のうち、一番早い開始。無ければ null。 */
+  freeFrom: string | null
 }
 
 const SKY_RANK: Record<ForecastSky, number> = { 晴れ: 0, くもり: 1, にわか雨: 2, 注意報: 3, 警報: 4 }
@@ -96,8 +108,6 @@ const RANGE: Record<ForecastSlotId, string> = {
 
 const QUIET_LINE = '今日は晴れ。特にやることなし'
 
-type UmbrellaKind = 'bath' | 'overtime' | 'party' | 'child' | 'prep' | 'pickup' | 'event' | 'leave'
-
 const UMBRELLAS: Record<UmbrellaKind, [string, string]> = {
   bath: ['19時までに帰れたら晴れ間に', '風呂の担当を一言送る'],
   overtime: ['着く時刻を先に一つ送る', '残業の終わり時刻を一つ送る'],
@@ -117,6 +127,7 @@ type Source = {
   range: string
   rank: number
   kind: UmbrellaKind
+  bit: string
 }
 
 export function forecast(input: ForecastInput): Forecast {
@@ -126,7 +137,7 @@ export function forecast(input: ForecastInput): Forecast {
     const list = loads.get(id) ?? []
     const current = list.find((item) => item.kind === kind)
     if (!current) {
-      list.push({ weight, reason, fact, umbrella: pickUmbrella(kind, input.steps), range, rank: weight, kind })
+      list.push({ weight, reason, fact, umbrella: pickUmbrella(kind, input.steps), range, rank: weight, kind, bit: bitFor(kind, reason, fact) })
       loads.set(id, list)
       return
     }
@@ -222,23 +233,27 @@ export function forecast(input: ForecastInput): Forecast {
     if (!why.includes('／')) continue
     let sky = skyFromSources(item.sources)
     if (item.id === alertId) sky = '警報'
+    const named = sky === '注意報' || sky === '警報' ? levelName(lead.kind, item.id, input.today, sky === '注意報' ? '注意報' : '警報') : ''
     const isLifted = lifted.has(item.id) || clearedByStep(input, lead.kind)
     if (isLifted && (sky === '注意報' || sky === '警報')) sky = 'くもり'
-    const call = sky === '注意報' || (item.id === alertId && !isLifted) ? levelName(lead.kind, item.id, input.today, sky === '注意報' ? '注意報' : '警報') : ''
     const shownSky: ForecastSky = item.id === alertId && !isLifted ? '警報' : sky
-    const prompt = `オウチ予報です。${lead.range}は${call || shownSky}。家の負荷の予報で、人の気持ちではありません。なぜ：${why}。傘は「${lead.umbrella}」。この枠を短くする一手を一つ。`
+    const prompt = `オウチ予報です。${lead.range}は${named || shownSky}。家の負荷の予報で、人の気持ちではありません。なぜ：${why}。傘は「${lead.umbrella}」。この枠を短くする一手を一つ。`
+    const bits = item.sources.map((source) => source.bit)
     slots[ORDER.indexOf(item.id)] = {
       id: item.id,
       label: item.id,
       range: lead.range,
       sky: shownSky,
-      call: isLifted ? '' : call,
+      call: named,
       reason: why,
       umbrella: lead.umbrella,
       prompt,
       stack: item.sources.length,
       lifted: isLifted && (skyFromSources(item.sources) === '注意報' || item.id === alertId),
       note: item.id === alertId || skyFromSources(item.sources) === '注意報' ? '備えておけば大丈夫' : '',
+      freedMin: FREED_MIN[lead.kind],
+      noun: lead.kind === 'child' || lead.kind === 'prep' || lead.kind === 'event' ? lead.bit : acceptNoun(lead.kind),
+      bits,
     }
   }
 
@@ -253,6 +268,7 @@ export function forecast(input: ForecastInput): Forecast {
           return slot.call || `${range}${slot.sky}`
         })
         .join('・')}`
+  const peak = ranked.map((item) => item.id).find((id) => slots.find((slot) => slot.id === id)?.sky !== '晴れ') ?? null
   return {
     date: input.today,
     estimate: true,
@@ -262,6 +278,8 @@ export function forecast(input: ForecastInput): Forecast {
     headline,
     slots,
     cleared: input.steps.filter((step) => step.status === 'good').length,
+    peak,
+    freeFrom: freeFromOf(slots, input.returnAt),
   }
 }
 
@@ -275,11 +293,49 @@ export function unknownForecast(date: string): Forecast {
     headline: '',
     slots: ORDER.map((id) => emptySlot(id)),
     cleared: 0,
+    peak: null,
+    freeFrom: null,
   }
 }
 
+export function slotClock(slot: ForecastSlot): string {
+  if (slot.range.includes('–') && /\d/.test(slot.range)) return slot.range.split('–').join('〜')
+  const [start, end] = RANGE[slot.id].split('–')
+  return `${start}〜${end}`
+}
+
 function emptySlot(id: ForecastSlotId): ForecastSlot {
-  return { id, label: id, range: RANGE[id], sky: '晴れ', call: '', reason: '', umbrella: '', prompt: '', stack: 0, lifted: false, note: '' }
+  return { id, label: id, range: RANGE[id], sky: '晴れ', call: '', reason: '', umbrella: '', prompt: '', stack: 0, lifted: false, note: '', freedMin: 0, noun: '', bits: [] }
+}
+
+function bitFor(kind: UmbrellaKind, reason: string, fact: string): string {
+  if (kind === 'bath') return 'お風呂'
+  if (kind === 'overtime') return '残業'
+  if (kind === 'party') return '寝かしつけ'
+  if (kind === 'pickup') return '迎え'
+  if (kind === 'leave') return '送り'
+  if (kind === 'prep') {
+    const item = fact.match(/「([^」]+)」/)?.[1]
+    return item ? `${item}の準備` : '持ち物'
+  }
+  if (kind === 'child') return reason.replace(/がある$/, '') || '予定'
+  const title = fact.match(/「([^」]+)」/)?.[1]
+  return title || '段取り'
+}
+
+function freeFromOf(slots: ForecastSlot[], returnAt: string | null): string | null {
+  if (!returnAt) return null
+  const back = minutes(returnAt)
+  const next = ORDER.find((id) => {
+    const slot = slots.find((item) => item.id === id)
+    return slot?.sky === '晴れ' && clockStart(id) >= back
+  })
+  if (!next) return null
+  return `${clockStart(next) / 60}時`
+}
+
+function clockStart(id: ForecastSlotId): number {
+  return Number(RANGE[id].split('–')[0]) * 60
 }
 
 function weightOf(sources: Source[]): number {

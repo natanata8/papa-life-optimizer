@@ -19,7 +19,7 @@ export function Onboarding() {
           {[1, 2, 3, 4].map((step) => (
             <i key={step} className={`h-1.5 flex-1 rounded-full ${step <= ob.step ? 'bg-accent' : 'bg-[#eadfd3]'}`} />
           ))}
-          <span className="text-[11px] text-muted">{ob.step}/4</span>
+          <span className="text-xs text-muted">{ob.step}/4</span>
         </div>
       ) : null}
 
@@ -146,7 +146,7 @@ export function Onboarding() {
           <button type="button" className="mx-auto mt-3 block text-[13px] text-muted" onClick={() => store.finishOb(null)}>
             今はない → 今日の画面へ
           </button>
-          <p className="mt-4 text-center text-[11px] text-muted">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
+          <p className="mt-4 text-center text-xs text-muted">園・ゴミの日・車などは、必要になった時に1つずつ聞きます</p>
         </div>
       ) : null}
     </div>
@@ -199,7 +199,7 @@ function OptionalStep() {
   const { ob } = store
   return (
     <div className="pt-4" data-testid="ob-optional">
-      <p className="text-[11px] font-bold text-muted">任意・答えなくても進めます</p>
+      <p className="text-xs font-bold text-muted">任意・答えなくても進めます</p>
       <h2 className="mt-1 text-lg font-bold">普段自分がやることは？</h2>
       <div className="mt-3 flex flex-wrap gap-1.5">
         {USUAL_OPTIONS.map((option) => (

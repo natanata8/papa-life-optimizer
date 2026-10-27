@@ -110,6 +110,7 @@ type StoreValue = {
   newChat: () => void
   openThread: (id: string) => void
   liftSlot: (date: string, slotId: string) => void
+  dropLift: (date: string, slotId: string) => void
   openSheet: (sheet: Sheet) => void
   closeSheet: () => void
   saveSuggestion: (id: string, date: string, time: string) => void
@@ -774,6 +775,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const lifted = current.lifted ?? []
       if (lifted.includes(key)) return
       commit({ ...current, lifted: [...lifted, key] })
+    },
+    dropLift: (date, slotId) => {
+      const current = dataRef.current
+      if (!current) return
+      const key = `${date}|${slotId}`
+      commit({ ...current, lifted: (current.lifted ?? []).filter((item) => item !== key) })
     },
     openThread: (id) => {
       const current = dataRef.current

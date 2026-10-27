@@ -22,7 +22,7 @@ export function Review() {
         <div className="mt-2 space-y-2">
           {pending.map((step) => (
             <article key={step.id} className="rounded-[14px] bg-white p-3 shadow-sm">
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 {dayName(step.date, store.today)}
                 {step.time ? ` ${step.time}` : ''}・{step.scene || step.source}
               </p>
@@ -73,7 +73,7 @@ export function Review() {
               data-testid={`thread-${thread.id}`}
               onClick={() => store.openThread(thread.id)}
             >
-              <span className="block text-[11px] text-muted">{formatMd(thread.at)}</span>
+              <span className="block text-xs text-muted">{formatMd(thread.at)}</span>
               <span className="mt-0.5 block text-[14px] font-bold">{thread.title}</span>
               {thread.preview ? <span className="mt-0.5 block text-[12px] leading-relaxed text-muted">{thread.preview}</span> : null}
             </button>
@@ -94,7 +94,7 @@ export function Review() {
           ))}
         </div>
       )}
-      <p className="mt-3 text-[11px] text-muted">点数や回数の比べっこはしません</p>
+      <p className="mt-3 text-xs text-muted">点数や回数の比べっこはしません</p>
     </div>
   )
 }

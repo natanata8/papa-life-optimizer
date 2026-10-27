@@ -172,7 +172,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       <LastGood />
       <ReadAloud text={`${message.answer.状況整理}${message.answer.声かけ例 ? `。${message.answer.声かけ例}` : ''}`} />
       {message.sample ? (
-        <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent-deep">サンプル回答</p>
+        <p className="mb-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent-deep">サンプル回答</p>
       ) : null}
       <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm">{message.answer.状況整理}</div>
       {message.answer.気づき ? <p className="mt-2 text-[13px] leading-relaxed text-muted">{message.answer.気づき}</p> : null}
@@ -246,8 +246,8 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           </div>
         </details>
       ) : null}
-      {message.used.length > 0 ? <p className="mt-3 text-left text-[11px] text-muted">使った家庭の情報：{message.used.join(' ／ ')}</p> : null}
-      {message.sample ? <p className="mt-1 text-[11px] text-muted">サンプル回答です。OpenAI には送っていません。</p> : null}
+      {message.used.length > 0 ? <p className="mt-3 text-left text-xs text-muted">使った家庭の情報：{message.used.join(' ／ ')}</p> : null}
+      {message.sample ? <p className="mt-1 text-xs text-muted">サンプル回答です。OpenAI には送っていません。</p> : null}
     </div>
   )
 }

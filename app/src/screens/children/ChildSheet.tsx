@@ -189,7 +189,7 @@ function List({ onAdd, onEdit, onPick }: { onAdd: () => void; onEdit: (id: strin
               className="w-full rounded-xl bg-white px-3 py-2.5 text-left"
               onClick={() => onEdit(event.id)}
             >
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 {dayName(event.date, store.today)} {event.allDay || !event.startTime ? '終日' : event.startTime}
                 {name ? ` · ${name}` : ''} · {event.category}
                 {event.deadline ? ' · 期限' : ''}
@@ -262,7 +262,7 @@ function Confirm({
   }
   return (
     <div data-testid="child-confirm">
-      {sample ? <p className="mt-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-[11px] font-bold text-accent-deep">サンプル読み取り</p> : null}
+      {sample ? <p className="mt-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent-deep">サンプル読み取り</p> : null}
       <p className="mt-1 text-[13px] leading-relaxed text-muted">候補です。使うものだけ残して、子どもと中身を直してから入れてください。</p>
       {rows.length === 0 ? <p className="mt-2 text-[13px] text-muted">読み取れた予定がありませんでした。</p> : null}
       <div className="mt-2 space-y-2">
@@ -271,7 +271,7 @@ function Confirm({
             <label className="flex items-center gap-2 text-sm font-bold">
               <input type="checkbox" checked={row.selected} onChange={(event) => patch(row.key, { selected: event.target.checked })} />
               入れる
-              <span className="ml-auto text-[11px] font-normal text-muted">確信度 {Math.round(row.confidence * 100)}%</span>
+              <span className="ml-auto text-xs font-normal text-muted">確信度 {Math.round(row.confidence * 100)}%</span>
             </label>
             <input className={field} value={row.title} aria-label="予定の名前" onChange={(event) => patch(row.key, { title: event.target.value })} />
             <div className="mt-2 flex gap-2">

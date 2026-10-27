@@ -55,7 +55,7 @@ export function Shell() {
               key={item.tab}
               type="button"
               data-testid={`nav-${item.tab}`}
-              className={`flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-bold ${active ? 'text-accent-deep' : 'text-muted'}`}
+              className={`flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 py-1 text-xs font-bold ${active ? 'text-accent-deep' : 'text-muted'}`}
               onClick={() => store.setTab(item.tab)}
             >
               <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />

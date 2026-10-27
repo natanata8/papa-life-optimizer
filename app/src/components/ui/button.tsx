@@ -10,7 +10,7 @@ const buttonVariants = cva(
         default: 'bg-accent-deep text-white',
         ghost: 'bg-accent-soft text-accent-deep',
         quiet: 'bg-[#eee] text-[#666]',
-        good: 'bg-good text-good-ink',
+        good: 'bg-margin text-white',
         meh: 'bg-meh text-[#6b625a]',
         outline: 'border border-line bg-white text-ink',
       },

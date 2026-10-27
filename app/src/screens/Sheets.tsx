@@ -92,7 +92,7 @@ function AddSheet({ id }: { id: string }) {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
-      <p className="mt-2 text-[11px] leading-relaxed text-muted">外部への連携はリンクを開くだけです。自動では送りません。</p>
+      <p className="mt-2 text-xs leading-relaxed text-muted">外部への連携はリンクを開くだけです。自動では送りません。</p>
     </div>
   )
 }
@@ -142,7 +142,7 @@ function WifeSheet({ date, blockId }: { date: string; blockId: string }) {
   if (!block) return <p className="text-sm">この推定は、今は出ていません。</p>
   return (
     <div data-testid="sheet-wife">
-      <span className="inline-block rounded-full bg-[#f3f0ea] px-2 py-0.5 text-[11px] font-bold text-muted">推定</span>
+      <span className="inline-block rounded-full bg-[#f3f0ea] px-2 py-0.5 text-xs font-bold text-muted">推定</span>
       <p className="mt-1 text-[17px] font-bold">{block.line}</p>
       <p className="text-xs text-muted">
         {dayName(date, store.today)} {block.time}
@@ -182,7 +182,7 @@ function InvisibleSheet({ date, itemKey }: { date: string; itemKey: string }) {
   const note = data.notes[def.taskId] ?? ''
   return (
     <div data-testid="sheet-invisible">
-      <span className="inline-block rounded-full bg-inv px-2 py-0.5 text-[11px] font-bold text-inv-ink">👀 見えない仕事</span>
+      <span className="inline-block rounded-full bg-inv px-2 py-0.5 text-xs font-bold text-inv-ink">👀 見えない仕事</span>
       <p className="mt-1 text-[17px] font-bold">{item.title}</p>
       <p className="text-xs text-muted">
         {dayName(date, store.today)}・{item.slot} ｜ {item.rel} ｜ 目安 約{def.minutes}分
@@ -197,7 +197,7 @@ function InvisibleSheet({ date, itemKey }: { date: string; itemKey: string }) {
       </ol>
       <h2 className="mt-3 text-sm font-bold">
         いつもは誰がやっている？
-        <span className="ml-1 text-[11px] font-normal text-muted">自分用のメモ・相手には見えません・任意</span>
+        <span className="ml-1 text-xs font-normal text-muted">自分用のメモ・相手には見えません・任意</span>
       </h2>
       <div className="mt-1 flex flex-wrap gap-1.5">
         {NOTE_OPTIONS.map((option) => (
@@ -226,7 +226,7 @@ function InvisibleSheet({ date, itemKey }: { date: string; itemKey: string }) {
           閉じる
         </button>
       </div>
-      <p className="mt-3 text-[11px] leading-relaxed text-muted">
+      <p className="mt-3 text-xs leading-relaxed text-muted">
         もとのデータ：家事・育児タスク一覧 {def.taskId}
         {snippet ? `「${snippet.title}」（${snippet.category}・${snippet.frequency}・一覧では「${snippet.visibility}」）` : ''}
         。手順と「なぜ大事」は叩き台の例文です。
@@ -241,7 +241,7 @@ function DailySheet({ taskId }: { taskId: string }) {
   if (!task) return null
   return (
     <div data-testid="sheet-daily">
-      <span className="inline-block rounded-full bg-inv px-2 py-0.5 text-[11px] font-bold text-inv-ink">👀 毎日まわっている見えない仕事</span>
+      <span className="inline-block rounded-full bg-inv px-2 py-0.5 text-xs font-bold text-inv-ink">👀 毎日まわっている見えない仕事</span>
       <p className="mt-1 text-[17px] font-bold">{task.title}</p>
       <p className="text-xs text-muted">
         {task.frequency}・約{task.minutes}分・{task.category}
@@ -255,7 +255,7 @@ function DailySheet({ taskId }: { taskId: string }) {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         閉じる
       </Button>
-      <p className="mt-2 text-[11px] text-muted">もとのデータ：家事・育児タスク一覧 {taskId}</p>
+      <p className="mt-2 text-xs text-muted">もとのデータ：家事・育児タスク一覧 {taskId}</p>
     </div>
   )
 }
@@ -272,7 +272,7 @@ function EventSheet({ id }: { id: string }) {
   })
   return (
     <div>
-      <span className="inline-block rounded-full bg-event px-2 py-0.5 text-[11px] font-bold text-event-ink">家族の予定</span>
+      <span className="inline-block rounded-full bg-event px-2 py-0.5 text-xs font-bold text-event-ink">家族の予定</span>
       <p className="mt-1 text-[17px] font-bold">{event.title}</p>
       <p className="text-xs text-muted">
         {dayName(event.date, store.today)} {event.time || '終日'}・{event.who}
@@ -290,7 +290,7 @@ function EventSheet({ id }: { id: string }) {
               onClick={() => store.openSheet({ type: 'invisible', date: item.date, key: item.key })}
             >
               <span>👀</span>
-              <span className="text-[11px]">{dayName(item.date, store.today)}</span>
+              <span className="text-xs">{dayName(item.date, store.today)}</span>
               <span>{item.title}</span>
             </button>
           ))}
@@ -435,7 +435,7 @@ function AddEventSheet() {
       <Button className="mt-2" size="lg" variant="quiet" onClick={store.closeSheet}>
         やめる
       </Button>
-      <p className="mt-2 text-[11px] text-muted">この叩き台では手入力だけです。</p>
+      <p className="mt-2 text-xs text-muted">この叩き台では手入力だけです。</p>
     </div>
   )
 }
@@ -446,7 +446,7 @@ function StepSheet({ id }: { id: string }) {
   if (!step) return null
   return (
     <div>
-      <span className="inline-block rounded-full bg-step px-2 py-0.5 text-[11px] font-bold text-step-ink">自分の一手</span>
+      <span className="inline-block rounded-full bg-step px-2 py-0.5 text-xs font-bold text-step-ink">自分の一手</span>
       <p className="mt-1 text-[17px] font-bold">{step.title}</p>
       <p className="text-xs text-muted">
         {dayName(step.date, store.today)} {step.time}・{step.source}

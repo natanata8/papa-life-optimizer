@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { FREED_MIN, marginAfter, marginLine, weekActionLine, weekSummaryLine } from './freed.ts'
 import { forecast, noticeBody, type ForecastInput } from './forecast.ts'
 
 const banned = /妻|雷|機嫌|家は雨|家族は|気分/
@@ -167,6 +168,24 @@ test('通知の見本は、雨の枠かふりかえり待ちだけ', () => {
 })
 
 const nameBan = /妻|嫁|イライラ|家庭内|機嫌|雷/
+
+test('余白の文は家が主語で、目安が付く', () => {
+  const line = marginLine('お風呂', FREED_MIN.bath)
+  assert.equal(line, 'お風呂を引き受ければ、家に30分の余白（目安）')
+  assert.match(marginAfter('お風呂', 30), /家に30分の余白（目安）/)
+  assert.match(weekActionLine('お風呂', 30), /家に30分の余白（目安）/)
+  assert.match(weekSummaryLine(2, 50), /家に今週の余白 \+50分（目安）/)
+  for (const text of [line, marginAfter('お風呂', 30), weekSummaryLine(2, 50)]) {
+    assert.match(text, /目安/)
+    assert.equal(/妻|嫁|パートナー/.test(text), false)
+  }
+  const result = forecast(base({ returnAt: '20:00', overtime: true }))
+  const evening = result.slots.find((slot) => slot.id === '夕方')
+  assert.equal(evening?.freedMin, FREED_MIN.bath)
+  assert.equal(evening?.noun, 'お風呂')
+  assert.equal(result.peak, '夕方')
+  assert.match(marginLine(evening?.noun ?? '', evening?.freedMin ?? 0), /目安/)
+})
 
 test('晩と残業が重なると寝かしつけ注意報', () => {
   const result = forecast(base({ returnAt: '20:00', overtime: true }))
