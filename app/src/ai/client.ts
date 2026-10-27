@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { demoOnly } from '@/domain/demo.ts'
 import type { ToneAnswer } from '@/domain/types.ts'
 import type { ConsultClient, ConsultRequest } from '@/ai/types.ts'
 import { sampleAnswer } from '@/ai/sample.ts'
@@ -53,6 +54,7 @@ export function createSupabaseConsult(url: string, anonKey: string): ConsultClie
 }
 
 export function createConsult(): { client: ConsultClient; sample: boolean } {
+  if (demoOnly) return { client: createSampleConsult(), sample: true }
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
   if (import.meta.env.VITE_AI === 'supabase' && url && key) {

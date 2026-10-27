@@ -1,6 +1,7 @@
 import { uid } from '@/lib/utils.ts'
+import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, todayInTokyo } from '@/domain/dates.ts'
-import { emptyProfile } from '@/domain/profile.ts'
+import { emptyProfile, kidsFromAges } from '@/domain/profile.ts'
 import type { ChildEvent, Persisted } from '@/domain/types.ts'
 
 export function createSeed(today = todayInTokyo()): Persisted {
@@ -106,6 +107,25 @@ export function createSeed(today = todayInTokyo()): Persisted {
     consultations: [],
     threads: [],
     lifted: [],
+  }
+}
+
+export function createPublicDemo(today = todayInTokyo()): Persisted {
+  const kids = kidsFromAges(['4歳', '1歳'])
+  const seed = createSeed(today)
+  const profile = {
+    ...seed.profile,
+    kids,
+    work: '両方フルタイム',
+    offDad: '土日',
+    offPartner: 'シフト制',
+    home: '19〜20時',
+  }
+  return {
+    ...seed,
+    onboarded: true,
+    profile,
+    childEvents: attachSeedChildren(seed.childEvents, kids),
   }
 }
 

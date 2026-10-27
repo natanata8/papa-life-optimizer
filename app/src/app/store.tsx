@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { createConsult } from '@/ai/client.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
 import { createRepository } from '@/data/index.ts'
-import { demoMode } from '@/domain/demo.ts'
+import { demoMode, demoOnly } from '@/domain/demo.ts'
 import { behindFor, gomiAround } from '@/domain/behind.ts'
 import { attachSeedChildren } from '@/domain/childEvents.ts'
 import { addDays, mondayOf, resolveToday, todayInTokyo } from '@/domain/dates.ts'
@@ -377,7 +377,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [day, setDay] = useState(today)
   const [filters, setFilters] = useState({ ev: true, step: true, inv: true, child: true, wife: true })
   const [lazyLock, setLazyLock] = useState<string | null>(null)
-  const [ownHome, setOwnHome] = useState(() => localStorage.getItem('tone-app:own-home') === '1')
+  const [ownHome, setOwnHome] = useState(() => (demoOnly ? false : localStorage.getItem('tone-app:own-home') === '1'))
   const hydrated = useRef(false)
   const dataRef = useRef<Persisted | null>(null)
   const flowRef = useRef<Flow | null>(null)
@@ -677,7 +677,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const scene = sceneFromText(trimmed)
       const care = level === 'care'
       if (!scene) {
-        if (consult.sample && !care) {
+        if (!demoOnly && consult.sample && !care) {
           commit({
             ...current,
             chat: [
@@ -749,6 +749,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       })
     },
     startOwnHome: () => {
+      if (demoOnly) return
       const empty = createEmpty(todayInTokyo())
       localStorage.setItem('tone-app:own-home', '1')
       setOwnHome(true)

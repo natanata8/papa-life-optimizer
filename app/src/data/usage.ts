@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { usingSupabase } from '@/data/index.ts'
+import { demoOnly } from '@/domain/demo.ts'
 
 export const USAGE_NAMES = ['consult_started', 'forecast_viewed', 'umbrella_tapped', 'review_done'] as const
 
@@ -15,11 +16,12 @@ export function logUsage(name: UsageName): void {
   } catch {
     // 件数の記録が失敗しても、画面は止めない。
   }
+  if (demoOnly) return
   void sendUsage(name)
 }
 
 async function sendUsage(name: UsageName): Promise<void> {
-  if (!usingSupabase()) return
+  if (demoOnly || !usingSupabase()) return
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
   if (!url || !key) return

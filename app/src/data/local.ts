@@ -1,5 +1,5 @@
-import { demoMode } from '@/domain/demo.ts'
-import { createEmpty, createSeed } from '@/domain/seed.ts'
+import { demoMode, demoOnly } from '@/domain/demo.ts'
+import { createEmpty, createPublicDemo, createSeed } from '@/domain/seed.ts'
 import { todayInTokyo } from '@/domain/dates.ts'
 import type { Persisted } from '@/domain/types.ts'
 import type { FamilyRepository, LoadResult } from '@/data/repository.ts'
@@ -38,6 +38,12 @@ export function createLocalRepository(): FamilyRepository {
   return {
     async load(): Promise<LoadResult> {
       const existing = read()
+      if (demoOnly) {
+        if (existing?.onboarded && existing.profile.kids.length > 0) return { kind: 'ready', state: existing }
+        const state = createPublicDemo(todayInTokyo())
+        localStorage.setItem(KEY, JSON.stringify(state))
+        return { kind: 'ready', state }
+      }
       if (existing) return { kind: 'ready', state: existing }
       const state = demoMode ? createSeed(todayInTokyo()) : createEmpty(todayInTokyo())
       localStorage.setItem(KEY, JSON.stringify(state))
@@ -47,7 +53,7 @@ export function createLocalRepository(): FamilyRepository {
       localStorage.setItem(KEY, JSON.stringify(state))
     },
     async reset() {
-      const state = demoMode ? createSeed(todayInTokyo()) : createEmpty(todayInTokyo())
+      const state = demoOnly ? createPublicDemo(todayInTokyo()) : demoMode ? createSeed(todayInTokyo()) : createEmpty(todayInTokyo())
       localStorage.setItem(KEY, JSON.stringify(state))
       localStorage.removeItem('tone-app:mode')
       if (demoMode) localStorage.removeItem('tone-app:own-home')

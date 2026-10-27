@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_AI?: string
   /** `false` でデモの時間帯スイッチを隠す。 */
   readonly VITE_DEMO_MODE?: string
+  /** `true` で公開デモ。サンプル家族だけで開き、外部へは繋がない。 */
+  readonly VITE_DEMO_ONLY?: string
 }
 
 interface ImportMeta {

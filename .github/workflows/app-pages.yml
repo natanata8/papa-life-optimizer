@@ -39,10 +39,7 @@ jobs:
         run: npm run lint
       - name: Build
         working-directory: app
-        env:
-          VITE_BASE: /${{ github.event.repository.name }}/
-          VITE_DEMO_MODE: "true"
-        run: npm run build
+        run: npm run build:demo
       - name: Upload Pages artifact
         if: github.event_name == 'push'
         uses: actions/upload-pages-artifact@v3

@@ -6,10 +6,22 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const base = env.VITE_BASE || '/'
+  const demoOnly = env.VITE_DEMO_ONLY === 'true'
+  const base = demoOnly ? '/papa-life-optimizer/' : env.VITE_BASE || '/'
+  const src = fileURLToPath(new URL('./src', import.meta.url))
 
   return {
     base,
+    define: demoOnly
+      ? {
+          'import.meta.env.VITE_DEMO_ONLY': JSON.stringify('true'),
+          'import.meta.env.VITE_DEMO_MODE': JSON.stringify('true'),
+          'import.meta.env.VITE_DATA': JSON.stringify('local'),
+          'import.meta.env.VITE_AI': JSON.stringify('sample'),
+          'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(''),
+          'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(''),
+        }
+      : undefined,
     plugins: [
       react(),
       tailwindcss(),
@@ -42,9 +54,12 @@ export default defineConfig(({ mode }) => {
       }),
     ],
     resolve: {
-      alias: {
-        '@': fileURLToPath(new URL('./src', import.meta.url)),
-      },
+      alias: [
+        ...(demoOnly
+          ? [{ find: '@supabase/supabase-js', replacement: fileURLToPath(new URL('./src/demo/no-remote.ts', import.meta.url)) }]
+          : []),
+        { find: '@', replacement: src },
+      ],
     },
     server: {
       host: true,

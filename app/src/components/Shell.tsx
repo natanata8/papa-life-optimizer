@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { CalendarDays, House, MapPin, MessageCircle, UserRound } from 'lucide-react'
 import { useStore } from '@/app/store.tsx'
+import { demoOnly } from '@/domain/demo.ts'
 import { Onboarding } from '@/screens/Onboarding.tsx'
 import { Home } from '@/screens/Home.tsx'
 import { Consult } from '@/screens/Consult.tsx'
@@ -29,7 +30,7 @@ export function Shell() {
       </Frame>
     )
   }
-  if (store.authRequired) return <AuthScreen />
+  if (store.authRequired && !demoOnly) return <AuthScreen />
   if (!store.data?.onboarded) {
     return (
       <Frame>

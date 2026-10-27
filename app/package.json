@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:demo": "node scripts/build-demo.mjs",
+    "publish:demo": "node scripts/build-demo.mjs --push",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
     "test": "node --experimental-strip-types --test src/domain/forecast.test.ts src/domain/copy-guard.test.ts",

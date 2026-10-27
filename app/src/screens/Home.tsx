@@ -3,6 +3,7 @@ import { DemoBar } from '@/components/DemoBar.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
+import { demoOnly } from '@/domain/demo.ts'
 import { addDays, dayName, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import { beforeLeaving, invisibleOn, SLOT_TIME, type InvItem } from '@/domain/invisible.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
@@ -295,14 +296,16 @@ function SampleBanner() {
   return (
     <div className="mb-2 flex items-center justify-between gap-2 rounded-xl bg-accent-soft px-3 py-2" data-testid="sample-banner">
       <p className="text-[13px] leading-snug font-bold text-accent-deep">サンプルの家族で表示しています</p>
-      <button
-        type="button"
-        data-testid="start-own"
-        className="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-accent-deep px-3 text-[13px] font-bold text-white"
-        onClick={store.startOwnHome}
-      >
-        自分の家で始める
-      </button>
+      {demoOnly ? null : (
+        <button
+          type="button"
+          data-testid="start-own"
+          className="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-accent-deep px-3 text-[13px] font-bold text-white"
+          onClick={store.startOwnHome}
+        >
+          自分の家で始める
+        </button>
+      )}
     </div>
   )
 }

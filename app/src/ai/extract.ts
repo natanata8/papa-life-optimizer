@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { asCategory, sampleExtract, type ExtractCandidate } from '@/domain/childEvents.ts'
+import { demoOnly } from '@/domain/demo.ts'
 
 export type ExtractResult = {
   candidates: ExtractCandidate[]
@@ -11,6 +12,7 @@ export async function extractSchedule(input: {
   today: string
   children: { id: string; name: string }[]
 }): Promise<ExtractResult> {
+  if (demoOnly) return { candidates: sampleExtract(input.today, input.children), sample: true }
   const url = import.meta.env.VITE_SUPABASE_URL
   const key = import.meta.env.VITE_SUPABASE_ANON_KEY
   if (import.meta.env.VITE_AI !== 'supabase' || !url || !key) {

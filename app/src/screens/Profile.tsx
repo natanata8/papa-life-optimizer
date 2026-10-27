@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
 import { usingSupabase } from '@/data/index.ts'
+import { demoOnly } from '@/domain/demo.ts'
 import { DAY_ORDER, DOW_CHARS, formatMd } from '@/domain/dates.ts'
 import {
   FIELDS,
@@ -34,9 +35,19 @@ function DataHandling() {
     <section className="mt-6">
       <h2 className="text-sm font-bold">データの扱い</h2>
       <div className="mt-2 space-y-2 text-[13px] leading-relaxed text-muted">
-        <p>保存場所：{usingSupabase() ? 'ログインした家族のデータ（Supabase）' : 'このブラウザの中だけ'}</p>
-        <p>相談するときAIに送るもの：子どもの年齢と呼び名、働き方、帰宅時間、予定、相談の文。本名ではなく呼び名（例：上の子）での登録がおすすめです。</p>
-        <p>お便りの画像：読み取りのためだけにAIへ送り、保存しません。</p>
+        {demoOnly ? (
+          <>
+            <p>保存場所：このブラウザの中だけ。ログインはありません。</p>
+            <p>相談の答えはサンプルです。書いた文は外に送りません。</p>
+            <p>お便りの写真は、サンプルの予定を出すだけで、アップロードしません。</p>
+          </>
+        ) : (
+          <>
+            <p>保存場所：{usingSupabase() ? 'ログインした家族のデータ（Supabase）' : 'このブラウザの中だけ'}</p>
+            <p>相談するときAIに送るもの：子どもの年齢と呼び名、働き方、帰宅時間、予定、相談の文。本名ではなく呼び名（例：上の子）での登録がおすすめです。</p>
+            <p>お便りの画像：読み取りのためだけにAIへ送り、保存しません。</p>
+          </>
+        )}
         <p>消し方：下の「この端末のデータを消す」で全部消えます。</p>
       </div>
     </section>
