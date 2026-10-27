@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Phrase } from '@/components/Phrase.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
 import { useStore, type Sheet } from '@/app/store.tsx'
@@ -561,7 +562,7 @@ function CantSheet({ date, slotId }: { date: string; slotId: string }) {
       <h2 className="text-lg font-bold">大丈夫。小さい一手もあります</h2>
       <p className="mt-1 text-sm leading-relaxed text-muted">今夜できそうなものを1つ選ぶか、今日はパスでOK。</p>
       <button type="button" className="mt-3 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall(`今から帰るね。${smaller}`)}>
-        <span className="block text-sm font-bold">{smaller}</span>
+        <span className="block text-sm font-bold"><Phrase text={smaller} /></span>
         <span className="mt-0.5 block text-xs text-muted">1分・送る文あり</span>
       </button>
       <button type="button" className="mt-2 min-h-[60px] w-full rounded-xl bg-white px-3 py-3 text-left" onClick={() => sendSmall('今から帰るね。何かいるものある？')}>

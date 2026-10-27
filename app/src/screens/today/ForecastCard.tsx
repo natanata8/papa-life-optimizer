@@ -95,9 +95,9 @@ function Decide({
   return (
     <>
     <article className={`rounded-[14px] border-t-[6px] bg-white px-3 py-3 shadow-sm ${edge}`}>
-      <p className={`inline-flex min-h-7 items-center gap-1 rounded-full px-2 text-xs font-bold whitespace-nowrap ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="badge">
+      <p className={`inline-flex max-w-full min-h-7 items-center gap-1 rounded-full px-2 text-xs font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="badge">
         <SkyMark sky={peak.sky} size={24} />
-        <Phrase text={`${peak.call} ${clock}`} />
+        <span className="whitespace-nowrap">{`${peak.call} ${clock}`}</span>
       </p>
       <h2 className="mt-3 text-[25px] leading-snug font-bold" data-testid="forecast-headline" data-fold="question">
         <Phrase text={questionOf(peak)} />
@@ -124,7 +124,7 @@ function Decide({
       >
         今日は無理
       </button>
-      <button type="button" data-testid="forecast-why-toggle" data-fold="why" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-accent-deep" onClick={onToggleWhy}>
+      <button type="button" data-testid="forecast-why-toggle" data-fold="why" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold whitespace-nowrap text-accent-deep" onClick={onToggleWhy}>
         なぜ？（時間帯つき） {whyOpen ? '▲' : '▼'}
       </button>
       {whyOpen ? (
@@ -236,9 +236,9 @@ function Done({
     <div>
       <article className="rounded-[14px] border-t-[6px] border-[#9fc2e3] bg-white px-3 py-3 shadow-sm">
         {small ? null : (
-          <p className="inline-flex items-center gap-1 rounded-full bg-margin-soft px-2 py-1 text-xs font-bold whitespace-nowrap text-margin" data-fold="badge">
+          <p className="inline-flex max-w-full items-center gap-1 rounded-full bg-margin-soft px-2 py-1 text-xs font-bold text-margin" data-fold="badge">
             <SkyMark sky="くもり" size={24} />
-            <Phrase text={`${peak.call}は解除 → くもり`} />
+            <span className="whitespace-nowrap">{`${peak.call}は解除 → くもり`}</span>
           </p>
         )}
         <h2 className="mt-3 text-[25px] leading-snug font-bold" data-fold="question">
