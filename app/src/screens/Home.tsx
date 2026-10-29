@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
-import { HareMark, HeroHome, SpotFamily, TaskTile } from '@/components/marks.tsx'
+import { HeroHome, RoofMark, SpotFamily, TaskTile } from '@/components/marks.tsx'
+import { houseLight } from '@/domain/house.ts'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { ToastBar } from '@/components/ToastBar.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
@@ -86,7 +87,7 @@ export function Home() {
     <div className="relative bg-paper px-3.5 pt-3 pb-36">
       <DemoBar title="今夜" fold />
       <section className="hero-card flex items-center gap-1 px-2 py-2.5" data-fold="hero" data-testid="hero-margin">
-        <HeroHome className="h-[74px] w-[140px] shrink-0" />
+        <HeroHome {...houseLight({ tasks: taken.length, minutes: margin })} className="h-[92px] w-[132px] shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-xs font-extrabold">
             <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${absorbed ? 'bg-accent' : 'bg-watch-line'}`} />
@@ -222,7 +223,7 @@ export function Home() {
       </div>
       <div className="pointer-events-none mt-6 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
         <SpotFamily className="h-12 w-16" />
-        <HareMark size={40} />
+        <RoofMark size={40} />
       </div>
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pb-2">
         {store.toast ? <ToastBar className="mb-2" /> : null}

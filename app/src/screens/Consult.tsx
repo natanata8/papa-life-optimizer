@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
-import { HareMark, IconBag, IconBed, SpotFamily } from '@/components/marks.tsx'
+import { IconBed, IconDoor, RoofMark, SpotFamily } from '@/components/marks.tsx'
 import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
 import { consultTelop } from '@/domain/glance.ts'
@@ -80,7 +80,7 @@ export function Consult() {
       )}
       <div className="pointer-events-none mt-8 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
         <SpotFamily className="h-12 w-16" />
-        <HareMark size={40} />
+        <RoofMark size={40} />
       </div>
       <div ref={endRef} />
       {store.flow ? <ThumbDock /> : <Composer />}
@@ -90,9 +90,9 @@ export function Consult() {
 
 function SceneMark({ testId }: { testId: string }) {
   if (testId.endsWith('bed')) return <IconBed size={24} />
-  if (testId.endsWith('work')) return <HareMark size={22} />
-  if (testId.endsWith('sick')) return <IconBag size={24} />
-  return <SpotFamily className="h-6 w-8" />
+  if (testId.endsWith('work')) return <RoofMark size={22} />
+  if (testId.endsWith('sick')) return <IconBed size={24} />
+  return <IconDoor size={24} />
 }
 
 function SceneRow({ testId, label, onClick }: { testId: string; label: string; onClick: () => void }) {

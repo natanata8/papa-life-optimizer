@@ -1,5 +1,5 @@
 import { Phrase } from '@/components/Phrase.tsx'
-import { HareMark } from '@/components/marks.tsx'
+import { RoofMark } from '@/components/marks.tsx'
 import { useStore } from '@/app/store.tsx'
 
 const PAGES = [
@@ -22,7 +22,7 @@ export function Welcome() {
   return (
     <div className="relative px-4 pt-10 pb-28">
       <div aria-hidden="true" className="sky sky-clear" />
-      <HareMark size={36} className="text-accent" />
+      <RoofMark size={36} className="text-accent" />
       <h1 className="mt-3 text-[25px] leading-snug font-extrabold">帰る前に、今夜の一つを決める</h1>
       <p className="mt-3 text-sm leading-relaxed">
         <Phrase text="黄色の注意は、備えておけば大丈夫の合図です。余白は、引き受けた家の仕事の分数（目安）です。" />

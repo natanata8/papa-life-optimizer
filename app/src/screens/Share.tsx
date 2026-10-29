@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Icon } from '@/components/icons.tsx'
+import { HeroHome, RoofMark } from '@/components/marks.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
+import { houseLight, takenHomeLine } from '@/domain/house.ts'
+import { takenMargin } from '@/domain/glance.ts'
 import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
 import { formatMd } from '@/domain/dates.ts'
@@ -60,10 +63,19 @@ export function ShareScreen() {
         <button type="button" className="min-h-11 min-w-11 text-sm font-bold" onClick={store.closePanel}>
           戻る
         </button>
-        <h1 className="flex-1 text-center text-base font-bold">{data.profile.partner || '家族'}に共有</h1>
+        <h1 className="flex flex-1 items-center justify-center gap-1.5 text-center text-base font-bold">
+          <RoofMark size={22} className="text-accent" />
+          {data.profile.partner || '家族'}に共有
+        </h1>
         <span className="w-11" />
       </div>
       <h2 className="mt-3 text-[25px] leading-snug font-bold">{heading}</h2>
+      <section className="hare-card mt-3 flex items-center gap-3 p-3" data-testid="share-home">
+        <HeroHome {...houseLight({ tasks: takenNow.length, minutes: takenMargin(takenNow, ages, ensoku).minutes })} className="h-[72px] w-[104px] shrink-0" />
+        <p className="min-w-0 text-sm font-extrabold" data-testid="share-home-line">
+          <Phrase text={takenHomeLine(takenNow.map((item) => item.routineId))} />
+        </p>
+      </section>
       <label className="mt-3 block text-xs text-muted" htmlFor="share-line">
         送る文（編集できます）
       </label>

@@ -134,6 +134,10 @@
     box-shadow: 0 2px 0 var(--color-lip);
   }
 
+  .house-light {
+    transition: opacity 280ms ease, r 280ms ease;
+  }
+
   .sky {
     display: none;
   }
@@ -186,5 +190,9 @@
   .lip:active {
     transform: none;
     box-shadow: 0 5px 0 var(--color-lip);
+  }
+
+  .house-light {
+    transition: none;
   }
 }

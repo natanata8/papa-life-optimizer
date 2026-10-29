@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon, ProgressRing } from '@/components/icons.tsx'
-import { HareMark, SpotFamily, TaskGlyph } from '@/components/marks.tsx'
+import { RoofMark, SpotFamily, TaskGlyph } from '@/components/marks.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -71,7 +71,7 @@ export function DoScreen() {
       ) : null}
       <div className="pointer-events-none mt-8 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
         <SpotFamily className="h-12 w-16" />
-        <HareMark size={40} />
+        <RoofMark size={40} />
       </div>
       </>
       )}

@@ -7,6 +7,7 @@ import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit 
 import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
 import { labelChunks, phraseChunks } from './freed.ts'
+import { houseLight, takenHomeLine } from './house.ts'
 import { SCENE_LIST } from './scenes.ts'
 import { TASK_ICONS, taskIcon, titleIcon } from './taskIcon.ts'
 import { FREED_MIN } from './freed.ts'
@@ -549,6 +550,25 @@ test('ベージュと茶色はパレットAに置き、うちで働き方を直�
   const hand = readFileSync(new URL('../components/NextHand.tsx', import.meta.url), 'utf8')
   assert.match(hand, /data-testid="next-hand-later"[\s\S]*bg-sand/)
   assert.doesNotMatch(hand, /#f3eee6/)
+})
+
+test('余白が増えると、窓と太陽が段で灯る', () => {
+  assert.deepEqual(houseLight({ tasks: 0, minutes: 0 }), { windows: 0, sun: 0 })
+  assert.deepEqual(houseLight({ tasks: 2, minutes: 0 }), { windows: 0, sun: 0 })
+  assert.deepEqual(houseLight({ tasks: 1, minutes: 30 }), { windows: 1, sun: 1 })
+  assert.deepEqual(houseLight({ tasks: 2, minutes: 45 }), { windows: 2, sun: 2 })
+  assert.deepEqual(houseLight({ tasks: 3, minutes: 60 }), { windows: 3, sun: 3 })
+  assert.deepEqual(houseLight({ tasks: 5, minutes: 90 }), { windows: 3, sun: 3 })
+  assert.equal(takenHomeLine([]), '今夜は、まだ引き受けていません')
+  assert.equal(takenHomeLine(['bath']), '今夜はお風呂を引き受けます')
+  assert.equal(takenHomeLine(['bath', 'bedtime']), '今夜はお風呂と寝かしつけを引き受けます')
+  assert.equal(/妻|晴れ|くもり|雷|注意報/.test(takenHomeLine(['bath', 'bedtime'])), false)
+  const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
+  assert.match(css, /\.house-light\s*\{[^}]*transition:\s*opacity/)
+  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.house-light\s*\{[^}]*transition:\s*none/)
+  const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
+  assert.match(home, /houseLight\(\{ tasks: taken\.length, minutes: margin \}\)/)
+  assert.match(home, /data-testid="hero-margin"/)
 })
 
 test('覚えていることは、新しい順で5件まで', () => {
