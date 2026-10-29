@@ -14,7 +14,8 @@ import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
 export function DoScreen() {
   const store = useStore()
   const data = store.data
-  const [focus, setFocus] = useState(false)
+  const [focus, setFocus] = useState(true)
+  const [showList, setShowList] = useState(false)
   const [cursor, setCursor] = useState(0)
   const [later, setLater] = useState<string | null>(null)
   const [band, setBand] = useState<'night' | 'day' | null>(null)
@@ -44,35 +45,29 @@ export function DoScreen() {
       {showDay ? <DayBand ages={ages} /> : null}
       {showDay ? null : (
       <>
-      <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#f0e8df] p-1">
-        <button type="button" data-testid="do-list" className={`min-h-11 rounded-lg text-sm font-bold ${focus ? '' : 'bg-white'}`} onClick={() => setFocus(false)}>
-          リスト
-        </button>
-        <button
-          type="button"
-          data-testid="do-focus"
-          className={`min-h-11 rounded-lg text-sm font-bold ${focus ? 'bg-white' : ''}`}
-          onClick={() => {
-            const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => step.id))
-            const checked = taken.flatMap((item) => item.checked)
-            setCursor(firstUnchecked(flat, checked))
-            setFocus(true)
-          }}
-        >
-          1つずつ
-        </button>
-      </div>
       {taken.length === 0 ? (
         <div className="hare-card mt-4 px-4 py-8 text-center">
           <Icon name="do" size={40} className="mx-auto text-accent" />
-          <p className="mt-3 text-sm leading-relaxed">今夜の流れから、引き受けるものを選べます。</p>
+          <p className="mt-3 text-sm leading-relaxed">今日で引き受けると、ここに手順が出ます。</p>
         </div>
       ) : null}
-      {focus ? (
-        <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} hand={showHand ? hand : null} onLater={() => hand && setLater(hand.id)} onOpen={() => setFocus(false)} />
+      {focus && !showList ? (
+        <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} hand={showHand ? hand : null} onLater={() => hand && setLater(hand.id)} onOpen={() => setShowList(true)} />
       ) : (
         taken.map((item) => <ListBlock key={item.routineId} item={item} ages={ages} ensoku={ensoku} back={back} hand={showHand && hand?.from === item.routineId ? hand : null} onLater={() => hand && setLater(hand.id)} />)
       )}
+      {taken.length > 0 ? (
+        <button type="button" data-testid={showList ? 'do-focus' : 'do-list'} className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-accent" onClick={() => {
+          if (showList) {
+            const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => step.id))
+            setCursor(firstUnchecked(flat, taken.flatMap((item) => item.checked)))
+          }
+          setShowList((value) => !value)
+          setFocus(true)
+        }}>
+          {showList ? '1つずつ見る' : 'リストで見る'}
+        </button>
+      ) : null}
       </>
       )}
     </div>

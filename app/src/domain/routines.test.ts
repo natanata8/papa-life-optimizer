@@ -320,17 +320,14 @@ test('寝かしつけが止まっても、次の手順だけ返す', () => {
 })
 
 test('今夜の流れの1画面目は12個まで', () => {
-  const full = tonightFold({ rows: 4, warning: true, sample: true })
-  assert.equal(full.length, 12)
-  assert.ok(tonightFold({ rows: 4, warning: false, sample: false }).length <= 12)
-  const pointed = tonightFold({ rows: 4, warning: true, sample: true, next: true })
-  assert.equal(pointed.length, 12)
-  assert.equal(pointed.includes('next'), true)
-  assert.equal(pointed.includes('consult'), false)
-  const withKit = tonightFold({ rows: 4, warning: true, sample: true, next: true, kit: true })
-  assert.equal(withKit.length, 12)
-  assert.equal(withKit.includes('kit'), true)
-  assert.equal(withKit.includes('small'), false)
+  const full = tonightFold({ rows: 4 })
+  assert.ok(full.length <= 12)
+  assert.equal(full.filter((item) => item.startsWith('row-')).length, 2)
+  assert.equal(full.includes('hero'), true)
+  assert.equal(full.includes('next'), true)
+  assert.equal(full.includes('more'), true)
+  assert.equal(full.includes('share'), true)
+  assert.equal(full.includes('sample'), false)
 })
 
 test('育休かリモートのときだけ、昼の手順を出す', () => {

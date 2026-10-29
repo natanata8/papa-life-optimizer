@@ -3,28 +3,28 @@
 @theme {
   --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
     Meiryo, sans-serif;
-  --color-sand: #f3eadf;
-  --color-paper: #fffaf4;
-  --color-ink: #2c2a28;
-  --color-muted: #736b63;
-  --color-faint: #a59c92;
-  --color-line: #eadfce;
-  --color-accent: #9a5414;
-  --color-accent-deep: #8a4510;
-  --color-accent-soft: #fff1d6;
+  --color-sand: #eef3f8;
+  --color-paper: #f7fafc;
+  --color-ink: #1c2430;
+  --color-muted: #5a6570;
+  --color-faint: #5a6570;
+  --color-line: #d9e2ec;
+  --color-accent: #0c7bb3;
+  --color-accent-deep: #0c7bb3;
+  --color-accent-soft: #e7f4fb;
   --color-sun: #fff4df;
   --color-rain: #e7f1f8;
   --color-rain-ink: #1a4f78;
-  --color-watch: #fff3a6;
+  --color-watch: #fff8d0;
   --color-watch-ink: #3d3200;
-  --color-watch-line: #e6cf00;
-  --color-watch-tag: #ffe75a;
-  --color-alert: #fde3de;
-  --color-alert-ink: #7a1608;
-  --color-alert-line: #d7301b;
-  --color-lift: #eef1f4;
-  --color-lift-ink: #4a5562;
-  --color-margin: #1d5fa0;
+  --color-watch-line: #e6b800;
+  --color-watch-tag: #e6b800;
+  --color-alert: #fff8d0;
+  --color-alert-ink: #3d3200;
+  --color-alert-line: #e6b800;
+  --color-lift: #eef3f8;
+  --color-lift-ink: #1c2430;
+  --color-margin: #0a5f8c;
   --color-margin-soft: #e6f0fa;
   --color-margin-wash: #f3f7fb;
   --color-cloud: #f3eee6;
@@ -42,10 +42,10 @@
   --color-good-ink: #fffaf4;
   /* 空は上部132pxだけ。本文は紙色。余白の数字は --color-margin。
      CUD: 黄＝注意（文字は焦茶）、赤＝警報（白文字）、青＝よかった。赤と緑は混ぜない。 */
-  --color-sky-dusk: #ffd9a8;
-  --color-sky-clear: #bfe3ff;
-  --color-sky-lifted: #e8f4ff;
-  --color-take-ink: #5c3b1e;
+  --color-sky-dusk: #e7f4fb;
+  --color-sky-clear: #f7fafc;
+  --color-sky-lifted: #e7f4fb;
+  --color-take-ink: #0c7bb3;
   --color-meh: #f3eee6;
   --color-lazy: #f1f6f1;
   --color-lazy-ink: #3d6b3d;
@@ -62,9 +62,10 @@
 
   body {
     margin: 0;
-    background: var(--color-sand);
+    background: var(--color-paper);
     color: var(--color-ink);
     font-family: var(--font-sans);
+    line-height: 1.5;
   }
 
   button,

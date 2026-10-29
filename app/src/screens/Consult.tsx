@@ -55,15 +55,17 @@ export function Consult() {
       </div>
       {data.chat.length === 0 ? (
         <>
-          <p className="mt-1 text-[13px] text-muted">今夜の流れを見て、次の手順と伝え方を出します。</p>
-          {data.threads.length > 0 ? (
-            <button type="button" className="mt-2 inline-flex min-h-11 items-center text-[13px] font-bold text-accent-deep" data-testid="open-history" onClick={() => store.setTab('review')}>
-              これまでの相談
-            </button>
-          ) : null}
-          <div className="mt-3">
-            <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id, true)} />
-            <SickTile />
+          <div className="relative mt-3 space-y-2">
+            <SceneRow testId="scene-late" label="残業で遅くなる" onClick={() => store.beginScene('late', true)} />
+            <SceneRow testId="scene-sick" label="子どもが熱のとき" onClick={() => store.sendText('子どもが熱のとき')} />
+            <SceneRow testId="scene-work" label="職場で育休が取りにくい" onClick={() => store.sendText('職場で育休が取りにくい')} />
+            <SceneRow testId="scene-bed" label="寝かしつけが長引いたら？" onClick={() => store.sendText('寝かしつけが長引いたら？')} />
+            <details>
+              <summary data-testid="consult-more" className="inline-flex min-h-11 items-center text-sm font-bold text-muted">ほかの場面</summary>
+              <div className="mt-2 space-y-2">
+                <SceneGrid testPrefix="more-" onPick={(id) => store.beginScene(id, true)} />
+              </div>
+            </details>
           </div>
         </>
       ) : (
@@ -80,19 +82,10 @@ export function Consult() {
   )
 }
 
-function SickTile() {
-  const store = useStore()
+function SceneRow({ testId, label, onClick }: { testId: string; label: string; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      data-testid="scene-sick"
-      className="hare-card mt-2 flex min-h-[88px] w-full flex-col items-center justify-center gap-1.5 px-3 py-2 text-center text-[13px] leading-snug font-bold"
-      onClick={() => store.sendText('子どもが熱のとき')}
-    >
-      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
-        <Icon name="child" size={20} />
-      </span>
-      子どもが熱のとき
+    <button type="button" data-testid={testId} className="flex min-h-11 w-full items-center rounded-xl border border-line bg-white px-3 text-left text-sm font-bold" onClick={onClick}>
+      {label}
     </button>
   )
 }
@@ -414,7 +407,7 @@ function ThumbDock() {
   )
 }
 
-const QUICK = ['職場で育休が取りにくい', '下の子が湯船を嫌がったら？', '寝かしつけが長引いたら？', '帰りが遅れそう']
+const QUICK = ['下の子が湯船を嫌がったら？', '帰りが遅れそう']
 
 function Composer() {
   const store = useStore()

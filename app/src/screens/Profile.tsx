@@ -88,6 +88,9 @@ export function Profile() {
     <div className="px-3.5 pt-3.5 pb-28" data-testid="profile">
       <DemoBar />
       <h1 className="text-lg font-bold">うち</h1>
+      <p className="mt-2 text-sm text-muted">覚えていること {data.memories.length}件。点数にはしません。</p>
+      <details className="mt-3">
+        <summary data-testid="profile-settings" className="inline-flex min-h-11 items-center text-sm font-bold">設定</summary>
       {data.profile.kids.length > 0 ? (
         <div className="mt-3 flex gap-2 overflow-x-auto">
           {data.profile.kids.map((kid) => (
@@ -168,7 +171,9 @@ export function Profile() {
         </div>
       </div>
       <p className="mt-1 text-xs leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
-
+      </details>
+      <details className="mt-2">
+        <summary data-testid="profile-records" className="inline-flex min-h-11 items-center text-sm font-bold">記録を見る</summary>
       <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
       <p className="mt-1 text-xs leading-relaxed text-muted">点数にはしません。次の提案にだけ使います。</p>
       {data.memories.length === 0 ? (
@@ -193,6 +198,7 @@ export function Profile() {
           ))}
         </div>
       )}
+      </details>
 
       <h2 className="mt-6 text-sm font-bold">一人称</h2>
       <div className="mt-2 flex flex-wrap gap-2">

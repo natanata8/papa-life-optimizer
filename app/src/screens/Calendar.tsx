@@ -108,7 +108,7 @@ function Week() {
     const events = data.events.filter((event) => event.date === row.date)
     return !dadBusy(events, slotClock(row.peak))
   })
-  const cards = capCards(openRows, 3)
+  const cards = capCards(openRows, 1)
   const weekMinutes = openRows.reduce((sum, row) => sum + (row.peak?.freedMin ?? 0), 0)
   const skies = rows.map((row) => (!row.cast.known ? 'none' : row.peak?.lifted ? '解除' : row.peak && row.peak.sky !== '晴れ' ? row.peak.sky : '晴れ'))
   const absorbed = rows.some((row) => row.open && (data.taken?.[row.date] ?? []).length > 0)
@@ -152,30 +152,14 @@ function Week() {
             >
               <span className="text-xs">{DOW_CHARS[dow]}</span>
               <span className="text-base leading-none font-bold">{Number(row.date.slice(8))}</span>
-              <span data-testid={`cal-sky-${row.date}`} className="mt-1 inline-flex items-center justify-center">
-                <SkyMark size={26} sky={sky === 'none' ? 'none' : sky} lifted={Boolean(peak?.lifted)} label={label} />
+              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex flex-col items-center">
+                <span className={`h-2.5 w-2.5 rounded-full ${sky === '注意報' || sky === '警報' ? 'bg-watch-line' : 'bg-line'}`} />
+                {sky === '注意報' || sky === '警報' ? <span className="text-xs font-bold text-watch-ink">注意</span> : null}
               </span>
-              {sky === '注意報' || sky === '警報' ? (
-                <span className={`mt-0.5 rounded-full px-1 text-xs font-bold ${sky === '警報' ? 'bg-alert-line text-white' : 'bg-watch-tag text-watch-ink'}`}>{sky === '警報' ? '警報' : '注意'}</span>
-              ) : null}
             </button>
           )
         })}
       </div>
-      <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted" data-testid="week-legend">
-        <span className="inline-flex items-center gap-1">
-          <SkyMark size={24} sky="注意報" />
-          注意報
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <SkyMark size={24} sky="警報" />
-          警報
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <SkyMark size={24} sky="none" />
-          予定ありなど
-        </span>
-      </p>
       <div className="mt-3 space-y-2">
         {cards.shown.map((row) => {
           const peak = row.peak

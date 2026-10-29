@@ -74,7 +74,7 @@ export function capCards<T>(items: readonly T[], max = 3): { shown: T[]; rest: T
 }
 
 /** 未引き受けの余白数字。紙 #fffaf4 の上で 4.5:1 以上、青より落ち着いた焦茶。 */
-export const HERO_QUIET = '#736b63'
+export const HERO_QUIET = '#5a6570'
 
 export function moreCountLabel(count: number): string {
   return `ほか${count}件`
