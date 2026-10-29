@@ -131,7 +131,7 @@ function Week() {
       </p>
       <h2 className="mt-2 text-[23px] font-bold">先回りできること {openRows.length}</h2>
       <p className="mt-1 flex flex-wrap items-baseline gap-x-1">
-        <span className={`text-[40px] leading-none font-bold ${weekMinutes > 0 ? 'text-margin' : 'text-faint'}`}>{weekMinutes}</span>
+        <span className={`text-[40px] leading-none font-bold ${weekMinutes > 0 ? 'text-margin' : 'text-muted'}`}>{weekMinutes}</span>
         <span className="text-sm text-muted">分 引き受ければ今週の余白（目安）</span>
       </p>
       <div className="mt-3 grid grid-cols-7 gap-1">

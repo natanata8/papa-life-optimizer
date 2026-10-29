@@ -72,3 +72,10 @@ export function consultTelop(range: string | null, quiet: boolean): string {
 export function capCards<T>(items: readonly T[], max = 3): { shown: T[]; rest: T[] } {
   return { shown: items.slice(0, max), rest: items.slice(max) }
 }
+
+/** 未引き受けの余白数字。紙 #fffaf4 の上で 4.5:1 以上、青より落ち着いた焦茶。 */
+export const HERO_QUIET = '#736b63'
+
+export function moreCountLabel(count: number): string {
+  return `ほか${count}件`
+}

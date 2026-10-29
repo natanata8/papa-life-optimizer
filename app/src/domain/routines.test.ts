@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { capCards, consultTelop, glanceLine, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
+import { HERO_QUIET, capCards, consultTelop, glanceLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
 import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
@@ -383,7 +383,30 @@ test('余白の数字は、引き受けた仕事の分数', () => {
   assert.equal(weekGlance(['くもり', 'くもり', '晴れ', '注意報', 'くもり']), '今週はおおむねくもり')
   assert.equal(consultTelop('20〜22時', false), '今夜は 20〜22時が山場。次の手だけやろう')
   assert.equal(capCards([1, 2, 3, 4], 3).rest.length, 1)
+  const weekend = capCards(['公園', '図書館', '家'], 1)
+  assert.deepEqual(weekend.shown, ['公園'])
+  assert.equal(moreCountLabel(weekend.rest.length), 'ほか2件')
+  assert.ok(contrast(HERO_QUIET, '#fffaf4') >= 4.5)
+  assert.ok(contrast('#a59c92', '#fffaf4') < 4.5)
+  assert.notEqual(HERO_QUIET.toLowerCase(), '#1d5fa0')
+  const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
+  assert.match(css, new RegExp(`--color-muted:\\s*${HERO_QUIET}`))
+  const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
+  assert.match(home, /text-margin' : 'text-muted'/)
 })
+
+function contrast(fg: string, bg: string): number {
+  const lum = (hex: string) => {
+    const n = Number.parseInt(hex.slice(1), 16)
+    const ch = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((value) => {
+      const c = value / 255
+      return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+  }
+  const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a)
+  return (hi + 0.05) / (lo + 0.05)
+}
 
 test('覚えていることは、新しい順で5件まで', () => {
   const rows = memoryRows(

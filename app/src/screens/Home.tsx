@@ -114,7 +114,7 @@ export function Home() {
           <Phrase text={heading} />
         </h2>
         <p className="mt-2 flex flex-wrap items-baseline gap-x-1" data-testid="hero-margin">
-          <span className={`text-[48px] leading-none font-bold ${margin > 0 ? 'text-margin' : 'text-faint'}`}>{margin}</span>
+          <span className={`text-[48px] leading-none font-bold ${margin > 0 ? 'text-margin' : 'text-muted'}`}>{margin}</span>
           <span className="text-base font-bold">分</span>
           <span className="text-sm text-muted">
             <Phrase text={`の余白（目安）・${hero.detail}`} />
