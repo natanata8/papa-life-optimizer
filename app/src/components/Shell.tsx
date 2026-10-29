@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Icon, type IconName } from '@/components/icons.tsx'
-import { Phrase } from '@/components/Phrase.tsx'
+import { ToastBar } from '@/components/ToastBar.tsx'
 import { useStore } from '@/app/store.tsx'
 import { demoOnly } from '@/domain/demo.ts'
 import { openRoutineCount } from '@/domain/routines.ts'
@@ -111,15 +111,26 @@ function Frame({ children }: { children: ReactNode }) {
 
 function Toast() {
   const store = useStore()
-  if (!store.toast) return null
+  const ref = useRef<HTMLDivElement>(null)
+  const onHome = store.tab === 'home' && !store.panel
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const tops = [...document.querySelectorAll('body *')].flatMap((node) => {
+      if (!(node instanceof HTMLElement) || node === el || el.contains(node)) return []
+      const style = getComputedStyle(node)
+      if (style.position !== 'fixed') return []
+      const box = node.getBoundingClientRect()
+      if (box.height < 40 || box.width < 80 || box.bottom < window.innerHeight - 4) return []
+      return [box.top]
+    })
+    const limit = tops.length > 0 ? Math.min(...tops) : window.innerHeight - 64
+    el.style.bottom = `${window.innerHeight - limit + 8}px`
+  }, [store.toast, store.tab, store.panel, onHome])
+  if (!store.toast || onHome) return null
   return (
-    <div className={`fixed left-1/2 z-[60] flex w-[min(360px,calc(100%-24px))] -translate-x-1/2 items-center gap-3 rounded-2xl bg-ink px-4 py-2 text-[13px] text-white shadow-lg ${store.demo && !store.ownHome && !store.panel && store.tab === 'home' ? 'top-[124px]' : 'top-[76px]'}`} data-testid="toast">
-      <p className="min-w-0 flex-1"><Phrase text={store.toast} /></p>
-      {store.toastUndo ? (
-        <button type="button" data-testid="toast-undo" className="inline-flex min-h-11 items-center font-bold whitespace-nowrap" onClick={() => { store.toastUndo?.(); store.dismissToast() }}>
-          元に戻す
-        </button>
-      ) : null}
+    <div ref={ref} className="fixed left-1/2 z-[60] w-[min(360px,calc(100%-24px))] -translate-x-1/2" style={{ bottom: 'calc(72px + env(safe-area-inset-bottom))' }}>
+      <ToastBar />
     </div>
   )
 }

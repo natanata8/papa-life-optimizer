@@ -398,7 +398,7 @@ function ThumbDock() {
   )
 }
 
-const QUICK = ['下の子が湯船を嫌がったら？', '寝かしつけが長引いたら？', '帰りが遅れそう']
+const QUICK = ['職場で育休が取りにくい', '下の子が湯船を嫌がったら？', '寝かしつけが長引いたら？', '帰りが遅れそう']
 
 function Composer() {
   const store = useStore()

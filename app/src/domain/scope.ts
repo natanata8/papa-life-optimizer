@@ -16,6 +16,26 @@ export const SICK_DAY = {
   line: '今日は病院に行く。夜の風呂は短く俺がやるね。',
 } as const
 
+/** 職場の話は、病児の手順に混ぜない。今夜の家でできることだけ。 */
+export const WORK_HOME = {
+  scope: '会社のことは、ここでは決めなくていい。',
+  note: '今夜の家の手順だけ先に置こう。',
+  title: '今夜の担当を一つ決める',
+  why: '会社の話は、そのあとでいい。',
+  steps: ['今夜の担当を一つ決める', '明日の朝の準備を一つ出す', '帰る時刻だけ先に送る'],
+  line: '今夜の担当は俺がやるね。帰る時刻も先に送る。',
+  tomorrow: '明日の朝の準備を一つ出す',
+} as const
+
+export type HomePlan = 'workplace' | 'sick'
+
+/** 職場が当たったら病児にはしない。熱の文だけが病児。 */
+export function homePlanFor(text: string): HomePlan | null {
+  if (isWorkplace(text)) return 'workplace'
+  if (isSickChild(text)) return 'sick'
+  return null
+}
+
 export function memoryRows<T extends { date: string }>(memories: readonly T[], limit = 5): T[] {
   return [...memories].sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0)).slice(0, limit)
 }

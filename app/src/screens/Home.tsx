@@ -2,6 +2,7 @@ import { Fragment, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
+import { ToastBar } from '@/components/ToastBar.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { formatMd, hourInRange } from '@/domain/dates.ts'
@@ -213,13 +214,19 @@ export function Home() {
       </button>
       )}
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pt-2 pb-2">
-        <div className="flex items-center gap-2" data-fold="margin">
-          <div className="h-2 w-16 shrink-0 overflow-hidden rounded-full bg-sand" aria-hidden="true">
-            <div className="h-full rounded-full bg-margin" style={{ width: `${margin <= 0 ? 0 : Math.max(12, Math.min(100, (margin / 90) * 100))}%` }} />
-          </div>
-          <p className="min-w-0 flex-1 text-sm">
-            <Phrase text={footerLine(taken.length, doneCount, margin)} />
-          </p>
+        <div data-fold="margin">
+          {store.toast ? (
+            <ToastBar />
+          ) : (
+            <div className="flex items-center gap-2">
+              <div className="h-2 w-16 shrink-0 overflow-hidden rounded-full bg-sand" aria-hidden="true">
+                <div className="h-full rounded-full bg-margin" style={{ width: `${margin <= 0 ? 0 : Math.max(12, Math.min(100, (margin / 90) * 100))}%` }} />
+              </div>
+              <p className="min-w-0 flex-1 text-sm">
+                <Phrase text={footerLine(taken.length, doneCount, margin)} />
+              </p>
+            </div>
+          )}
         </div>
         <button
           type="button"

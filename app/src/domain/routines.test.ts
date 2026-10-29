@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
-import { SICK_DAY, isSickChild, isWorkplace, memoryRows } from './scope.ts'
+import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
 import { labelChunks, phraseChunks } from './freed.ts'
 import { SCENE_LIST } from './scenes.ts'
@@ -354,11 +354,17 @@ test('職場の話は、家の段取りに戻す', () => {
   assert.equal(isWorkplace('子どもが熱のとき'), false)
   assert.equal(isSickChild('子どもが熱のとき'), true)
   assert.equal(isSickChild('職場で育休が取りにくい'), false)
-  const text = [SICK_DAY.scope, SICK_DAY.note, SICK_DAY.title, ...SICK_DAY.steps, SICK_DAY.line].join('\n')
-  assert.match(text, /受診/)
-  assert.match(text, /風呂は短く/)
-  assert.equal(/手伝|転職|上司へのメール|ありがとう/.test(text), false)
-  assert.equal(text.includes('会社のことは、ここでは決めなくていい。'), true)
+  assert.equal(homePlanFor('職場で育休が取りにくい'), 'workplace')
+  assert.equal(homePlanFor('子どもが熱のとき'), 'sick')
+  assert.equal(homePlanFor('職場で熱が出た'), 'workplace')
+  const work = [WORK_HOME.scope, WORK_HOME.note, WORK_HOME.title, WORK_HOME.why, ...WORK_HOME.steps, WORK_HOME.line].join('\n')
+  assert.equal(work.includes('会社のことは、ここでは決めなくていい。'), true)
+  assert.equal(work.includes('病児'), false)
+  assert.equal(work.includes('受診'), false)
+  assert.equal(/手伝|ありがとう|晴れ|くもり|曇|雷/.test(work), false)
+  const sick = [SICK_DAY.title, ...SICK_DAY.steps, SICK_DAY.line].join('\n')
+  assert.match(sick, /受診/)
+  assert.equal(sick.includes(WORK_HOME.title), false)
 })
 
 test('覚えていることは、新しい順で5件まで', () => {

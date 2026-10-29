@@ -1,6 +1,6 @@
 import { addDays, formatMd } from '@/domain/dates.ts'
 import { BEDTIME_SLIP, isBedtimeSlip } from '@/domain/routines.ts'
-import { SICK_DAY, isSickChild, isWorkplace } from '@/domain/scope.ts'
+import { SICK_DAY, WORK_HOME, homePlanFor } from '@/domain/scope.ts'
 import { fallbackScenes } from '@/domain/scenes.ts'
 import type { StepKind, ToneAnswer, ToneStep } from '@/domain/types.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
@@ -79,8 +79,9 @@ function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.entry === 'invisible') return invisibleAnswer(request)
   if (request.userText.includes('湯船') || request.entry.includes('湯船')) return bathBoat()
   if (isBedtimeSlip(request.userText) || isBedtimeSlip(request.entry)) return bedtimeSlip()
-  if (isWorkplace(request.userText) || isWorkplace(request.entry)) return sickDay(true)
-  if (isSickChild(request.userText) || isSickChild(request.entry)) return sickDay(false)
+  const plan = homePlanFor(request.userText) ?? homePlanFor(request.entry)
+  if (plan === 'workplace') return workplaceHome()
+  if (plan === 'sick') return sickDay()
   if (request.entry.startsWith('オウチ予報') || request.entry.startsWith('今夜の流れ')) return forecastConsult(request)
   const blocked = blockedTitles(request.memory)
   if (request.scene === 'nomi') return noteBlocked(nomi(request), blocked)
@@ -137,9 +138,21 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
   }
 }
 
-function sickDay(workplace: boolean): ToneAnswer {
+function workplaceHome(): ToneAnswer {
   return {
-    状況整理: workplace ? SICK_DAY.scope : SICK_DAY.home,
+    状況整理: WORK_HOME.scope,
+    気づき: WORK_HOME.note,
+    一手: [step(WORK_HOME.title, WORK_HOME.why, '今やる', '今夜', [...WORK_HOME.steps])],
+    声かけ例: WORK_HOME.line,
+    明日やること: WORK_HOME.tomorrow,
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function sickDay(): ToneAnswer {
+  return {
+    状況整理: SICK_DAY.home,
     気づき: SICK_DAY.note,
     一手: [step(SICK_DAY.title, SICK_DAY.why, '今やる', '今夜', [...SICK_DAY.steps])],
     声かけ例: SICK_DAY.line,
