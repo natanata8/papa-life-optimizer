@@ -1,6 +1,7 @@
 import { Fragment, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
+import { SkyMark } from '@/components/SkyMark.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { ToastBar } from '@/components/ToastBar.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
@@ -9,11 +10,11 @@ import { formatMd, hourInRange } from '@/domain/dates.ts'
 import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import { morningKitLine, showMorningKit } from '@/domain/dayMode.ts'
+import { glanceLine, liftLine, rowMark, skyWash, takenMargin } from '@/domain/glance.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import {
   contextChips,
   footerLine,
-  freedFor,
   listLabel,
   listedSteps,
   nextHand,
@@ -26,7 +27,6 @@ import {
   tonightIds,
   type RoutineId,
 } from '@/domain/routines.ts'
-import { taskIcon } from '@/domain/taskIcon.ts'
 import type { AgeLabel } from '@/domain/types.ts'
 
 export function Home() {
@@ -49,7 +49,8 @@ export function Home() {
   const hand = nextHand({ order: ids, taken, ages, ensoku })
   const showHand = Boolean(hand && hand.id !== later)
   const anyDone = taken.some((item) => routineDone(item, ages, ensoku))
-  const recommended = showHand && hand ? hand.id : !anyDone && peak ? routineForPeak(peak.noun, peak.kind) : null
+  const peakRoutine = peak ? routineForPeak(peak.noun, peak.kind) : null
+  const recommended = showHand && hand ? hand.id : !anyDone && peakRoutine && !taken.some((item) => item.routineId === peakRoutine) ? peakRoutine : null
   const kit = showMorningKit(data.profile.notif, store.mode) ? morningKitLine(data.childEvents, store.today) : null
   const askTonight = () => {
     const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
@@ -67,7 +68,16 @@ export function Home() {
     const clock = listLabel(listedSteps(id, ages, ensoku, item?.partial, item?.extra), anchor)
     return { id, at: anchor, start: clock.start, item }
   })
-  const margin = taken.reduce((sum, item) => sum + freedFor(item.routineId as RoutineId, item.partial, ages, ensoku), 0)
+  const hero = takenMargin(taken, ages, ensoku)
+  const margin = hero.minutes
+  const absorbed = margin > 0 && warning
+  const wash = skyWash({ quiet: cast.quiet, absorbed })
+  const glance = glanceLine({
+    quiet: cast.quiet,
+    absorbed,
+    slots: cast.slots.map((slot) => ({ label: slot.label, sky: slot.sky })),
+  })
+  const glanceSky = cast.quiet ? '晴れ' : absorbed ? 'くもり' : peak?.sky ?? 'くもり'
   const passed = Object.entries(data.accept ?? {}).some(([key, value]) => key.startsWith(`${store.today}|`) && value.phase === 'passed')
   const shared = taken.some((item) => item.sharedAt)
   const doneCount = taken.filter((item) => routineDone(item, ages, ensoku)).length
@@ -75,8 +85,15 @@ export function Home() {
   const clock = store.mode === '帰宅前' && info ? info.open : back ?? ''
   const partner = data.profile.partner || '家族'
 
+  const heading = back
+    ? taken.length > 0
+      ? `帰宅 ${back}。${taken.length}つ引き受け中`
+      : `帰宅 ${back}。先に決めておこう`
+    : '今夜の流れを、先に決めておこう'
+
   return (
-    <div className="px-3.5 pt-3.5 pb-44">
+    <div className="relative px-3.5 pt-3.5 pb-44">
+      <div aria-hidden="true" className={`sky sky-${wash}`} />
       <DemoBar title="今夜の流れ" meta={`${formatMd(store.today)} ${clock}`} fold />
       {store.demo && !store.ownHome ? (
         <div className="mb-3 flex gap-2" data-fold="sample">
@@ -86,18 +103,38 @@ export function Home() {
           </button>
         </div>
       ) : null}
-      <h2 className="text-[22px] leading-snug font-bold" data-fold="heading">
-        <Phrase text={back ? `帰宅 ${back}。先に決めておこう` : '今夜の流れを、先に決めておこう'} />
-      </h2>
+      <div data-fold="heading">
+        <p className="flex items-center gap-2 text-sm font-bold">
+          <SkyMark sky={glanceSky} size={26} lifted={absorbed} label={glance} />
+          <span className="min-w-0">
+            <Phrase text={glance} />
+          </span>
+        </p>
+        <h2 className="mt-2 text-[23px] leading-snug font-bold">
+          <Phrase text={heading} />
+        </h2>
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-1" data-testid="hero-margin">
+          <span className={`text-[48px] leading-none font-bold ${margin > 0 ? 'text-margin' : 'text-faint'}`}>{margin}</span>
+          <span className="text-base font-bold">分</span>
+          <span className="text-sm text-muted">
+            <Phrase text={`の余白（目安）・${hero.detail}`} />
+          </span>
+        </p>
+      </div>
       {passed ? <p className="mt-2 text-sm" data-testid="tonight-passed">今日はパスしました。記録は残していません。</p> : null}
       {finished && !hand ? <p className="mt-2 text-sm font-bold" data-testid="tonight-done">終わった</p> : null}
       {shared ? <p className="mt-1 text-sm font-bold text-margin" data-testid="tonight-shared">共有済み</p> : null}
       {warning && peak && overlap ? (
-        <p className={`mt-3 flex min-w-0 items-start gap-2 rounded-2xl px-3 py-2 text-sm font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="warning">
-          <Icon name="cloud" size={16} className={`mt-0.5 shrink-0 ${peak.sky === '警報' ? 'text-alert-ink' : 'text-cloud-ink'}`} />
-          <span className={`inline-flex h-6 shrink-0 items-center rounded-full px-1.5 text-xs ${peak.sky === '警報' ? 'bg-white text-alert-ink' : 'bg-watch-tag text-watch-ink'}`}>{peak.sky}</span>
+        <p
+          className={`mt-2 flex min-w-0 items-start gap-2 rounded-2xl border-l-[5px] px-3 py-2 text-sm font-bold ${absorbed ? 'border-[#9aa6b2] bg-lift text-lift-ink' : peak.sky === '警報' ? 'border-alert-line bg-alert text-alert-ink' : 'border-watch-line bg-[#fff8d6] text-watch-ink'}`}
+          data-fold="warning"
+        >
+          <SkyMark sky={absorbed ? 'くもり' : peak.sky} size={26} lifted={absorbed} />
+          <span className={`inline-flex h-6 shrink-0 items-center rounded-full px-1.5 text-xs font-bold ${absorbed ? 'bg-white text-lift-ink' : peak.sky === '警報' ? 'bg-alert-line text-white' : 'bg-watch-tag text-watch-ink'}`}>
+            {absorbed ? '解除' : peak.sky}
+          </span>
           <span className="min-w-0 flex-1">
-            <Phrase text={overlap} />
+            <Phrase text={absorbed ? liftLine(taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))) : `${overlap}。備えておけば大丈夫`} />
           </span>
         </p>
       ) : cast.quiet ? (
@@ -121,6 +158,7 @@ export function Home() {
           <Phrase text={kit} />
         </button>
       ) : null}
+      <p className="mt-3 text-xs font-bold text-muted">今夜の予報・時刻ごとの家のこと</p>
       <div className="mt-3 space-y-2">
         {rows.map((row, index) => {
           const on = Boolean(row.item)
@@ -131,25 +169,26 @@ export function Home() {
           return (
             <Fragment key={row.id}>
             <div className="flex items-stretch gap-2" data-fold={`row-${index}`}>
-              <div className="relative w-11 shrink-0">
+              <div className="relative w-12 shrink-0 text-right">
                 {index < rows.length - 1 ? (
-                  <span aria-hidden="true" className={`absolute top-7 -bottom-2 left-1/2 w-1 -translate-x-1/2 ${band ? bandColor : 'bg-line'}`} />
+                  <span aria-hidden="true" className={`absolute top-7 -bottom-2 left-1/2 w-1 -translate-x-1/2 ${band && !on ? bandColor : 'bg-line'}`} />
                 ) : null}
-                <p className="relative z-10 text-center text-xs font-bold whitespace-nowrap">{row.start}</p>
-                <span
-                  aria-hidden="true"
-                  className={`relative z-10 mx-auto mt-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border-2 ${finishedRow ? 'border-margin bg-margin text-white' : on ? 'border-accent-deep bg-accent-deep' : 'border-faint bg-paper'}`}
-                >
-                  {finishedRow ? <Icon name="check" size={10} /> : null}
-                </span>
+                <p className="relative z-10 text-xs font-bold whitespace-nowrap">{row.start}</p>
               </div>
-                <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${showHand && hand?.id === row.id ? 'bg-accent-soft' : ''} ${band ? `border-l-4 ${bandEdge}` : ''}`}>
-                <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${on ? 'bg-accent-deep text-white' : 'bg-sand text-ink'}`}>
-                  <Icon name={taskIcon(row.id)} size={20} />
-                </span>
+              <div className="relative z-10 flex w-7 shrink-0 justify-center pt-1">
+                <SkyMark
+                  size={28}
+                  sky={rowMark({ taken: on, warning: band && peak?.sky !== '警報', alert: band && peak?.sky === '警報' })}
+                  label={on ? '引き受けた' : band ? peak?.sky : '軽い'}
+                />
+              </div>
+                <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${showHand && hand?.id === row.id ? 'bg-accent-soft' : ''} ${band && !on ? `border-l-4 ${bandEdge}` : ''}`}>
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
                     <Phrase text={rowTitle(row.id, ages, ensoku)} />
+                    {band && !on ? (
+                      <span className={`whitespace-nowrap rounded-full px-1.5 py-0.5 text-xs font-bold ${peak?.sky === '警報' ? 'bg-alert-line text-white' : 'bg-watch-tag text-watch-ink'}`}>{peak?.sky}</span>
+                    ) : null}
                     {row.id === recommended ? (
                       <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink" data-testid={showHand && hand?.id === row.id ? 'tonight-next' : undefined}>
                         おすすめ
@@ -163,7 +202,7 @@ export function Home() {
                 <button
                   type="button"
                   data-testid={`tonight-take-${row.id}`}
-                  className={`inline-flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2.5 text-sm font-bold whitespace-nowrap ${on ? 'bg-accent-deep text-white' : 'bg-[#f3eee6]'}`}
+                  className={`inline-flex min-h-11 min-w-[92px] shrink-0 items-center justify-center gap-1 rounded-full px-3 text-sm font-bold whitespace-nowrap ${on ? 'take-on' : 'take-open'}`}
                   onClick={() => {
                     if (!on || !row.item) {
                       store.takeRoutine(store.today, row.id, row.at)
@@ -218,21 +257,16 @@ export function Home() {
           {store.toast ? (
             <ToastBar />
           ) : (
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-16 shrink-0 overflow-hidden rounded-full bg-sand" aria-hidden="true">
-                <div className="h-full rounded-full bg-margin" style={{ width: `${margin <= 0 ? 0 : Math.max(12, Math.min(100, (margin / 90) * 100))}%` }} />
-              </div>
-              <p className="min-w-0 flex-1 text-sm">
-                <Phrase text={footerLine(taken.length, doneCount, margin)} />
-              </p>
-            </div>
+            <p className="min-w-0 text-sm">
+              <Phrase text={footerLine(taken.length, doneCount, margin)} />
+            </p>
           )}
         </div>
         <button
           type="button"
           data-testid="tonight-share"
           data-fold="share"
-          className="mt-2 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl bg-accent-deep text-base font-bold text-white"
+          className="mt-2 inline-flex min-h-[54px] w-full items-center justify-center gap-1.5 rounded-xl bg-accent-deep text-base font-bold text-white"
           onClick={() => store.openShare()}
         >
           <Icon name="share" size={18} />

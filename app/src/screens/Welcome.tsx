@@ -10,7 +10,7 @@ const PAGES = [
   },
   {
     title: '考えずに、ただやるだけ',
-    body: '引き受けた家のことは、時刻とコツつきの手順になります。リストでも、1つずつでも進められます。',
+    body: '引き受けた家の仕事の分数が、余白（目安）です。リストでも、1つずつでも進められます。',
   },
   {
     title: '引き受けたことが、そのまま伝わる',
@@ -23,7 +23,8 @@ export function Welcome() {
   const [page, setPage] = useState(0)
   const last = page >= PAGES.length
   return (
-    <div className="px-4 pt-6 pb-28">
+    <div className="relative px-4 pt-6 pb-28">
+      <div aria-hidden="true" className="sky sky-clear" />
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-muted">{last ? 'どちらで見ますか' : `${page + 1} / ${PAGES.length}`}</span>
         {last ? null : (

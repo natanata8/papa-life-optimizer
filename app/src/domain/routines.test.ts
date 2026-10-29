@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { capCards, consultTelop, glanceLine, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
 import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
@@ -365,6 +366,23 @@ test('職場の話は、家の段取りに戻す', () => {
   const sick = [SICK_DAY.title, ...SICK_DAY.steps, SICK_DAY.line].join('\n')
   assert.match(sick, /受診/)
   assert.equal(sick.includes(WORK_HOME.title), false)
+})
+
+test('余白の数字は、引き受けた仕事の分数', () => {
+  const none = takenMargin([], ['4歳', '1歳'], true)
+  assert.equal(none.minutes, 0)
+  assert.equal(none.detail, '引き受けると戻る')
+  const both = takenMargin([{ routineId: 'bath' }, { routineId: 'tomorrow' }], ['4歳', '1歳'], true)
+  assert.equal(both.minutes, 45)
+  assert.equal(both.detail, 'お風呂30＋持ち物15')
+  assert.equal(glanceLine({ quiet: false, absorbed: false, slots: [{ label: '夕方', sky: 'くもり' }, { label: '夜', sky: '注意報' }] }), '夕方はくもり・夜は注意報')
+  assert.equal(glanceLine({ quiet: false, absorbed: true, slots: [] }), '注意報はひとつ解除・この調子で大丈夫')
+  assert.equal(rowMark({ taken: true, warning: true, alert: false }), 'くもり')
+  assert.equal(rowMark({ taken: false, warning: true, alert: false }), '注意報')
+  assert.equal(skyWash({ quiet: false, absorbed: true }), 'lifted')
+  assert.equal(weekGlance(['くもり', 'くもり', '晴れ', '注意報', 'くもり']), '今週はおおむねくもり')
+  assert.equal(consultTelop('20〜22時', false), '今夜は 20〜22時が山場。次の手だけやろう')
+  assert.equal(capCards([1, 2, 3, 4], 3).rest.length, 1)
 })
 
 test('覚えていることは、新しい順で5件まで', () => {

@@ -40,6 +40,12 @@
   --color-step-ink: #8a3f1d;
   --color-good: #1d5fa0;
   --color-good-ink: #fffaf4;
+  /* 空は上部132pxだけ。本文は紙色。余白の数字は --color-margin。
+     CUD: 黄＝注意（文字は焦茶）、赤＝警報（白文字）、青＝よかった。赤と緑は混ぜない。 */
+  --color-sky-dusk: #ffd9a8;
+  --color-sky-clear: #bfe3ff;
+  --color-sky-lifted: #e8f4ff;
+  --color-take-ink: #5c3b1e;
   --color-meh: #f3eee6;
   --color-lazy: #f1f6f1;
   --color-lazy-ink: #3d6b3d;
@@ -107,6 +113,40 @@
     background: #fff;
     box-shadow: 0 1px 2px rgba(44, 42, 40, 0.06), 0 8px 18px rgba(44, 42, 40, 0.04);
   }
+
+  .sky {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 132px;
+    pointer-events: none;
+    transition: background 300ms ease;
+  }
+
+  .sky-dusk {
+    background: linear-gradient(var(--color-sky-dusk), transparent);
+  }
+
+  .sky-clear {
+    background: linear-gradient(var(--color-sky-clear), transparent);
+  }
+
+  .sky-lifted {
+    background: linear-gradient(var(--color-sky-dusk), var(--color-sky-lifted) 55%, transparent);
+  }
+
+  .take-open {
+    border: 2px solid var(--color-accent-deep);
+    background: var(--color-paper);
+    color: var(--color-take-ink);
+  }
+
+  .take-on {
+    border: 2px solid var(--color-accent-deep);
+    background: var(--color-accent-deep);
+    color: #fff;
+  }
 }
 
 @keyframes cloud-drift {
@@ -127,5 +167,9 @@
   .tone-sheet,
   .thinking-cloud {
     animation: none;
+  }
+
+  .sky {
+    transition: none;
   }
 }

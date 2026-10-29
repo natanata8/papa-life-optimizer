@@ -1,5 +1,5 @@
 import { DemoBar } from '@/components/DemoBar.tsx'
-import { Icon, WeatherDot } from '@/components/icons.tsx'
+import { Icon } from '@/components/icons.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { LevelBadge, SkyMark } from '@/components/SkyMark.tsx'
 import { Button } from '@/components/ui/button.tsx'
@@ -10,6 +10,7 @@ import { DAY_ORDER, DOW_CHARS, SLOTS, addDays, dowIndex, formatMd, slotOf } from
 import { DAILY_TASKS, adoptedKeys, invisibleOn, type InvItem } from '@/domain/invisible.ts'
 import { partnerDay, type PartnerBlock } from '@/domain/partnerDay.ts'
 import { returnInfo } from '@/domain/profile.ts'
+import { capCards, skyWash, weekGlance } from '@/domain/glance.ts'
 import { dadBusy, routineForPeak, rowAt } from '@/domain/routines.ts'
 import { titleIcon } from '@/domain/taskIcon.ts'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
@@ -107,9 +108,16 @@ function Week() {
     const events = data.events.filter((event) => event.date === row.date)
     return !dadBusy(events, slotClock(row.peak))
   })
+  const cards = capCards(openRows, 3)
+  const weekMinutes = openRows.reduce((sum, row) => sum + (row.peak?.freedMin ?? 0), 0)
+  const skies = rows.map((row) => (!row.cast.known ? 'none' : row.peak?.lifted ? '解除' : row.peak && row.peak.sky !== '晴れ' ? row.peak.sky : '晴れ'))
+  const absorbed = rows.some((row) => row.open && (data.taken?.[row.date] ?? []).length > 0)
+  const wash = skyWash({ quiet: rows.every((row) => row.cast.quiet), absorbed })
 
   return (
-    <div data-testid="week-view">
+    <div data-testid="week-view" className="relative">
+      <div aria-hidden="true" className={`sky sky-${wash}`} />
+      <div className="relative">
       <DateBar
         label={`${formatMd(store.weekStart)}〜${formatMd(addDays(store.weekStart, 6))}`}
         prevLabel="前の週"
@@ -117,7 +125,16 @@ function Week() {
         onPrev={() => store.shiftWeek(-1)}
         onNext={() => store.shiftWeek(1)}
       />
-      <div className="mt-2 grid grid-cols-7 gap-1">
+      <p className="mt-3 flex items-center gap-2 text-sm font-bold">
+        <SkyMark size={26} sky={skies.includes('注意報') ? '注意報' : skies.includes('くもり') ? 'くもり' : '晴れ'} label={weekGlance(skies)} />
+        <Phrase text={weekGlance(skies)} />
+      </p>
+      <h2 className="mt-2 text-[23px] font-bold">先回りできること {openRows.length}</h2>
+      <p className="mt-1 flex flex-wrap items-baseline gap-x-1">
+        <span className={`text-[40px] leading-none font-bold ${weekMinutes > 0 ? 'text-margin' : 'text-faint'}`}>{weekMinutes}</span>
+        <span className="text-sm text-muted">分 引き受ければ今週の余白（目安）</span>
+      </p>
+      <div className="mt-3 grid grid-cols-7 gap-1">
         {rows.map((row) => {
           const dow = dowIndex(row.date)
           const peak = row.peak
@@ -135,30 +152,32 @@ function Week() {
             >
               <span className="text-xs">{DOW_CHARS[dow]}</span>
               <span className="text-base leading-none font-bold">{Number(row.date.slice(8))}</span>
-              <span data-testid={`cal-sky-${row.date}`} aria-label={label} className="mt-1 inline-flex h-4 w-4 items-center justify-center">
-                {known && !peak?.lifted ? <WeatherDot sky={sky} /> : <span className="inline-block h-4 w-4 rounded-full border-2 border-dashed border-muted" />}
+              <span data-testid={`cal-sky-${row.date}`} className="mt-1 inline-flex items-center justify-center">
+                <SkyMark size={26} sky={sky === 'none' ? 'none' : sky} lifted={Boolean(peak?.lifted)} label={label} />
               </span>
+              {sky === '注意報' || sky === '警報' ? (
+                <span className={`mt-0.5 rounded-full px-1 text-xs font-bold ${sky === '警報' ? 'bg-alert-line text-white' : 'bg-watch-tag text-watch-ink'}`}>{sky === '警報' ? '警報' : '注意'}</span>
+              ) : null}
             </button>
           )
         })}
       </div>
       <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted" data-testid="week-legend">
         <span className="inline-flex items-center gap-1">
-          <WeatherDot sky="注意報" />
+          <SkyMark size={24} sky="注意報" />
           注意報
         </span>
         <span className="inline-flex items-center gap-1">
-          <WeatherDot sky="警報" />
+          <SkyMark size={24} sky="警報" />
           警報
         </span>
         <span className="inline-flex items-center gap-1">
-          <WeatherDot sky="none" />
+          <SkyMark size={24} sky="none" />
           予定ありなど
         </span>
       </p>
-      <h2 className="mt-4 text-sm font-bold">今週、先回りできること {openRows.length}つ</h2>
-      <div className="mt-2 space-y-2">
-        {openRows.map((row) => {
+      <div className="mt-3 space-y-2">
+        {cards.shown.map((row) => {
           const peak = row.peak
           if (!peak) return null
           const routineId = routineForPeak(peak.noun, peak.kind)
@@ -185,17 +204,17 @@ function Week() {
                   <Phrase text={`家に${peak.freedMin}分の余白（目安）`} />
                 </p>
               ) : null}
-              <div className="mt-2 flex justify-end">
+              <div className="mt-2">
                 {taken ? (
-                  <button type="button" className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-[#f3eee6] px-4 text-sm font-bold" onClick={() => store.setTab('do')}>
-                    開く
-                    <Icon name="chevron" size={14} />
+                  <button type="button" className="take-on inline-flex min-h-[54px] w-full items-center justify-center gap-1 rounded-xl text-sm font-bold" onClick={() => store.setTab('do')}>
+                    <Icon name="check" size={16} />
+                    引き受けた
                   </button>
                 ) : (
                   <button
                     type="button"
                     data-testid={`week-accept-${row.date}`}
-                    className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-accent-deep px-4 text-sm font-bold text-white"
+                    className="take-open inline-flex min-h-[54px] w-full items-center justify-center gap-1 rounded-xl text-sm font-bold"
                     onClick={() => {
                       store.takeRoutine(row.date, routineId, at)
                       store.showToast('引き受けました。「やる」に追加', () => store.dropRoutine(row.date, routineId))
@@ -210,12 +229,25 @@ function Week() {
           )
         })}
       </div>
+      {cards.rest.length > 0 ? (
+        <details className="mt-2">
+          <summary className="inline-flex min-h-11 items-center text-sm font-bold text-accent-deep">ほか {cards.rest.length}</summary>
+          <div className="mt-2 space-y-2">
+            {cards.rest.map((row) => (
+              <p key={row.date} className="text-sm">
+                <Phrase text={`${formatMd(row.date)} ${row.peak?.noun ?? ''}を引き受ければ、家に${row.peak?.freedMin ?? 0}分の余白（目安）`} />
+              </p>
+            ))}
+          </div>
+        </details>
+      ) : null}
       <WeekendCard />
       <p className="mt-3 text-xs leading-relaxed text-muted">
         <Phrase text="日付をタップすると、その日の予定と時間帯が見られます。" />
         <Phrase text="妻の1日・推定もそこにあります。" />
         <Phrase text="天気はつけません。" />
       </p>
+      </div>
     </div>
   )
 }

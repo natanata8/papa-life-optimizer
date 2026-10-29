@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
+import { SkyMark } from '@/components/SkyMark.tsx'
 import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
+import { consultTelop, skyWash } from '@/domain/glance.ts'
+import { slotClock } from '@/domain/forecast.ts'
+import { forecastFor } from '@/domain/forecastView.ts'
 import { chipIcon } from '@/domain/taskIcon.ts'
 import { dayName } from '@/domain/dates.ts'
 import { lineShareUrl } from '@/domain/export.ts'
 import { fieldOptions, lazyTitle } from '@/domain/profile.ts'
 import { SCENES } from '@/domain/scenes.ts'
+import { Phrase } from '@/components/Phrase.tsx'
 import { SceneGrid } from '@/components/SceneGrid.tsx'
 import type { ChatMessage } from '@/domain/types.ts'
 import { CARE_CARD, SELF_HARM_LINES } from '@/domain/safety.ts'
@@ -24,11 +29,22 @@ export function Consult() {
   }, [data?.chat.length, store.flow, store.pending])
   if (!data) return null
   const dock = Boolean(store.flow)
+  const cast = forecastFor(data, store.today)
+  const peak = cast.slots.find((slot) => slot.id === cast.peak) ?? null
+  const telop = consultTelop(peak ? slotClock(peak) : null, cast.quiet)
+  const wash = skyWash({ quiet: cast.quiet, absorbed: false })
 
   return (
-    <div className={`px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-28'}`}>
+    <div className={`relative px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-28'}`}>
+      <div aria-hidden="true" className={`sky sky-${wash}`} />
       <DemoBar />
-      <div className="flex items-center justify-between">
+      <p className="relative flex items-center gap-2 rounded-2xl border-l-[5px] border-watch-line bg-[#fff8d6] px-3 py-2 text-sm font-bold text-watch-ink" data-testid="consult-telop">
+        <SkyMark size={26} sky={peak?.sky ?? 'くもり'} label={telop} />
+        <span className="min-w-0">
+          <Phrase text={telop} />
+        </span>
+      </p>
+      <div className="relative mt-3 flex items-center justify-between">
         <h1 className="text-lg font-bold">相談</h1>
         {data.chat.length > 0 ? (
           <Button size="sm" variant="ghost" onClick={store.newChat}>
