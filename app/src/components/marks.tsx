@@ -117,7 +117,7 @@ export function TaskTile({ id, large = false, done = false }: { id: string; larg
       className={
         large
           ? `inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-md ${done ? 'bg-accent-soft text-accent' : 'bg-sand text-ink'}`
-          : `inline-flex h-8 w-8 shrink-0 items-center justify-center rounded ${done ? 'bg-accent-soft text-accent' : 'bg-sand text-ink'}`
+          : `inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md ${done ? 'bg-accent-soft text-accent' : 'bg-sand text-ink'}`
       }
     >
       <TaskGlyph id={id} size={large ? 26 : 18} />

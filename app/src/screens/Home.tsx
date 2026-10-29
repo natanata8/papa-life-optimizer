@@ -174,7 +174,7 @@ export function Home() {
             <button
               type="button"
               data-testid={`tonight-take-${row.id}`}
-              className={`inline-flex min-h-11 min-w-[68px] items-center justify-center rounded border-2 border-accent text-sm font-extrabold text-accent active:bg-accent-soft ${row.item ? 'bg-accent-soft' : 'bg-white'}`}
+              className={`inline-flex min-h-11 min-w-[68px] items-center justify-center rounded-md border-2 border-accent text-sm font-extrabold text-accent active:bg-accent-soft ${row.item ? 'bg-accent-soft' : 'bg-white'}`}
               onClick={() => {
                 if (!row.item) store.takeRoutine(store.today, row.id, row.at)
                 else {

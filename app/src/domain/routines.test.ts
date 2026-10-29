@@ -495,6 +495,12 @@ test('探す場所は、切ったあとも画面にある', () => {
     return bad.filter((pattern) => pattern.test(text)).map((pattern) => `${path} ${pattern}`)
   })
   assert.deepEqual(flatHits, [])
+  const radiusHits = flatFiles.flatMap((path) => {
+    const text = readFileSync(path, 'utf8')
+    const four = /(?:^|[\s"'`{])rounded(?:[\s"'`}])/
+    return four.test(text) || /rounded-\[4px\]|border-radius:\s*4px/.test(text) ? [path] : []
+  })
+  assert.deepEqual(radiusHits, [])
   const hand = readFileSync(new URL('../components/NextHand.tsx', import.meta.url), 'utf8')
   assert.match(hand, /迷ったら相談/)
   const flow = readFileSync(new URL('../screens/Do.tsx', import.meta.url), 'utf8')

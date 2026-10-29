@@ -15,7 +15,7 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
         {title ? <h1 className="min-w-0 text-lg font-extrabold">{title}</h1> : null}
       </div>
       <div className="ml-auto flex min-w-0 items-center gap-1">
-        {store.demo && !store.ownHome ? <span className="shrink-0 rounded bg-accent px-2.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル</span> : null}
+        {store.demo && !store.ownHome ? <span className="shrink-0 rounded-md bg-accent px-2.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル</span> : null}
         {meta ? <span className="truncate text-xs whitespace-nowrap text-muted">{meta}</span> : null}
         {store.demo ? (
           <button
