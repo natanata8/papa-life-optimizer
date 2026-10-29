@@ -247,6 +247,7 @@ function Hand({ hand, back, onLater, onOpen }: { hand: NextHand; back: string | 
         store.takeRoutine(store.today, hand.id, rowAt(hand.id, back))
         onOpen()
       }}
+      onConsult={() => store.askForecast('今夜の流れについて、次の手順を一つ。')}
     />
   )
 }

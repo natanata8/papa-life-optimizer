@@ -138,7 +138,7 @@ function bedtimeSlip(): ToneAnswer {
   return {
     状況整理: BEDTIME_SLIP.lead,
     気づき: BEDTIME_SLIP.note,
-    一手: [step(BEDTIME_SLIP.title, BEDTIME_SLIP.why, '今やる', '今夜', [...BEDTIME_SLIP.steps])],
+    一手: [step(BEDTIME_SLIP.title, BEDTIME_SLIP.why, '今やる', '寝かしつけ', [...BEDTIME_SLIP.steps])],
     声かけ例: BEDTIME_SLIP.line,
     明日やること: BEDTIME_SLIP.tomorrow,
     questions: [],

@@ -212,10 +212,42 @@ export function rowNote(
   return `約${minutes}分・${steps.length}つの手順`
 }
 
-/** 相談の「お風呂」は、その家のお風呂の開始時刻。21:00 には置かない。 */
+const TASK_ALIAS: { id: RoutineId; word: string }[] = [
+  { id: 'bath', word: '湯船' },
+  { id: 'bath', word: '保湿' },
+  { id: 'bath', word: '風呂' },
+  { id: 'bedtime', word: '寝かしつけ' },
+  { id: 'tomorrow', word: '持ち物' },
+  { id: 'tomorrow', word: '弁当' },
+  { id: 'dinnerClean', word: '夕食' },
+  { id: 'dinnerClean', word: '食器' },
+  { id: 'laundry', word: '洗濯' },
+  { id: 'pickup', word: 'お迎え' },
+  { id: 'dropoff', word: '送り' },
+  { id: 'pickup', word: '迎え' },
+  { id: 'morning', word: '朝ごはん' },
+]
+
+/** 文に出てくる家の仕事。長い名前を先に見る。 */
+export function routineFromText(text: string): RoutineId | null {
+  const titled = [...ROUTINES].sort((a, b) => b.title.length - a.title.length).find((routine) => text.includes(routine.title))
+  if (titled) return titled.id
+  return TASK_ALIAS.find((item) => text.includes(item.word))?.id ?? null
+}
+
+/** 相談の時刻は、その仕事の開始。仕事が読めない「今夜」は置かない。 */
 export function placedTime(timing: string, back: string | null): string | null {
-  if (timing === 'お風呂') return rowAt('bath', back)
-  return null
+  const id = routineFromText(timing)
+  return id ? rowAt(id, back) : null
+}
+
+/** 時刻の印か、本文に書いた仕事の開始。どちらも無ければ null。 */
+export function answerClock(timing: string, text: string, back: string | null): string | null {
+  const fromTiming = routineFromText(timing)
+  if (fromTiming) return rowAt(fromTiming, back)
+  if (timing !== '今夜') return null
+  const fromText = routineFromText(text)
+  return fromText ? rowAt(fromText, back) : null
 }
 
 const EVENING: RoutineId[] = ['bath', 'bedtime', 'tomorrow', 'dinnerClean']
@@ -359,7 +391,7 @@ export type NextHand = {
   label: string
 }
 
-/** 終わった枠の次。まだ引き受けていない時刻枠を先に、なければ引き受け済みで未了の枠。 */
+/** 終わった枠のすぐ次。引き受けたら、その枠が終わるまでカードは出さない。 */
 export function nextHand(input: {
   order: RoutineId[]
   taken: { routineId: string; checked: string[]; partial?: string[]; extra?: { id: string }[] }[]
@@ -371,15 +403,13 @@ export function nextHand(input: {
     return { id, accepted: Boolean(item), done: item ? routineDone(item, input.ages, input.ensoku) : false }
   })
   const lastDone = rows.reduce((found, row, index) => (row.done ? index : found), -1)
-  if (lastDone < 0) return null
-  const rest = rows.slice(lastDone + 1)
-  const target = rest.find((row) => !row.accepted) ?? rest.find((row) => !row.done)
-  if (!target) return null
+  const next = rows[lastDone + 1]
+  if (lastDone < 0 || !next || next.accepted) return null
   return {
-    id: target.id,
+    id: next.id,
     from: rows[lastDone].id,
-    taken: target.accepted,
-    label: nextHandLine(target.id, input.ages, input.ensoku, rows[lastDone].id),
+    taken: false,
+    label: nextHandLine(next.id, input.ages, input.ensoku, rows[lastDone].id),
   }
 }
 
@@ -391,7 +421,7 @@ export function nextHandLine(id: RoutineId, ages: AgeLabel[], ensoku: boolean, f
 
 export const BEDTIME_SLIP = {
   lead: '起きても大丈夫。次の手だけやる。',
-  note: '責めない。暗くして、もう一度だけ置く。',
+  note: '暗くして、もう一度置くだけです。',
   title: 'もう一度、暗くして置く',
   why: '長く戦わない。短く区切る。',
   steps: ['もう一度抱っこして落ち着かせる', '部屋を暗くする', '5分歩いてから布団に置く'],

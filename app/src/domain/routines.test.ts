@@ -13,6 +13,7 @@ import {
   completionBound,
   dadBusy,
   isBedtimeSlip,
+  answerClock,
   nextHand,
   extraOffsets,
   firstStepAt,
@@ -194,6 +195,17 @@ test('お風呂の相談は、お風呂の開始時刻に置く', () => {
   assert.equal(placedTime('今夜', '19:30'), null)
 })
 
+test('相談の時刻は、書いた仕事の開始', () => {
+  for (const routine of ROUTINES) {
+    assert.equal(answerClock(routine.title, '', '19:30'), rowAt(routine.id, '19:30'), routine.id)
+    assert.equal(answerClock('今夜', routine.title, '18:00'), rowAt(routine.id, '18:00'), routine.id)
+  }
+  assert.equal(answerClock('寝かしつけ', '', '19:30'), '20:30')
+  assert.notEqual(answerClock('寝かしつけ', '', '19:30'), '21:00')
+  assert.equal(answerClock('お風呂', '湯船は短くてOK', '19:30'), '19:40')
+  assert.equal(answerClock('今夜', '言い換えてもう一度', '19:30'), null)
+})
+
 test('小さいお風呂の見出しは、最初の手順の時刻から始まる', () => {
   assert.equal(firstStepAt('19:40', [{ offsetMin: 18 }, { offsetMin: 25 }]), '19:58')
   assert.equal(firstStepAt('19:40', [{ offsetMin: 0 }, { offsetMin: 2 }]), '19:40')
@@ -272,14 +284,19 @@ test('終わった枠の次は、まだ残っている時刻枠を一つだけ�
   assert.equal(next?.taken, false)
   assert.equal(next?.label, '次：寝かしつけ（約30分）')
   assert.equal(nextHand({ order: ['bath', 'tomorrow'], taken: [bath], ages: [...ages], ensoku: true })?.label, '次：明日の持ち物')
-  const open = nextHand({
-    order: ['bath', 'bedtime'],
-    taken: [bath, { routineId: 'bedtime', checked: [] }],
-    ages: [...ages],
-    ensoku: true,
-  })
-  assert.equal(open?.id, 'bedtime')
-  assert.equal(open?.taken, true)
+  assert.equal(
+    nextHand({
+      order: ['bath', 'bedtime', 'tomorrow'],
+      taken: [bath, { routineId: 'bedtime', checked: [] }],
+      ages: [...ages],
+      ensoku: true,
+    }),
+    null,
+  )
+  const bedtime = { routineId: 'bedtime', checked: stepsFor('bedtime', [...ages], true).map((step) => step.id) }
+  const after = nextHand({ order: ['bath', 'bedtime', 'tomorrow', 'dinnerClean'], taken: [bath, bedtime], ages: [...ages], ensoku: true })
+  assert.equal(after?.id, 'tomorrow')
+  assert.equal(after?.taken, false)
   assert.equal(nextHand({ order: ['bath'], taken: [bath], ages: [...ages], ensoku: true }), null)
   assert.equal(nextHand({ order: ['bath', 'bedtime'], taken: [{ routineId: 'bath', checked: [] }], ages: [...ages], ensoku: true }), null)
   assert.equal(/何かある|手伝|ありがとう/.test(next?.label ?? ''), false)
@@ -296,7 +313,7 @@ test('寝かしつけが止まっても、次の手順だけ返す', () => {
   assert.match(text, /抱っこ/)
   assert.match(text, /暗く/)
   assert.match(text, /置く/)
-  assert.equal(/失敗|ダメ出し|下手|ちゃんと|手伝/.test(text), false)
+  assert.equal(/失敗|ダメ出し|下手|ちゃんと|手伝|責めない/.test(text), false)
 })
 
 test('今夜の流れの1画面目は12個まで', () => {

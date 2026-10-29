@@ -46,7 +46,18 @@ export function Home() {
   const taken = data.taken?.[store.today] ?? []
   const hand = nextHand({ order: ids, taken, ages, ensoku })
   const showHand = Boolean(hand && hand.id !== later)
-  const recommended = showHand && hand ? hand.id : peak ? routineForPeak(peak.noun, peak.kind) : null
+  const anyDone = taken.some((item) => routineDone(item, ages, ensoku))
+  const recommended = showHand && hand ? hand.id : !anyDone && peak ? routineForPeak(peak.noun, peak.kind) : null
+  const askTonight = () => {
+    const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
+    store.askForecast(peak?.prompt || '今夜の流れについて、次の手順を一つ。', contextChips({
+      dateLabel: `${formatMd(store.today)} 今夜`,
+      back,
+      titles,
+      overlap,
+      ages,
+    }))
+  }
   const rows = ids.map((id) => {
     const item = taken.find((row) => row.routineId === id)
     const anchor = item?.at || rowAt(id, back)
@@ -163,6 +174,7 @@ export function Home() {
                     const at = rows.find((item) => item.id === hand.id)?.at ?? rowAt(hand.id, back)
                     store.takeRoutine(store.today, hand.id, at)
                   }}
+                  onConsult={askTonight}
                 />
               </div>
             ) : null}
@@ -176,16 +188,7 @@ export function Home() {
         data-testid="tonight-consult"
         data-fold="consult"
         className="hare-card mt-3 flex min-h-11 w-full items-center gap-2 px-3 text-left text-sm font-bold"
-        onClick={() => {
-          const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
-          store.askForecast(peak?.prompt || '今夜の流れについて、次の手順を一つ。', contextChips({
-            dateLabel: `${formatMd(store.today)} 今夜`,
-            back,
-            titles,
-            overlap,
-            ages,
-          }))
-        }}
+        onClick={askTonight}
       >
         <Icon name="consult" size={18} className="shrink-0 text-accent" />
         <span className="min-w-0 flex-1">迷ったら相談（今夜の流れは入力済み）</span>
