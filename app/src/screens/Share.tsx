@@ -83,7 +83,7 @@ export function ShareScreen() {
         <textarea
           id="share-line"
           data-testid="share-line"
-          className="ml-8 block w-[calc(100%-2rem)] resize-none rounded-2xl rounded-tr-md border-0 bg-[#d9fdd3] px-3 py-2 text-sm leading-relaxed shadow-sm outline-none"
+          className="block w-full resize-none rounded-lg border border-line bg-white px-3 py-2 text-sm leading-relaxed outline-none"
           rows={4}
           value={text}
           onChange={(event) => {
@@ -116,7 +116,7 @@ export function ShareScreen() {
       </button>
       <a
         data-testid="share-send"
-        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl border-2 border-[#06c755] bg-[#e7f8ee] text-base font-bold text-ink no-underline"
+        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-md border-2 border-accent bg-white text-base font-extrabold text-accent no-underline active:bg-accent-soft"
         href={lineShareUrl(body)}
         onClick={() => localStorage.setItem('tone-app:await-share', '1')}
       >

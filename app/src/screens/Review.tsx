@@ -21,7 +21,7 @@ export function Review() {
       ) : (
         <div className="mt-2 space-y-2">
           {pending.map((step) => (
-            <article key={step.id} className="rounded-[14px] bg-white p-3 shadow-sm">
+            <article key={step.id} className="rounded-[14px] bg-white p-3 border border-line">
               <p className="text-xs text-muted">
                 {dayName(step.date, store.today)}
                 {step.time ? ` ${step.time}` : ''}・{step.scene || step.source}

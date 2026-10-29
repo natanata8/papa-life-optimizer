@@ -52,18 +52,18 @@ function mark(x, y, size, pad) {
   const dy = y - sunY
   if (dx * dx + dy * dy <= sunR * sunR) return [230, 168, 0, 255]
   const roof = inside(x, y, s * 0.16, s * 0.82, s * 0.5, s * (0.36 + pad), s * 0.84, s * 0.82)
-  if (roof) return [4, 122, 53, 255]
+  if (roof) return [0, 82, 204, 255]
   return null
 }
 
 function paint(x, y, size, maskable) {
   const hit = mark(x, y, size, maskable ? 0.08 : 0)
   if (hit) {
-    const roof = hit[1] === 122
+    const roof = hit[0] === 0 && hit[2] === 204
     if (maskable && roof) return [255, 255, 255, 255]
     return hit
   }
-  return maskable ? [4, 122, 53, 255] : [255, 255, 255, 255]
+  return maskable ? [0, 82, 204, 255] : [255, 255, 255, 255]
 }
 
 writeFileSync('public/icon-192.png', png(192, (x, y, size) => paint(x, y, size, false)))

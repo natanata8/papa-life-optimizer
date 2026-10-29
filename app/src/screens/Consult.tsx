@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
-import { IconBed, IconDoor, RoofMark, SpotFamily } from '@/components/marks.tsx'
+import { IconBed, IconDoor, RoofMark } from '@/components/marks.tsx'
 import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
 import { consultTelop } from '@/domain/glance.ts'
@@ -36,8 +36,8 @@ export function Consult() {
   return (
     <div className={`relative bg-paper px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-56'}`}>
       <DemoBar title="相談" />
-      <p className="flex items-start gap-2 rounded-2xl bg-ink px-3.5 py-3 text-sm font-extrabold text-white" data-testid="consult-telop">
-        <span aria-hidden="true" className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />
+      <p className="flex items-start gap-2 rounded-lg border border-line bg-white px-3.5 py-3 text-sm font-extrabold text-ink" data-testid="consult-telop">
+        <span aria-hidden="true" className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-watch-line" />
         <span className="min-w-0">
           <Phrase text={telop} />
         </span>
@@ -78,10 +78,6 @@ export function Consult() {
           {store.pending ? <Thinking /> : null}
         </div>
       )}
-      <div className="pointer-events-none mt-8 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
-        <SpotFamily className="h-12 w-16" />
-        <RoofMark size={40} />
-      </div>
       <div ref={endRef} />
       {store.flow ? <ThumbDock /> : <Composer />}
     </div>
@@ -129,7 +125,7 @@ function Message({ message, latest = false }: { message: ChatMessage; latest?: b
   if (message.role === 'bot') {
     const hotline = message.safety === 'stop'
     return (
-      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm ${hotline ? 'border border-line' : ''}`} data-testid={hotline ? 'safety-stop' : undefined}>
+      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed border border-line ${hotline ? 'border border-line' : ''}`} data-testid={hotline ? 'safety-stop' : undefined}>
         {hotline ? <Hotline selfHarm={message.selfHarm} /> : message.text}
         {message.scenes ? (
           <div className="mt-2">
@@ -237,10 +233,10 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           <p className="inline-flex min-h-11 items-center rounded-full bg-accent-soft px-3 text-xs font-bold text-margin">サンプル回答</p>
         ) : null}
       </div>
-      <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm">{message.answer.状況整理}</div>
+      <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed border border-line">{message.answer.状況整理}</div>
       {message.answer.気づき ? <p className="mt-2 text-[13px] leading-relaxed text-muted">{message.answer.気づき}</p> : null}
       <p className="mt-3 text-xs font-bold text-accent">まずこれ</p>
-      <div className="mt-1 rounded-xl border-l-4 border-accent bg-white px-3 py-2.5 shadow-sm">
+      <div className="mt-1 rounded-xl border-l-4 border-accent bg-white px-3 py-2.5 border border-line">
         <p className="text-[16px] font-bold">{first.タイトル}</p>
         <p className="mt-1 text-xs text-muted">
           {first.タイトル === '近い場面を選ぶ'
@@ -317,7 +313,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
               const id = message.suggestionIds[index + 1]
               const placed = id ? data.suggestions[id] : undefined
               return (
-                <div key={item.タイトル} className="rounded-xl border-l-4 border-accent bg-white px-3 py-2 shadow-sm">
+                <div key={item.タイトル} className="rounded-xl border-l-4 border-accent bg-white px-3 py-2 border border-line">
                   <p className="text-sm font-bold">{item.タイトル}</p>
                   <p className="mt-1 text-xs text-muted">
                     {placed ? `${dayName(placed.date, store.today)} ${placed.time}` : item.タイミング} {item.なぜ今}
@@ -405,7 +401,7 @@ function ThumbDock() {
   const options = flow.lazy ? fieldOptions(flow.lazy) : (SCENES[flow.scene].questions[flow.answers.length]?.options ?? [])
   if (!prompt) return null
   return (
-    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-white px-3 py-2.5 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-white px-3 py-2.5 bg-white">
       <p className="mb-1.5 text-xs text-muted">{prompt}（タップで答える）</p>
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => (

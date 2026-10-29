@@ -15,7 +15,7 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
         {title ? <h1 className="min-w-0 text-lg font-extrabold">{title}</h1> : null}
       </div>
       <div className="ml-auto flex min-w-0 items-center gap-1">
-        {store.demo && !store.ownHome ? <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル</span> : null}
+        {store.demo && !store.ownHome ? <span className="shrink-0 rounded bg-accent px-2.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル</span> : null}
         {meta ? <span className="truncate text-xs whitespace-nowrap text-muted">{meta}</span> : null}
         {store.demo ? (
           <button
@@ -31,7 +31,7 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
         ) : null}
       </div>
       {open ? (
-        <div className="absolute top-12 right-0 z-20 w-56 rounded-xl bg-white p-2 shadow-lg">
+        <div className="absolute top-12 right-0 z-20 w-56 rounded-lg border border-line bg-white p-2">
           <p className="px-2 py-1 text-xs font-bold text-muted">デモ設定</p>
           {MODES.map((mode) => (
             <button

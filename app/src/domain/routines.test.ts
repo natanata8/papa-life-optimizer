@@ -385,17 +385,18 @@ test('余白の数字は、引き受けた仕事の分数', () => {
   const weekend = capCards(['公園', '図書館', '家'], 1)
   assert.deepEqual(weekend.shown, ['公園'])
   assert.equal(moreCountLabel(weekend.rest.length), 'ほか2件')
-  assert.ok(contrast('#047a35', '#ffffff') >= 4.5)
-  assert.ok(contrast('#ffffff', '#047a35') >= 4.5)
-  assert.ok(contrast('#035a28', '#e8fbef') >= 4.5)
-  assert.ok(contrast('#555555', '#ffffff') >= 4.5)
-  assert.ok(contrast('#888888', '#ffffff') < 4.5)
-  assert.ok(contrast('#111111', '#fff6d0') >= 4.5)
+  assert.ok(contrast('#0052cc', '#ffffff') >= 4.5)
+  assert.ok(contrast('#ffffff', '#0052cc') >= 4.5)
+  assert.ok(contrast('#b45309', '#f8fafc') >= 4.5)
+  assert.ok(contrast('#6b7280', '#ffffff') >= 4.5)
+  assert.ok(contrast('#6b7280', '#f8fafc') >= 4.5)
+  assert.ok(contrast('#111827', '#ffffff') >= 4.5)
   const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
-  assert.match(css, /--color-accent:\s*#047a35/)
-  assert.match(css, /--color-plus:\s*#035a28/)
+  assert.match(css, /--color-accent:\s*#0052cc/)
+  assert.match(css, /--color-plus:\s*#b45309/)
   assert.match(css, /--color-paper:\s*#ffffff/)
-  assert.match(css, /--color-muted:\s*#555555/)
+  assert.match(css, /--color-muted:\s*#6b7280/)
+  assert.match(css, /--color-ink:\s*#111827/)
   const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
   assert.match(home, /text-plus' : 'text-accent'/)
   assert.match(home, /HeroHome/)
@@ -452,18 +453,18 @@ test('注意報の解除は、ひとつを途中で割らない', () => {
 })
 
 test('小さい青文字とLINEは4.5:1、日曜はパレットの文字色', () => {
-  assert.ok(contrast('#ffffff', '#047a35') >= 4.5)
-  assert.ok(contrast('#047a35', '#e8fbef') >= 4.5)
-  assert.ok(contrast('#111111', '#e7f8ee') >= 4.5)
-  assert.ok(contrast('#ffffff', '#06c755') < 4.5)
+  assert.ok(contrast('#ffffff', '#0052cc') >= 4.5)
+  assert.ok(contrast('#0052cc', '#e8f0fe') >= 4.5)
+  assert.ok(contrast('#111827', '#ffffff') >= 4.5)
   const button = readFileSync(new URL('../components/ui/button.tsx', import.meta.url), 'utf8')
   assert.match(button, /ghost: 'bg-accent-soft text-accent'/)
-  assert.match(button, /default: 'lip bg-accent text-white'/)
+  assert.match(button, /default: 'bg-accent text-white active:bg-\[#003d99\]'/)
+  assert.doesNotMatch(button, /lip /)
   const demo = readFileSync(new URL('../components/DemoBar.tsx', import.meta.url), 'utf8')
   assert.match(demo, /bg-accent px-2\.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル/)
   const share = readFileSync(new URL('../screens/Share.tsx', import.meta.url), 'utf8')
-  assert.match(share, /border-\[#06c755\] bg-\[#e7f8ee\] text-base font-bold text-ink/)
-  assert.doesNotMatch(share, /bg-\[#06c755\] text-white/)
+  assert.match(share, /border-2 border-accent bg-white/)
+  assert.doesNotMatch(share, /#06c755|#047a35/)
   const calendar = readFileSync(new URL('../screens/Calendar.tsx', import.meta.url), 'utf8')
   assert.doesNotMatch(calendar, /#b3261e/)
   assert.match(calendar, /dow === 0 \? 'text-ink'/)
@@ -478,6 +479,22 @@ test('探す場所は、切ったあとも画面にある', () => {
   const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
   assert.match(home, /data-testid="tonight-more"[\s\S]*ほかを見る[\s\S]*name="chevron"/)
   assert.match(home, /onConsult=\{askTonight\}/)
+  const flatRoot = new URL('..', import.meta.url)
+  const flatFiles: string[] = []
+  const walkFlat = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      const path = join(dir, name)
+      if (statSync(path).isDirectory()) walkFlat(path)
+      else if (/\.(tsx|css)$/.test(name)) flatFiles.push(path)
+    }
+  }
+  walkFlat(flatRoot.pathname)
+  const flatHits = flatFiles.flatMap((path) => {
+    const text = readFileSync(path, 'utf8')
+    const bad = [/box-shadow/, /linear-gradient/, /radial-gradient/, /shadow-sm/, /shadow-lg/, /shadow-xl/, /shadow-\[/, /#047a35/i]
+    return bad.filter((pattern) => pattern.test(text)).map((pattern) => `${path} ${pattern}`)
+  })
+  assert.deepEqual(flatHits, [])
   const hand = readFileSync(new URL('../components/NextHand.tsx', import.meta.url), 'utf8')
   assert.match(hand, /迷ったら相談/)
   const flow = readFileSync(new URL('../screens/Do.tsx', import.meta.url), 'utf8')
@@ -523,6 +540,9 @@ test('ベージュと茶色はパレットAに置き、うちで働き方を直�
     '3d3200',
     'e8910f',
     '6b5548',
+    '047a35',
+    'e8fbef',
+    'b7e4c8',
   ]
   const root = new URL('..', import.meta.url)
   const files: string[] = []
@@ -564,9 +584,10 @@ test('余白が増えると、窓と太陽が段で灯る', () => {
   assert.equal(takenHomeLine(['bath', 'bedtime']), '今夜はお風呂と寝かしつけを引き受けます')
   assert.equal(/妻|晴れ|くもり|雷|注意報/.test(takenHomeLine(['bath', 'bedtime'])), false)
   const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
-  assert.match(css, /\.house-light\s*\{[^}]*transition:\s*opacity/)
-  assert.match(css, /prefers-reduced-motion:\s*reduce[\s\S]*\.house-light\s*\{[^}]*transition:\s*none/)
+  assert.doesNotMatch(css, /house-light/)
+  assert.match(css, /prefers-reduced-motion:\s*reduce/)
   const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
+  assert.match(home, /hero-meter/)
   assert.match(home, /houseLight\(\{ tasks: taken\.length, minutes: margin \}\)/)
   assert.match(home, /data-testid="hero-margin"/)
 })

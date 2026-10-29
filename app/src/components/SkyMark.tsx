@@ -45,8 +45,8 @@ export function SkyMark({
 function Sun() {
   return (
     <>
-      <circle cx="24" cy="24" r="8" fill="#047a35" />
-      <g stroke="#047a35" strokeWidth="2.4" strokeLinecap="round">
+      <circle cx="24" cy="24" r="8" fill="#0052cc" />
+      <g stroke="#0052cc" strokeWidth="2.4" strokeLinecap="round">
         <path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4" />
       </g>
     </>

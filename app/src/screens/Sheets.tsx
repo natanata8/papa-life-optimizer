@@ -20,7 +20,7 @@ export function Sheets() {
   if (!store.sheet || !store.data) return null
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/30" onClick={(event) => event.target === event.currentTarget && store.closeSheet()}>
-      <div className="tone-sheet max-h-[88dvh] w-full max-w-[430px] overflow-y-auto rounded-t-3xl bg-paper px-4 pt-4 pb-6 shadow-xl">
+      <div className="tone-sheet max-h-[88dvh] w-full max-w-[430px] overflow-y-auto rounded-t-lg border-t border-line bg-paper px-4 pt-4 pb-6">
         <SheetBody sheet={store.sheet} />
       </div>
     </div>

@@ -154,8 +154,8 @@ export function StepSketch() {
   return (
     <svg width="220" height="132" viewBox="0 0 220 132" fill="none" aria-hidden="true" className="mx-auto">
       <rect x="8" y="8" width="204" height="116" rx="16" fill="#fff" />
-      <circle cx="110" cy="62" r="28" stroke="#047a35" strokeOpacity="0.2" strokeWidth="6" />
-      <path d="M110 34a28 28 0 0 1 24 42" stroke="#047a35" strokeWidth="6" strokeLinecap="round" />
+      <circle cx="110" cy="62" r="28" stroke="#0052cc" strokeOpacity="0.2" strokeWidth="6" />
+      <path d="M110 34a28 28 0 0 1 24 42" stroke="#0052cc" strokeWidth="6" strokeLinecap="round" />
       <path d="M98 58h24M102 50h16l-2 16H104z" stroke="#1c2430" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

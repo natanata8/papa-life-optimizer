@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
-import { HeroHome, RoofMark, SpotFamily, TaskTile } from '@/components/marks.tsx'
+import { HeroHome, TaskTile } from '@/components/marks.tsx'
 import { houseLight } from '@/domain/house.ts'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { ToastBar } from '@/components/ToastBar.tsx'
@@ -65,6 +65,8 @@ export function Home() {
   const hero = takenMargin(taken, ages, ensoku)
   const margin = hero.minutes
   const absorbed = margin > 0 && warning
+  const light = houseLight({ tasks: taken.length, minutes: margin })
+  const meter = Math.min(3, taken.length)
   const glance = glanceLine({
     quiet: cast.quiet,
     absorbed,
@@ -87,7 +89,7 @@ export function Home() {
     <div className="relative bg-paper px-3.5 pt-3 pb-36">
       <DemoBar title="今夜" fold />
       <section className="hero-card flex items-center gap-1 px-2 py-2.5" data-fold="hero" data-testid="hero-margin">
-        <HeroHome {...houseLight({ tasks: taken.length, minutes: margin })} className="h-[92px] w-[132px] shrink-0" />
+        <HeroHome windows={light.windows} sun={light.sun} className="h-16 w-[72px] shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-xs font-extrabold">
             <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${absorbed ? 'bg-accent' : 'bg-watch-line'}`} />
@@ -100,13 +102,17 @@ export function Home() {
           <p className="text-xs font-bold leading-snug text-muted">
             <Phrase text={margin > 0 ? `家の余白（目安）・${hero.detail}` : '家の余白（目安）・引き受けると戻る'} />
           </p>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-meter" aria-hidden="true">
+            <div className="h-full bg-accent" style={{ width: `${(meter / 3) * 100}%` }} />
+          </div>
+          <p className="mt-1 text-xs font-bold tracking-wide text-muted" data-testid="hero-meter">{meter} / 3 引き受け</p>
         </div>
       </section>
       {primary ? (
         <article className="hare-card mt-3 px-4 py-3.5" data-fold="next" data-testid="tonight-next-card">
           <p className="text-xs font-extrabold tracking-wide text-muted">次にやること・1つだけ</p>
           <div className="mt-2 flex items-center gap-3">
-            <TaskTile id={primary.id} large />
+            <TaskTile id={primary.id} large done={Boolean(primary.item)} />
             <h2 className="min-w-0 text-xl leading-snug font-extrabold">
               <Phrase text={rowTitle(primary.id, ages, ensoku)} />
             </h2>
@@ -121,7 +127,7 @@ export function Home() {
           <button
             type="button"
             data-testid={`tonight-take-${primary.id}`}
-            className={`lip mt-3.5 inline-flex min-h-[54px] w-full items-center justify-center text-[17px] font-extrabold text-white ${primary.item ? 'bg-muted shadow-none' : 'bg-accent'}`}
+            className={`mt-3.5 inline-flex min-h-[52px] w-full items-center justify-center rounded-md text-[17px] font-extrabold text-white active:bg-[#003d99] ${primary.item ? 'bg-muted' : 'bg-accent'}`}
             onClick={() => {
               if (!primary.item) {
                 store.takeRoutine(store.today, primary.id, primary.at)
@@ -161,14 +167,14 @@ export function Home() {
         {preview.map((row, index) => (
           <div key={row.id} className="flex min-h-14 items-center gap-2 border-t border-line first:border-t-0" data-fold={`row-${index}`}>
             <span className="w-11 shrink-0 text-right text-[13px] font-extrabold text-muted">{row.start}</span>
-            <TaskTile id={row.id} />
+            <TaskTile id={row.id} done={Boolean(row.item)} />
             <span className="min-w-0 flex-1 text-[15px] font-extrabold">
               <Phrase text={rowTitle(row.id, ages, ensoku)} />
             </span>
             <button
               type="button"
               data-testid={`tonight-take-${row.id}`}
-              className={`inline-flex min-h-11 min-w-[72px] items-center justify-center rounded-[14px] border-2 border-accent text-sm font-extrabold text-accent ${row.item ? 'bg-accent-soft' : 'bg-white'}`}
+              className={`inline-flex min-h-11 min-w-[68px] items-center justify-center rounded border-2 border-accent text-sm font-extrabold text-accent active:bg-accent-soft ${row.item ? 'bg-accent-soft' : 'bg-white'}`}
               onClick={() => {
                 if (!row.item) store.takeRoutine(store.today, row.id, row.at)
                 else {
@@ -221,17 +227,13 @@ export function Home() {
         </div>
       </details>
       </div>
-      <div className="pointer-events-none mt-6 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
-        <SpotFamily className="h-12 w-16" />
-        <RoofMark size={40} />
-      </div>
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pb-2">
         {store.toast ? <ToastBar className="mb-2" /> : null}
         <button
           type="button"
           data-testid="tonight-share"
           data-fold="share"
-          className="inline-flex min-h-[52px] w-full items-center justify-center rounded-[18px] border-2 border-accent bg-white text-base font-extrabold text-accent"
+          className="inline-flex min-h-[52px] w-full items-center justify-center rounded-md border-2 border-accent bg-white text-base font-extrabold text-accent active:bg-accent-soft"
           onClick={() => store.openShare()}
         >
           {shared ? '共有済み' : `${partner}に共有する`}

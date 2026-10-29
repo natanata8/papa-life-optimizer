@@ -94,7 +94,7 @@ function Decide({
   const bits = [...new Set(peak.bits)]
   return (
     <>
-    <article className={`rounded-[14px] border-t-[6px] bg-white px-3 py-3 shadow-sm ${edge}`}>
+    <article className={`rounded-[14px] bg-white px-3 py-3 border border-line ${edge}`}>
       <p className={`inline-flex max-w-full min-h-7 items-center gap-1 rounded-full px-2 text-xs font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="badge">
         <SkyMark sky={peak.sky} size={24} />
         <span className="whitespace-nowrap">{`${peak.call} ${clock}`}</span>
@@ -166,7 +166,7 @@ function Tell({ peak, initial, small }: { peak: ForecastSlot; initial: string; s
   const [text, setText] = useState(initial)
   const finish = () => store.finishAccept(store.today, peak.id)
   return (
-    <article className="rounded-[14px] border-t-[6px] border-[#9fc2e3] bg-white px-3 py-3 shadow-sm">
+    <article className="rounded-[14px] bg-white px-3 py-3 border border-line">
       <p className="text-xs font-bold text-muted" data-fold="steps">
         <span className="text-margin">✓ 決めた</span>
         <span> — </span>
@@ -234,7 +234,7 @@ function Done({
   const store = useStore()
   return (
     <div>
-      <article className="rounded-[14px] border-t-[6px] border-[#9fc2e3] bg-white px-3 py-3 shadow-sm">
+      <article className="rounded-[14px] bg-white px-3 py-3 border border-line">
         {small ? null : (
           <p className="inline-flex max-w-full items-center gap-1 rounded-full bg-margin-soft px-2 py-1 text-xs font-bold text-margin" data-fold="badge">
             <SkyMark sky="くもり" size={24} />
@@ -273,7 +273,7 @@ function Quiet({
 }) {
   return (
     <div data-testid="forecast-quiet">
-      <article className={`rounded-[14px] px-3 py-3 shadow-sm ${passed ? 'bg-white' : 'bg-sand'}`}>
+      <article className={`rounded-[14px] px-3 py-3 border border-line ${passed ? 'bg-white' : 'bg-sand'}`}>
         <p className="inline-flex items-center gap-1 text-sm font-bold" data-fold="badge">
           <SkyMark sky="晴れ" size={24} />
           {passed ? '今日はパス' : '一日 晴れ'}
@@ -309,7 +309,7 @@ function TomorrowLine({ tomorrow, title, date }: { tomorrow: ReturnType<typeof f
 
 function ConsultCard({ title, note, testId, onClick }: { title: string; note: string; testId: string; onClick: () => void }) {
   return (
-    <button type="button" data-testid={testId} data-fold="consult" className="mt-3 flex min-h-16 w-full items-center gap-2 rounded-[14px] bg-white px-3 py-2 text-left shadow-sm" onClick={onClick}>
+    <button type="button" data-testid={testId} data-fold="consult" className="mt-3 flex min-h-16 w-full items-center gap-2 rounded-[14px] bg-white px-3 py-2 text-left border border-line" onClick={onClick}>
       <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-margin-soft text-margin">
         <UserRound size={20} />
       </span>

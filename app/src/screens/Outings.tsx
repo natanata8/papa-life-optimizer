@@ -54,7 +54,7 @@ export function Outings() {
               <button
                 type="button"
                 data-testid={`outing-${spot.id}`}
-                className="w-full rounded-[14px] bg-white px-3 py-3 text-left shadow-sm"
+                className="w-full rounded-[14px] bg-white px-3 py-3 text-left border border-line"
                 onClick={() => setOpenId(spot.id)}
               >
                 <p className="text-[15px] font-bold">{spot.title}</p>
@@ -79,7 +79,7 @@ function OutingDetail({ spot, onBack }: { spot: OutingSpot; onBack: () => void }
   if (!data) return null
   const pack = packFor(spot, data.profile)
   return (
-    <article className="mt-3 rounded-[14px] bg-white p-3 shadow-sm" data-testid="outing-detail">
+    <article className="mt-3 rounded-[14px] bg-white p-3 border border-line" data-testid="outing-detail">
       <button type="button" className="text-[12px] font-bold text-accent-deep" onClick={onBack}>
         一覧へ
       </button>

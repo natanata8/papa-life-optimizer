@@ -25,7 +25,7 @@ export function NiceEvents() {
         <button
           type="button"
           data-testid="nice-empty"
-          className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-white px-3 text-[13px] font-bold shadow-sm"
+          className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-white px-3 text-[13px] font-bold border border-line"
           onClick={() => store.openSheet({ type: 'addNice' })}
         >
           🎂 誕生日や記念日を入れる
@@ -35,7 +35,7 @@ export function NiceEvents() {
           {items.map((event) => {
             const hint = careHint(event, store.today)
             return (
-              <article key={event.id} className="rounded-[14px] bg-white p-3 shadow-sm">
+              <article key={event.id} className="rounded-[14px] bg-white p-3 border border-line">
                 <div className="flex items-start justify-between gap-2">
                   <p className="text-[14px] font-bold">{event.title}</p>
                   <button type="button" className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center px-2 text-[12px] text-muted" onClick={() => store.removeNice(event.id)}>

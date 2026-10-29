@@ -27,7 +27,7 @@ export function Welcome() {
       <p className="mt-3 text-sm leading-relaxed">
         <Phrase text="黄色の注意は、備えておけば大丈夫の合図です。余白は、引き受けた家の仕事の分数（目安）です。" />
       </p>
-      <button type="button" data-testid="welcome-sample" className="lip mt-6 inline-flex min-h-[54px] w-full items-center justify-center bg-accent text-base font-extrabold text-white" onClick={() => store.markWelcome('sample')}>
+      <button type="button" data-testid="welcome-sample" className="mt-6 inline-flex min-h-[52px] w-full items-center justify-center rounded-md bg-accent text-base font-extrabold text-white active:bg-[#003d99]" onClick={() => store.markWelcome('sample')}>
         サンプルの家族で試す
       </button>
       <button type="button" data-testid="welcome-own" className="mt-2 inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-bold text-accent" onClick={() => store.markWelcome('own')}>

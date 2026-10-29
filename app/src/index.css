@@ -3,54 +3,54 @@
 @theme {
   --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
     Meiryo, sans-serif;
-  --color-sand: #f7f8f7;
+  --color-sand: #f3f4f6;
   --color-paper: #ffffff;
-  --color-ink: #111111;
-  --color-muted: #555555;
-  --color-faint: #555555;
-  --color-line: #e5e5e5;
-  --color-accent: #047a35;
-  --color-accent-deep: #047a35;
-  --color-accent-soft: #e8fbef;
-  --color-plus: #035a28;
-  --color-lip: #035a28;
-  --color-card-lip: #b7e4c8;
+  --color-hero: #f8fafc;
+  --color-ink: #111827;
+  --color-muted: #6b7280;
+  --color-faint: #6b7280;
+  --color-line: #d1d5db;
+  --color-accent: #0052cc;
+  --color-accent-deep: #0052cc;
+  --color-accent-soft: #e8f0fe;
+  --color-plus: #b45309;
   --color-sun: #e6a800;
-  --color-rain: #e8fbef;
-  --color-rain-ink: #047a35;
-  --color-watch: #fff6d0;
-  --color-watch-ink: #111111;
+  --color-rain: #e8f0fe;
+  --color-rain-ink: #0052cc;
+  --color-watch: #fffbeb;
+  --color-watch-ink: #111827;
   --color-watch-line: #e6a800;
   --color-watch-tag: #e6a800;
-  --color-alert: #fff6d0;
-  --color-alert-ink: #111111;
+  --color-alert: #fffbeb;
+  --color-alert-ink: #111827;
   --color-alert-line: #e6a800;
-  --color-lift: #e8fbef;
-  --color-lift-ink: #111111;
-  --color-margin: #047a35;
-  --color-margin-soft: #e8fbef;
-  --color-margin-wash: #f7f8f7;
-  --color-cloud: #f7f8f7;
-  --color-cloud-ink: #555555;
-  --color-inv: #f7f8f7;
-  --color-inv-ink: #111111;
-  --color-inv-line: #e5e5e5;
-  --color-event: #e8fbef;
-  --color-event-ink: #047a35;
-  --color-child: #e8fbef;
-  --color-child-ink: #111111;
-  --color-step: #e8fbef;
-  --color-step-ink: #111111;
-  --color-good: #047a35;
+  --color-lift: #f8fafc;
+  --color-lift-ink: #111827;
+  --color-margin: #0052cc;
+  --color-margin-soft: #e8f0fe;
+  --color-margin-wash: #f8fafc;
+  --color-cloud: #f3f4f6;
+  --color-cloud-ink: #6b7280;
+  --color-inv: #f8fafc;
+  --color-inv-ink: #111827;
+  --color-inv-line: #d1d5db;
+  --color-event: #e8f0fe;
+  --color-event-ink: #0052cc;
+  --color-child: #e8f0fe;
+  --color-child-ink: #111827;
+  --color-step: #f3f4f6;
+  --color-step-ink: #111827;
+  --color-good: #0052cc;
   --color-good-ink: #ffffff;
-  /* D3の形、D2の色。地は白。ブランド緑 #047A35。黄は注意の言葉と点だけ。 */
+  /* M1 ツール白＋信頼ブルー。影もグラデーションも置かない。黄は注意の言葉と点だけ。 */
   --color-sky-dusk: #ffffff;
   --color-sky-clear: #ffffff;
   --color-sky-lifted: #ffffff;
-  --color-take-ink: #047a35;
-  --color-meh: #f7f8f7;
-  --color-lazy: #e8fbef;
-  --color-lazy-ink: #047a35;
+  --color-take-ink: #0052cc;
+  --color-meh: #f3f4f6;
+  --color-lazy: #f3f4f6;
+  --color-lazy-ink: #0052cc;
+  --color-meter: #e5e7eb;
 }
 
 @layer base {
@@ -112,46 +112,18 @@
 
 @layer components {
   .hare-card {
-    border-radius: 24px;
+    border-radius: 8px;
     background: #fff;
-    border: 2px solid var(--color-line);
-    box-shadow: 0 5px 0 var(--color-card-lip);
+    border: 1px solid var(--color-line);
   }
 
   .hero-card {
-    border-radius: 24px;
-    background: linear-gradient(135deg, #e8fbef 0%, #ffffff 62%);
-    box-shadow: 0 6px 0 var(--color-card-lip);
-  }
-
-  .lip {
-    border-radius: 18px;
-    box-shadow: 0 5px 0 var(--color-lip);
-  }
-
-  .lip:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 0 var(--color-lip);
-  }
-
-  .house-light {
-    transition: opacity 280ms ease, r 280ms ease;
+    border-radius: 8px;
+    background: var(--color-hero);
   }
 
   .sky {
     display: none;
-  }
-
-  .sky-dusk {
-    background: linear-gradient(var(--color-sky-dusk), transparent);
-  }
-
-  .sky-clear {
-    background: linear-gradient(var(--color-sky-clear), transparent);
-  }
-
-  .sky-lifted {
-    background: linear-gradient(var(--color-sky-dusk), var(--color-sky-lifted) 55%, transparent);
   }
 
   .take-open {
@@ -187,12 +159,4 @@
     animation: none;
   }
 
-  .lip:active {
-    transform: none;
-    box-shadow: 0 5px 0 var(--color-lip);
-  }
-
-  .house-light {
-    transition: none;
-  }
 }

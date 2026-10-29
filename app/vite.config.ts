@@ -37,7 +37,7 @@ export default defineConfig(({ mode }) => {
           display: 'standalone',
           orientation: 'portrait',
           background_color: '#ffffff',
-          theme_color: '#047a35',
+          theme_color: '#0052cc',
           start_url: '.',
           scope: '.',
           shortcuts: [{ name: '今夜の余白', short_name: '余白', url: '.', description: '今夜の余白を開く' }],
