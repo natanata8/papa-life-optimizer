@@ -129,6 +129,10 @@ export function createPublicDemo(today = todayInTokyo()): Persisted {
     onboarded: true,
     profile,
     childEvents: attachSeedChildren(seed.childEvents, kids),
+    memories: [
+      { id: 'sample-mem-1', date: addDays(today, -1), text: '「お風呂」はうまくいった → 似た場面でまた提案する' },
+      { id: 'sample-mem-2', date: addDays(today, -3), text: '「寝かしつけ」は微妙だった → 次は短い手順にする' },
+    ],
   }
 }
 

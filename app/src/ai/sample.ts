@@ -1,5 +1,6 @@
 import { addDays, formatMd } from '@/domain/dates.ts'
 import { BEDTIME_SLIP, isBedtimeSlip } from '@/domain/routines.ts'
+import { SICK_DAY, isSickChild, isWorkplace } from '@/domain/scope.ts'
 import { fallbackScenes } from '@/domain/scenes.ts'
 import type { StepKind, ToneAnswer, ToneStep } from '@/domain/types.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
@@ -78,6 +79,8 @@ function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.entry === 'invisible') return invisibleAnswer(request)
   if (request.userText.includes('湯船') || request.entry.includes('湯船')) return bathBoat()
   if (isBedtimeSlip(request.userText) || isBedtimeSlip(request.entry)) return bedtimeSlip()
+  if (isWorkplace(request.userText) || isWorkplace(request.entry)) return sickDay(true)
+  if (isSickChild(request.userText) || isSickChild(request.entry)) return sickDay(false)
   if (request.entry.startsWith('オウチ予報') || request.entry.startsWith('今夜の流れ')) return forecastConsult(request)
   const blocked = blockedTitles(request.memory)
   if (request.scene === 'nomi') return noteBlocked(nomi(request), blocked)
@@ -129,6 +132,18 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
     一手: [step(short, '今週分だけ自分がやると、次の声かけが具体的になります', '今やる', '今夜', steps)],
     声かけ例: `${short}、今週は俺がやってみる。コツがあったら教えて。`,
     明日やること: steps[0] ?? '中身を1つ確認する',
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function sickDay(workplace: boolean): ToneAnswer {
+  return {
+    状況整理: workplace ? SICK_DAY.scope : SICK_DAY.home,
+    気づき: SICK_DAY.note,
+    一手: [step(SICK_DAY.title, SICK_DAY.why, '今やる', '今夜', [...SICK_DAY.steps])],
+    声かけ例: SICK_DAY.line,
+    明日やること: '受診の時間を決める',
     questions: [],
     safety_flag: false,
   }

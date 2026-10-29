@@ -47,6 +47,7 @@ export function Consult() {
           ) : null}
           <div className="mt-3">
             <SceneGrid testPrefix="scene-" onPick={(id) => store.beginScene(id, true)} />
+            <SickTile />
           </div>
         </>
       ) : (
@@ -60,6 +61,23 @@ export function Consult() {
       <div ref={endRef} />
       {store.flow ? <ThumbDock /> : <Composer />}
     </div>
+  )
+}
+
+function SickTile() {
+  const store = useStore()
+  return (
+    <button
+      type="button"
+      data-testid="scene-sick"
+      className="hare-card mt-2 flex min-h-[88px] w-full flex-col items-center justify-center gap-1.5 px-3 py-2 text-center text-[13px] leading-snug font-bold"
+      onClick={() => store.sendText('子どもが熱のとき')}
+    >
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-accent-deep">
+        <Icon name="child" size={20} />
+      </span>
+      子どもが熱のとき
+    </button>
   )
 }
 

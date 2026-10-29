@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
+import { SICK_DAY, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
 import { labelChunks, phraseChunks } from './freed.ts'
 import { SCENE_LIST } from './scenes.ts'
@@ -345,6 +346,34 @@ test('育休かリモートのときだけ、昼の手順を出す', () => {
   assert.equal(dayPacks(['小5〜6']).some((pack) => pack.title.includes('昼寝')), false)
   const text = young.flatMap((pack) => [pack.title, ...pack.steps.map((step) => step.title)]).join('\n')
   assert.equal(text.includes('手伝'), false)
+})
+
+test('職場の話は、家の段取りに戻す', () => {
+  assert.equal(isWorkplace('職場で育休が取りにくい'), true)
+  assert.equal(isWorkplace('上司に育休を交渉したい'), true)
+  assert.equal(isWorkplace('子どもが熱のとき'), false)
+  assert.equal(isSickChild('子どもが熱のとき'), true)
+  assert.equal(isSickChild('職場で育休が取りにくい'), false)
+  const text = [SICK_DAY.scope, SICK_DAY.note, SICK_DAY.title, ...SICK_DAY.steps, SICK_DAY.line].join('\n')
+  assert.match(text, /受診/)
+  assert.match(text, /風呂は短く/)
+  assert.equal(/手伝|転職|上司へのメール|ありがとう/.test(text), false)
+  assert.equal(text.includes('会社のことは、ここでは決めなくていい。'), true)
+})
+
+test('覚えていることは、新しい順で5件まで', () => {
+  const rows = memoryRows(
+    [
+      { date: '2026-10-01', text: 'a' },
+      { date: '2026-10-20', text: 'b' },
+      { date: '2026-10-10', text: 'c' },
+      { date: '2026-10-18', text: 'd' },
+      { date: '2026-10-12', text: 'e' },
+      { date: '2026-10-15', text: 'f' },
+    ],
+  )
+  assert.deepEqual(rows.map((row) => row.text), ['b', 'd', 'f', 'e', 'c'])
+  assert.equal(rows.length, 5)
 })
 
 test('お知らせの持ち物は、翌朝の一行になる', () => {

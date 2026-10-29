@@ -3,10 +3,12 @@ import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon, type IconName } from '@/components/icons.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Chip } from '@/components/ui/chip.tsx'
+import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { usingSupabase } from '@/data/index.ts'
 import { demoOnly } from '@/domain/demo.ts'
 import { DAY_ORDER, DOW_CHARS, formatMd } from '@/domain/dates.ts'
+import { memoryRows } from '@/domain/scope.ts'
 import {
   FIELDS,
   PRIVACY_LABEL,
@@ -168,19 +170,21 @@ export function Profile() {
       <p className="mt-1 text-xs leading-relaxed text-muted">スマホへの通知は準備中です。今日の画面の見本だけ出します。</p>
 
       <h2 className="mt-4 text-sm font-bold">ハレゴトが覚えていること</h2>
+      <p className="mt-1 text-xs leading-relaxed text-muted">点数にはしません。次の提案にだけ使います。</p>
       {data.memories.length === 0 ? (
         <div className="hare-card mt-2 flex items-center gap-3 px-3 py-3">
           <Icon name="thought" size={28} className="text-faint" />
           <p className="text-[13px] text-muted">まだありません。</p>
         </div>
       ) : (
-        <div className="mt-2 space-y-2">
-          {data.memories.map((memory) => (
+        <div className="mt-2 space-y-2" data-testid="memory-list">
+          {memoryRows(data.memories).map((memory) => (
             <div key={memory.id} className="flex items-start justify-between gap-2 rounded-xl bg-white px-3 py-2 text-[13px]">
               <p>
                 <span className="text-muted">{formatMd(memory.date)}</span>
+                {memory.id.startsWith('sample-') ? <span className="ml-2 rounded-full bg-accent-soft px-1.5 py-0.5 text-xs font-bold text-accent-deep">サンプル</span> : null}
                 <br />
-                {memory.text}
+                <Phrase text={memory.text} />
               </p>
               <button type="button" className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center text-xs text-muted" onClick={() => store.deleteMemory(memory.id)}>
                 消す
