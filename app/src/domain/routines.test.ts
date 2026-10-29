@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
-import { HERO_QUIET, capCards, consultTelop, glanceLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
+import { HERO_QUIET, capCards, consultTelop, glanceLine, liftLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
 import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
@@ -404,6 +404,77 @@ function contrast(fg: string, bg: string): number {
   const [hi, lo] = [lum(fg), lum(bg)].sort((a, b) => b - a)
   return (hi + 0.05) / (lo + 0.05)
 }
+
+test('注意報の解除は、ひとつを途中で割らない', () => {
+  const sign = '注意報はひとつ解除'
+  const chunks = labelChunks(sign)
+  assert.equal(chunks.join(''), sign)
+  assert.ok(chunks.some((chunk) => chunk.includes('ひとつ解除')))
+  assert.equal(chunks.some((chunk) => chunk.endsWith('ひと')), false)
+  const diet = [
+    sign,
+    glanceLine({ quiet: false, absorbed: true, slots: [] }),
+    '家の余白（目安）・引き受けると戻る',
+    '家の余白（目安）・お風呂30＋持ち物15',
+    '次にやること・1つだけ',
+    consultTelop('20〜22時', false),
+    consultTelop(null, true),
+    'ほかを見る',
+    moreCountLabel(2),
+    '夜は注意報',
+    liftLine(['お風呂']),
+    liftLine([]),
+    weekGlance(['注意報']),
+    weekGlance(['くもり', 'くもり', '晴れ', '注意報', 'くもり']),
+    weekGlance([]),
+    '今日は晴れ',
+    '今夜はおおむね晴れ',
+  ]
+  for (const text of diet) {
+    const parts = labelChunks(text)
+    assert.equal(parts.join(''), text, text)
+    for (let index = 0; index < parts.length - 1; index += 1) {
+      assert.equal(parts[index].endsWith('ひと') && parts[index + 1].startsWith('つ'), false, text)
+    }
+  }
+})
+
+test('小さい青文字とLINEは4.5:1、日曜はパレットの文字色', () => {
+  assert.ok(contrast('#0a5f8c', '#e7f4fb') >= 4.5)
+  assert.ok(contrast('#0c7bb3', '#e7f4fb') < 4.5)
+  assert.ok(contrast('#ffffff', '#0c7bb3') >= 4.5)
+  assert.ok(contrast('#1c2430', '#e7f8ee') >= 4.5)
+  assert.ok(contrast('#ffffff', '#06c755') < 4.5)
+  const button = readFileSync(new URL('../components/ui/button.tsx', import.meta.url), 'utf8')
+  assert.match(button, /ghost: 'bg-accent-soft text-margin'/)
+  const demo = readFileSync(new URL('../components/DemoBar.tsx', import.meta.url), 'utf8')
+  assert.match(demo, /text-margin">サンプル/)
+  const share = readFileSync(new URL('../screens/Share.tsx', import.meta.url), 'utf8')
+  assert.match(share, /border-\[#06c755\] bg-\[#e7f8ee\] text-base font-bold text-ink/)
+  assert.doesNotMatch(share, /bg-\[#06c755\] text-white/)
+  const calendar = readFileSync(new URL('../screens/Calendar.tsx', import.meta.url), 'utf8')
+  assert.doesNotMatch(calendar, /#b3261e/)
+  assert.match(calendar, /dow === 0 \? 'text-ink'/)
+})
+
+test('探す場所は、切ったあとも画面にある', () => {
+  const screen = readFileSync(new URL('../screens/Do.tsx', import.meta.url), 'utf8')
+  assert.match(screen, /const dayOn = shouldShowDayMode\(data\.profile\)/)
+  assert.match(screen, /data-testid="do-night"/)
+  assert.match(screen, /data-testid="do-day"/)
+  assert.doesNotMatch(screen, /demo-menu/)
+  const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
+  assert.match(home, /data-testid="tonight-more"[\s\S]*ほかを見る[\s\S]*name="chevron"/)
+  assert.match(home, /onConsult=\{askTonight\}/)
+  const hand = readFileSync(new URL('../components/NextHand.tsx', import.meta.url), 'utf8')
+  assert.match(hand, /迷ったら相談/)
+  const flow = readFileSync(new URL('../screens/Do.tsx', import.meta.url), 'utf8')
+  assert.match(flow, /onConsult=/)
+  const consult = readFileSync(new URL('../screens/Consult.tsx', import.meta.url), 'utf8')
+  assert.match(consult, /const QUICK = \['職場で育休が取りにくい'/)
+  assert.match(consult, /testId="scene-work"/)
+  assert.match(consult, /consult-chip-work/)
+})
 
 test('覚えていることは、新しい順で5件まで', () => {
   const rows = memoryRows(

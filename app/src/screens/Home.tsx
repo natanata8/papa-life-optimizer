@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
+import { Icon } from '@/components/icons.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { ToastBar } from '@/components/ToastBar.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
@@ -176,8 +177,9 @@ export function Home() {
         ))}
       </div>
       <details className="mt-2" data-fold="more">
-        <summary data-testid="tonight-more" className="inline-flex min-h-11 items-center text-sm font-bold text-muted">
+        <summary data-testid="tonight-more" className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-muted">
           ほかを見る
+          <Icon name="chevron" size={18} className="rotate-90" />
         </summary>
         <div className="mt-2 space-y-2">
           {folded.map((row) => (

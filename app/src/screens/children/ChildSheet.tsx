@@ -105,7 +105,7 @@ function ImageCapture({ onPick, onBack }: { onPick: (file: File | undefined) => 
         読み取りのため、画像を外部のAI（OpenAI）に送ります。このアプリには画像を保存しません。お子さんの顔や名前が写らないように撮るのがおすすめです。予定は確認してから入ります。
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-accent-deep">
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-margin">
           画像を選ぶ
           <input
             className="hidden"
@@ -118,7 +118,7 @@ function ImageCapture({ onPick, onBack }: { onPick: (file: File | undefined) => 
             }}
           />
         </label>
-        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-accent-deep">
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-accent-soft px-3 text-xs font-bold text-margin">
           写真を撮る
           <input
             className="hidden"
@@ -152,7 +152,7 @@ function List({ onAdd, onEdit, onPick }: { onAdd: () => void; onEdit: (id: strin
         <Button size="sm" onClick={onAdd}>
           手で入れる
         </Button>
-        <label className="inline-flex cursor-pointer items-center rounded-lg bg-accent-soft px-2.5 py-1.5 text-xs font-bold text-accent-deep">
+        <label className="inline-flex cursor-pointer items-center rounded-lg bg-accent-soft px-2.5 py-1.5 text-xs font-bold text-margin">
           画像を選ぶ
           <input
             className="hidden"
@@ -165,7 +165,7 @@ function List({ onAdd, onEdit, onPick }: { onAdd: () => void; onEdit: (id: strin
             }}
           />
         </label>
-        <label className="inline-flex cursor-pointer items-center rounded-lg bg-accent-soft px-2.5 py-1.5 text-xs font-bold text-accent-deep">
+        <label className="inline-flex cursor-pointer items-center rounded-lg bg-accent-soft px-2.5 py-1.5 text-xs font-bold text-margin">
           写真を撮る
           <input
             className="hidden"
@@ -264,7 +264,7 @@ function Confirm({
   }
   return (
     <div data-testid="child-confirm">
-      {sample ? <p className="mt-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-accent-deep">サンプル読み取り</p> : null}
+      {sample ? <p className="mt-1 inline-block rounded-full bg-accent-soft px-2 py-0.5 text-xs font-bold text-margin">サンプル読み取り</p> : null}
       <p className="mt-1 text-[13px] leading-relaxed text-muted">候補です。使うものだけ残して、子どもと中身を直してから入れてください。</p>
       {rows.length === 0 ? <p className="mt-2 text-[13px] text-muted">読み取れた予定がありませんでした。</p> : null}
       <div className="mt-2 space-y-2">

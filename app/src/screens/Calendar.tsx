@@ -27,7 +27,7 @@ export function Calendar() {
     <div className="min-w-0 overflow-x-hidden px-3.5 pt-3.5 pb-28" data-testid="calendar">
       <DemoBar title="予定" />
       <div className="flex items-center justify-end">
-        <div className="flex rounded-xl bg-[#f0e8df] p-0.5 text-xs font-bold">
+        <div className="flex rounded-xl bg-sand p-0.5 text-xs font-bold">
           <button
             type="button"
             data-testid="cal-week"
@@ -147,7 +147,7 @@ function Week() {
               type="button"
               data-testid={`cal-date-${row.date}`}
               aria-label={`${formatMd(row.date)} ${DOW_CHARS[dow]} ${label}`}
-              className={`flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl py-1 ${row.date === store.today ? 'bg-watch/50' : ''} ${dow === 0 ? 'text-[#b3261e]' : dow === 6 ? 'text-margin' : ''}`}
+              className={`flex min-h-11 min-w-11 flex-col items-center justify-center rounded-xl py-1 ${row.date === store.today ? 'bg-watch/50' : ''} ${dow === 0 ? 'text-ink' : dow === 6 ? 'text-margin' : ''}`}
               onClick={() => store.setCal('day', row.date)}
             >
               <span className="text-xs">{DOW_CHARS[dow]}</span>

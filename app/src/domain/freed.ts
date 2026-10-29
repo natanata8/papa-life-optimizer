@@ -64,7 +64,7 @@ export function phraseChunks(text: string): string[] {
       buf = ''
     }
     buf += ch
-    if (BREAK_AFTER.has(ch) || (SOFT_BREAK.has(ch) && buf.length >= 6)) {
+    if (BREAK_AFTER.has(ch) || softParticle(buf, ch)) {
       chunks.push(buf)
       buf = ''
     }
@@ -72,6 +72,12 @@ export function phraseChunks(text: string): string[] {
   if (buf) chunks.push(buf)
   if (tail) chunks.push(tail)
   return chunks.filter((chunk) => chunk.length > 0)
+}
+
+/** 「ひとつ」の「と」は語の中。助詞の「は」「と」だけ折る。 */
+function softParticle(buf: string, ch: string): boolean {
+  if (!SOFT_BREAK.has(ch) || buf.length < 6) return false
+  return !(ch === 'と' && buf.endsWith('ひと'))
 }
 
 const LABEL_PARTICLE = new Set(['の', 'を', 'に', 'で', 'へ', 'と', 'は', 'や'])
@@ -91,6 +97,7 @@ function splitLabel(chunk: string): string[] {
     const right = chars.length - left
     if (left < 2 || right < 2 || left > LABEL_MAX) continue
     const mark = chars[index]
+    if (mark === 'と' && chars[index - 1] === 'ひ') continue
     if (LABEL_PARTICLE.has(mark) || (mark === 'か' && left >= 6)) {
       best = index
       break

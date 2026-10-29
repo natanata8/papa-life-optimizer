@@ -36,7 +36,7 @@ export function DayBand({ ages }: { ages: readonly string[] }) {
       <p className="mt-1 text-sm text-muted">
         <Phrase text="帰宅まえでも、線で進める。" />
       </p>
-      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-[#f0e8df] p-1">
+      <div className="mt-3 grid grid-cols-2 gap-2 rounded-xl bg-sand p-1">
         <button type="button" data-testid="day-list" className={`min-h-11 rounded-lg text-sm font-bold ${focus ? '' : 'bg-white'}`} onClick={() => setFocus(false)}>
           リスト
         </button>

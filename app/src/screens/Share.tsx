@@ -104,7 +104,7 @@ export function ShareScreen() {
       </button>
       <a
         data-testid="share-send"
-        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl bg-[#06c755] text-base font-bold text-white no-underline"
+        className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center gap-1.5 rounded-xl border-2 border-[#06c755] bg-[#e7f8ee] text-base font-bold text-ink no-underline"
         href={lineShareUrl(body)}
         onClick={() => localStorage.setItem('tone-app:await-share', '1')}
       >

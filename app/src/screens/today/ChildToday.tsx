@@ -27,7 +27,7 @@ export function ChildToday() {
           <button
             type="button"
             data-testid="child-empty-photo"
-            className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-soft px-3 text-[13px] font-bold text-accent-deep"
+            className="mt-2 inline-flex min-h-11 items-center rounded-xl bg-accent-soft px-3 text-[13px] font-bold text-margin"
             onClick={() => store.openSheet({ type: 'children', image: true })}
           >
             📷 お便りを撮って入れる

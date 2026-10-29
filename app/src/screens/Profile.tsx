@@ -187,7 +187,7 @@ export function Profile() {
             <div key={memory.id} className="flex items-start justify-between gap-2 rounded-xl bg-white px-3 py-2 text-[13px]">
               <p>
                 <span className="text-muted">{formatMd(memory.date)}</span>
-                {memory.id.startsWith('sample-') ? <span className="ml-2 rounded-full bg-accent-soft px-1.5 py-0.5 text-xs font-bold text-accent-deep">サンプル</span> : null}
+                {memory.id.startsWith('sample-') ? <span className="ml-2 rounded-full bg-accent-soft px-1.5 py-0.5 text-xs font-bold text-margin">サンプル</span> : null}
                 <br />
                 <Phrase text={memory.text} />
               </p>

@@ -82,6 +82,7 @@ export function Shell() {
               onClick={() => {
                 store.closePanel()
                 store.setTab(item.tab)
+                window.scrollTo(0, 0)
               }}
             >
               <span className="relative">

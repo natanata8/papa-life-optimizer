@@ -33,7 +33,7 @@ export function DoScreen() {
     <div className="px-3.5 pt-3.5 pb-28">
       <DemoBar title={showDay ? '昼の家のこと' : '今夜やること'} />
       {dayOn ? (
-        <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl bg-[#f0e8df] p-1">
+        <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl bg-sand p-1" data-testid="do-band">
           <button type="button" data-testid="do-night" className={`min-h-11 rounded-lg text-sm font-bold ${showDay ? '' : 'bg-white'}`} onClick={() => { setBand('night'); setFocus(false) }}>
             今夜
           </button>

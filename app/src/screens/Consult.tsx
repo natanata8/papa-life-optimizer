@@ -35,7 +35,7 @@ export function Consult() {
   const wash = skyWash({ quiet: cast.quiet, absorbed: false })
 
   return (
-    <div className={`relative px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-28'}`}>
+    <div className={`relative px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-56'}`}>
       <div aria-hidden="true" className={`sky sky-${wash}`} />
       <DemoBar />
       <p className="relative flex items-center gap-2 rounded-2xl border-l-[5px] border-watch-line bg-[#fff8d6] px-3 py-2 text-sm font-bold text-watch-ink" data-testid="consult-telop">
@@ -61,7 +61,10 @@ export function Consult() {
             <SceneRow testId="scene-work" label="職場で育休が取りにくい" onClick={() => store.sendText('職場で育休が取りにくい')} />
             <SceneRow testId="scene-bed" label="寝かしつけが長引いたら？" onClick={() => store.sendText('寝かしつけが長引いたら？')} />
             <details>
-              <summary data-testid="consult-more" className="inline-flex min-h-11 items-center text-sm font-bold text-muted">ほかの場面</summary>
+              <summary data-testid="consult-more" className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-muted">
+                ほかの場面
+                <Icon name="chevron" size={18} className="rotate-90" />
+              </summary>
               <div className="mt-2 space-y-2">
                 <SceneGrid testPrefix="more-" onPick={(id) => store.beginScene(id, true)} />
               </div>
@@ -218,7 +221,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <ReadAloud text={`${message.answer.状況整理}${message.answer.声かけ例 ? `。${message.answer.声かけ例}` : ''}`} />
         {message.sample ? (
-          <p className="inline-flex min-h-11 items-center rounded-full bg-accent-soft px-3 text-xs font-bold text-accent-deep">サンプル回答</p>
+          <p className="inline-flex min-h-11 items-center rounded-full bg-accent-soft px-3 text-xs font-bold text-margin">サンプル回答</p>
         ) : null}
       </div>
       <div className="max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm">{message.answer.状況整理}</div>
@@ -407,16 +410,16 @@ function ThumbDock() {
   )
 }
 
-const QUICK = ['下の子が湯船を嫌がったら？', '帰りが遅れそう']
+const QUICK = ['職場で育休が取りにくい', '下の子が湯船を嫌がったら？', '帰りが遅れそう']
 
 function Composer() {
   const store = useStore()
   const [text, setText] = useState('')
   return (
-    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-[#f0e8df] bg-paper px-3 py-2">
+    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-paper px-3 py-2">
       <div className="mb-2 flex gap-2 overflow-x-auto">
         {QUICK.map((chip) => (
-          <button key={chip} type="button" className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-xs font-bold" onClick={() => store.sendText(chip)}>
+          <button key={chip} type="button" data-testid={chip.startsWith('職場') ? 'consult-chip-work' : undefined} className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-full bg-white px-3 text-xs font-bold" onClick={() => store.sendText(chip)}>
             <Icon name={chipIcon(chip)} size={14} />
             {chip}
           </button>
