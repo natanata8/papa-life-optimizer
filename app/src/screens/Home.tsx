@@ -7,6 +7,7 @@ import { useStore } from '@/app/store.tsx'
 import { formatMd, hourInRange } from '@/domain/dates.ts'
 import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
+import { morningKitLine, showMorningKit } from '@/domain/dayMode.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import {
   contextChips,
@@ -48,6 +49,7 @@ export function Home() {
   const showHand = Boolean(hand && hand.id !== later)
   const anyDone = taken.some((item) => routineDone(item, ages, ensoku))
   const recommended = showHand && hand ? hand.id : !anyDone && peak ? routineForPeak(peak.noun, peak.kind) : null
+  const kit = showMorningKit(data.profile.notif, store.mode) ? morningKitLine(data.childEvents, store.today) : null
   const askTonight = () => {
     const titles = taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
     store.askForecast(peak?.prompt || '今夜の流れについて、次の手順を一つ。', contextChips({
@@ -102,6 +104,21 @@ export function Home() {
           <Icon name="sun" size={16} className="text-[#e0a04a]" />
           今日は晴れ。余白はそのまま使おう
         </p>
+      ) : null}
+      {kit ? (
+        <button
+          type="button"
+          data-testid="morning-kit"
+          data-fold="kit"
+          className="mt-3 flex min-h-11 w-full items-center rounded-xl bg-white px-3 text-left text-sm font-bold"
+          onClick={() => {
+            const event = data.childEvents.find((item) => item.items.includes('体操着') || item.title.includes('体操着') || item.category === '持ち物')
+            store.setTab('cal')
+            store.setCal('day', event?.date ?? store.today)
+          }}
+        >
+          <Phrase text={kit} />
+        </button>
       ) : null}
       <div className="mt-3 space-y-2">
         {rows.map((row, index) => {
@@ -214,6 +231,7 @@ export function Home() {
           <Icon name="share" size={18} />
           {shared ? '共有済み' : `${partner}に共有する`}
         </button>
+        {kit ? null : (
         <button
           type="button"
           data-testid="tonight-cant"
@@ -223,6 +241,7 @@ export function Home() {
         >
           今日はむずかしい → 小さく引き受ける
         </button>
+        )}
       </div>
     </div>
   )

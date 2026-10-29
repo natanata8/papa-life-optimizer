@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
 import { hourInRange } from './dates.ts'
 import { labelChunks, phraseChunks } from './freed.ts'
 import { SCENE_LIST } from './scenes.ts'
@@ -324,4 +325,36 @@ test('今夜の流れの1画面目は12個まで', () => {
   assert.equal(pointed.length, 12)
   assert.equal(pointed.includes('next'), true)
   assert.equal(pointed.includes('consult'), false)
+  const withKit = tonightFold({ rows: 4, warning: true, sample: true, next: true, kit: true })
+  assert.equal(withKit.length, 12)
+  assert.equal(withKit.includes('kit'), true)
+  assert.equal(withKit.includes('small'), false)
+})
+
+test('育休かリモートのときだけ、昼の手順を出す', () => {
+  assert.equal(shouldShowDayMode({ work: '自分が育休中', home: '19〜20時' }), true)
+  assert.equal(shouldShowDayMode({ work: '両方フルタイム', home: '日による・リモート' }), true)
+  assert.equal(shouldShowDayMode({ work: '両方フルタイム', home: '19〜20時' }), false)
+  const young = dayPacks(['4歳', '1歳'])
+  assert.equal(young.length, 3)
+  assert.equal(young[0]?.title, '洗濯（干す・取り込むまで）')
+  assert.ok(young[0]?.steps.some((step) => step.title.includes('畳んでしまう')))
+  assert.equal(young[0]?.steps.at(-1)?.tip, '畳んでしまうまでが完了')
+  assert.ok(young.some((pack) => pack.steps.some((step) => step.title === 'おもちゃを一箇所に戻す')))
+  assert.ok(young.some((pack) => pack.title.includes('昼寝')))
+  assert.equal(dayPacks(['小5〜6']).some((pack) => pack.title.includes('昼寝')), false)
+  const text = young.flatMap((pack) => [pack.title, ...pack.steps.map((step) => step.title)]).join('\n')
+  assert.equal(text.includes('手伝'), false)
+})
+
+test('お知らせの持ち物は、翌朝の一行になる', () => {
+  assert.equal(morningKitLine([], '2026-10-27'), null)
+  assert.equal(morningKitLine([{ date: '2026-10-28', title: '遠足', items: ['お弁当'], category: '行事' }], '2026-10-27'), null)
+  const notice = gymNotice('2026-10-27', 'kid')
+  assert.equal(morningKitLine([notice], '2026-10-27'), '持ち物：体操着')
+  assert.equal(morningKitLine([notice, { ...notice, items: ['帽子'] }], '2026-10-27'), '持ち物：体操着（ほか1）')
+  assert.equal(showMorningKit(false, '帰宅前'), false)
+  assert.equal(showMorningKit(true, '朝'), true)
+  assert.equal(showMorningKit(null, '帰宅前'), true)
+  assert.equal(showMorningKit(null, '朝'), false)
 })

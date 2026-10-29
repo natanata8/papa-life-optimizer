@@ -501,12 +501,12 @@ export function usedFromChips(labels: string[], chips: string[] | undefined): st
 }
 
 /** 今夜の流れの1画面目。下のナビは数えない。次の1手があるときは相談の案内を畳む。 */
-export function tonightFold(input: { rows: number; warning: boolean; sample: boolean; next?: boolean }): string[] {
+export function tonightFold(input: { rows: number; warning: boolean; sample: boolean; next?: boolean; kit?: boolean }): string[] {
   const items = ['bar']
   if (input.sample) items.push('sample')
   items.push('heading')
   if (input.warning) items.push('warning')
   for (let index = 0; index < input.rows; index += 1) items.push(`row-${index}`)
-  items.push(input.next ? 'next' : 'consult', 'margin', 'share', 'small')
+  items.push(input.next ? 'next' : 'consult', 'margin', 'share', input.kit ? 'kit' : 'small')
   return items
 }

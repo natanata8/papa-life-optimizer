@@ -4,6 +4,8 @@ import { Icon, ProgressRing } from '@/components/icons.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
+import { DayBand } from '@/screens/DayBand.tsx'
+import { shouldShowDayMode } from '@/domain/dayMode.ts'
 import { firstUnchecked, listLabel, nextHand, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, tonightIds, type NextHand, type RoutineId } from '@/domain/routines.ts'
 import { taskIcon } from '@/domain/taskIcon.ts'
 import { returnInfo } from '@/domain/profile.ts'
@@ -15,6 +17,7 @@ export function DoScreen() {
   const [focus, setFocus] = useState(false)
   const [cursor, setCursor] = useState(0)
   const [later, setLater] = useState<string | null>(null)
+  const [band, setBand] = useState<'night' | 'day' | null>(null)
   if (!data) return null
   const ages = data.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
   const ensoku = data.childEvents.some((event) => event.title.includes('遠足'))
@@ -22,10 +25,25 @@ export function DoScreen() {
   const back = returnInfo(data.profile.home)?.back ?? null
   const hand = nextHand({ order: tonightIds(store.mode), taken, ages, ensoku })
   const showHand = Boolean(hand && hand.id !== later)
+  const dayOn = shouldShowDayMode(data.profile)
+  const showDay = dayOn && (band ?? 'day') === 'day'
 
   return (
     <div className="px-3.5 pt-3.5 pb-28">
-      <DemoBar title="今夜やること" />
+      <DemoBar title={showDay ? '昼の家のこと' : '今夜やること'} />
+      {dayOn ? (
+        <div className="mb-3 grid grid-cols-2 gap-2 rounded-xl bg-[#f0e8df] p-1">
+          <button type="button" data-testid="do-night" className={`min-h-11 rounded-lg text-sm font-bold ${showDay ? '' : 'bg-white'}`} onClick={() => { setBand('night'); setFocus(false) }}>
+            今夜
+          </button>
+          <button type="button" data-testid="do-day" className={`min-h-11 rounded-lg text-sm font-bold ${showDay ? 'bg-white' : ''}`} onClick={() => setBand('day')}>
+            昼
+          </button>
+        </div>
+      ) : null}
+      {showDay ? <DayBand ages={ages} /> : null}
+      {showDay ? null : (
+      <>
       <div className="grid grid-cols-2 gap-2 rounded-xl bg-[#f0e8df] p-1">
         <button type="button" data-testid="do-list" className={`min-h-11 rounded-lg text-sm font-bold ${focus ? '' : 'bg-white'}`} onClick={() => setFocus(false)}>
           リスト
@@ -54,6 +72,8 @@ export function DoScreen() {
         <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} hand={showHand ? hand : null} onLater={() => hand && setLater(hand.id)} onOpen={() => setFocus(false)} />
       ) : (
         taken.map((item) => <ListBlock key={item.routineId} item={item} ages={ages} ensoku={ensoku} back={back} hand={showHand && hand?.from === item.routineId ? hand : null} onLater={() => hand && setLater(hand.id)} />)
+      )}
+      </>
       )}
     </div>
   )

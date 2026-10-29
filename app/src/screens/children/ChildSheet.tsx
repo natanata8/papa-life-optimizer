@@ -4,6 +4,7 @@ import { Chip } from '@/components/ui/chip.tsx'
 import { useStore } from '@/app/store.tsx'
 import { extractSchedule } from '@/ai/extract.ts'
 import { childName, matchChildId, splitItems, upcomingChildEvents, type ExtractCandidate } from '@/domain/childEvents.ts'
+import { NoticeSample } from '@/screens/NoticeSample.tsx'
 import { dayName } from '@/domain/dates.ts'
 import { CHILD_CATEGORIES, type ChildCategory, type ChildEvent, type ChildEventSource } from '@/domain/types.ts'
 import { downscaleToJpeg } from '@/lib/image.ts'
@@ -146,6 +147,7 @@ function List({ onAdd, onEdit, onPick }: { onAdd: () => void; onEdit: (id: strin
   return (
     <div data-testid="child-list">
       <p className="mt-1 text-[13px] leading-relaxed text-muted">お便り、行事予定、予約票、LINEの画面を読み取れます。入れる前に中身を確認します。</p>
+      <NoticeSample />
       <div className="mt-2 flex flex-wrap gap-2">
         <Button size="sm" onClick={onAdd}>
           手で入れる

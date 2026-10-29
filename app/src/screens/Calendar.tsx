@@ -14,6 +14,7 @@ import { dadBusy, routineForPeak, rowAt } from '@/domain/routines.ts'
 import { titleIcon } from '@/domain/taskIcon.ts'
 import { WeekendCard } from '@/screens/today/WeekendCard.tsx'
 import { childName } from '@/domain/childEvents.ts'
+import { NoticeSample } from '@/screens/NoticeSample.tsx'
 import type { ChildEvent, FamEvent, Step } from '@/domain/types.ts'
 
 export function Calendar() {
@@ -45,6 +46,7 @@ export function Calendar() {
         </div>
       </div>
       {store.cal === 'week' ? <Week /> : <Day />}
+      <NoticeSample />
       <div className="mt-3 flex gap-2">
         <Button className="flex-1" size="lg" variant="ghost" onClick={() => store.openSheet({ type: 'addEvent' })}>
           <Icon name="plus" size={16} />
