@@ -337,13 +337,74 @@ export function withoutPassed<T extends { phase: string }>(accept: Record<string
   return Object.fromEntries(Object.entries(accept).filter(([key, value]) => !(key.startsWith(`${date}|`) && value.phase === 'passed')))
 }
 
-export function shareLine(input: { titles: string[]; pronoun: Pronoun; back: string | null }): string {
+/** 完了の境目がある仕事だけ、やる宣言に一句足す。 */
+export function completionBound(ids: readonly string[]): string {
+  return ids.includes('bath') ? '拭く・保湿までやる。' : ''
+}
+
+export function shareLine(input: { titles: string[]; pronoun: Pronoun; back: string | null; bound?: string }): string {
   const back = input.back ? `${input.back}に帰ります。` : ''
   if (input.titles.length === 0) return back || '今夜の家のことは、帰ってから話すね。'
   const list = input.titles.join('と')
   const who = input.pronoun ? `${input.pronoun}が` : ''
-  const line = `今夜の${list}は${who}やるね。${back}`
+  const bound = input.bound ? `\n${input.bound}` : ''
+  const line = `今夜の${list}は${who}やるね。${bound}${back}`
   return line.replace('はやるね', 'をやるね')
+}
+
+export type NextHand = {
+  id: RoutineId
+  from: RoutineId
+  taken: boolean
+  label: string
+}
+
+/** 終わった枠の次。まだ引き受けていない時刻枠を先に、なければ引き受け済みで未了の枠。 */
+export function nextHand(input: {
+  order: RoutineId[]
+  taken: { routineId: string; checked: string[]; partial?: string[]; extra?: { id: string }[] }[]
+  ages: AgeLabel[]
+  ensoku: boolean
+}): NextHand | null {
+  const rows = input.order.map((id) => {
+    const item = input.taken.find((row) => row.routineId === id)
+    return { id, accepted: Boolean(item), done: item ? routineDone(item, input.ages, input.ensoku) : false }
+  })
+  const lastDone = rows.reduce((found, row, index) => (row.done ? index : found), -1)
+  if (lastDone < 0) return null
+  const rest = rows.slice(lastDone + 1)
+  const target = rest.find((row) => !row.accepted) ?? rest.find((row) => !row.done)
+  if (!target) return null
+  return {
+    id: target.id,
+    from: rows[lastDone].id,
+    taken: target.accepted,
+    label: nextHandLine(target.id, input.ages, input.ensoku, rows[lastDone].id),
+  }
+}
+
+export function nextHandLine(id: RoutineId, ages: AgeLabel[], ensoku: boolean, from: RoutineId): string {
+  if (id === 'tomorrow' && from === 'bath') return '次：明日の持ち物'
+  const minutes = shownMinutes(id, ages, ensoku)
+  return `次：${rowTitle(id, ages, ensoku)}（約${minutes}分）`
+}
+
+export const BEDTIME_SLIP = {
+  lead: '起きても大丈夫。次の手だけやる。',
+  note: '責めない。暗くして、もう一度だけ置く。',
+  title: 'もう一度、暗くして置く',
+  why: '長く戦わない。短く区切る。',
+  steps: ['もう一度抱っこして落ち着かせる', '部屋を暗くする', '5分歩いてから布団に置く'],
+  line: '起きちゃった。もう一度抱っこして、暗くして置くね。',
+  tomorrow: '寝る前の部屋を先に暗くしておく',
+} as const
+
+/** 寝かしつけが止まったときの相談だけ。予報の文には反応しない。 */
+export function isBedtimeSlip(text: string): boolean {
+  const value = text.replace(/\s+/g, '')
+  if (value.includes('起きちゃった')) return true
+  if (value.includes('布団に置く')) return true
+  return /寝かしつけ.{0,6}長引|長引.{0,6}寝かしつけ/.test(value)
 }
 
 function pronounToken(id: Pronoun): string {
@@ -409,13 +470,13 @@ export function usedFromChips(labels: string[], chips: string[] | undefined): st
   })
 }
 
-/** 今夜の流れの1画面目。下のナビは数えない。 */
-export function tonightFold(input: { rows: number; warning: boolean; sample: boolean }): string[] {
+/** 今夜の流れの1画面目。下のナビは数えない。次の1手があるときは相談の案内を畳む。 */
+export function tonightFold(input: { rows: number; warning: boolean; sample: boolean; next?: boolean }): string[] {
   const items = ['bar']
   if (input.sample) items.push('sample')
   items.push('heading')
   if (input.warning) items.push('warning')
   for (let index = 0; index < input.rows; index += 1) items.push(`row-${index}`)
-  items.push('consult', 'margin', 'share', 'small')
+  items.push(input.next ? 'next' : 'consult', 'margin', 'share', 'small')
   return items
 }

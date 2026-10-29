@@ -1,4 +1,5 @@
 import { addDays, formatMd } from '@/domain/dates.ts'
+import { BEDTIME_SLIP, isBedtimeSlip } from '@/domain/routines.ts'
 import { fallbackScenes } from '@/domain/scenes.ts'
 import type { StepKind, ToneAnswer, ToneStep } from '@/domain/types.ts'
 import type { ConsultRequest } from '@/ai/types.ts'
@@ -76,6 +77,7 @@ export function sampleAnswer(request: ConsultRequest): ToneAnswer {
 function rawAnswer(request: ConsultRequest): ToneAnswer {
   if (request.entry === 'invisible') return invisibleAnswer(request)
   if (request.userText.includes('湯船') || request.entry.includes('湯船')) return bathBoat()
+  if (isBedtimeSlip(request.userText) || isBedtimeSlip(request.entry)) return bedtimeSlip()
   if (request.entry.startsWith('オウチ予報') || request.entry.startsWith('今夜の流れ')) return forecastConsult(request)
   const blocked = blockedTitles(request.memory)
   if (request.scene === 'nomi') return noteBlocked(nomi(request), blocked)
@@ -127,6 +129,18 @@ function invisibleAnswer(request: ConsultRequest): ToneAnswer {
     一手: [step(short, '今週分だけ自分がやると、次の声かけが具体的になります', '今やる', '今夜', steps)],
     声かけ例: `${short}、今週は俺がやってみる。コツがあったら教えて。`,
     明日やること: steps[0] ?? '中身を1つ確認する',
+    questions: [],
+    safety_flag: false,
+  }
+}
+
+function bedtimeSlip(): ToneAnswer {
+  return {
+    状況整理: BEDTIME_SLIP.lead,
+    気づき: BEDTIME_SLIP.note,
+    一手: [step(BEDTIME_SLIP.title, BEDTIME_SLIP.why, '今やる', '今夜', [...BEDTIME_SLIP.steps])],
+    声かけ例: BEDTIME_SLIP.line,
+    明日やること: BEDTIME_SLIP.tomorrow,
     questions: [],
     safety_flag: false,
   }

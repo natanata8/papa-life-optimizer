@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import { hourInRange } from './dates.ts'
 import { labelChunks, phraseChunks } from './freed.ts'
@@ -7,8 +8,12 @@ import { TASK_ICONS, taskIcon, titleIcon } from './taskIcon.ts'
 import { FREED_MIN } from './freed.ts'
 import { fallbackScenes } from './scenes.ts'
 import {
+  BEDTIME_SLIP,
   ROUTINES,
+  completionBound,
   dadBusy,
+  isBedtimeSlip,
+  nextHand,
   extraOffsets,
   firstStepAt,
   firstUnchecked,
@@ -22,6 +27,7 @@ import {
   plusMinutes,
   routineDone,
   rowAt,
+  rowTitle,
   shareLine,
   swapPronoun,
   shownMinutes,
@@ -60,7 +66,22 @@ test('送る文は何を誰がいつやるかを書く', () => {
   assert.equal(line, '今夜のお風呂（2人とも）と明日の遠足の持ち物は俺がやるね。19:30に帰ります。')
   assert.equal(shareLine({ titles: ['お風呂（2人とも）'], pronoun: '俺', back: '19:30' }), '今夜のお風呂（2人とも）は俺がやるね。19:30に帰ります。')
   assert.equal(line.includes('任せて'), false)
+  assert.equal(line.includes('手伝'), false)
   assert.equal(line.includes('は俺が') && line.indexOf('は') !== line.lastIndexOf('は'), false)
+  const bath = shareLine({ titles: ['お風呂（2人とも）'], pronoun: '俺', back: '19:30', bound: completionBound(['bath']) })
+  assert.equal(bath, '今夜のお風呂（2人とも）は俺がやるね。\n拭く・保湿までやる。19:30に帰ります。')
+  assert.equal(bath.includes('手伝'), false)
+  assert.equal(completionBound(['bedtime']), '')
+  assert.equal(shareLine({ titles: ['寝かしつけ'], pronoun: '俺', back: '19:30' }).includes('手伝'), false)
+  assert.equal(rowTitle('morning', ['1歳']).includes('手伝'), false)
+  const share = readFileSync(new URL('../screens/Share.tsx', import.meta.url), 'utf8')
+  assert.equal(share.includes('ありがとう'), false)
+  assert.equal(share.includes('手伝'), false)
+  const sample = readFileSync(new URL('../ai/sample.ts', import.meta.url), 'utf8')
+  for (const row of sample.split('\n')) {
+    if (!row.includes('声かけ例:')) continue
+    assert.equal(row.includes('手伝'), false, row.trim())
+  }
 })
 
 test('一人称を変えても、直した文は一人称だけ替わる', () => {
@@ -243,8 +264,47 @@ test('お風呂の質問には、お風呂の場面だけを出す', () => {
   assert.equal(scenes.includes('残業で遅くなる'), false)
 })
 
+test('終わった枠の次は、まだ残っている時刻枠を一つだけ返す', () => {
+  const ages = ['4歳', '1歳'] as const
+  const bath = { routineId: 'bath', checked: stepsFor('bath', [...ages], true).map((step) => step.id) }
+  const next = nextHand({ order: ['bath', 'bedtime', 'tomorrow', 'dinnerClean'], taken: [bath], ages: [...ages], ensoku: true })
+  assert.equal(next?.id, 'bedtime')
+  assert.equal(next?.taken, false)
+  assert.equal(next?.label, '次：寝かしつけ（約30分）')
+  assert.equal(nextHand({ order: ['bath', 'tomorrow'], taken: [bath], ages: [...ages], ensoku: true })?.label, '次：明日の持ち物')
+  const open = nextHand({
+    order: ['bath', 'bedtime'],
+    taken: [bath, { routineId: 'bedtime', checked: [] }],
+    ages: [...ages],
+    ensoku: true,
+  })
+  assert.equal(open?.id, 'bedtime')
+  assert.equal(open?.taken, true)
+  assert.equal(nextHand({ order: ['bath'], taken: [bath], ages: [...ages], ensoku: true }), null)
+  assert.equal(nextHand({ order: ['bath', 'bedtime'], taken: [{ routineId: 'bath', checked: [] }], ages: [...ages], ensoku: true }), null)
+  assert.equal(/何かある|手伝|ありがとう/.test(next?.label ?? ''), false)
+})
+
+test('寝かしつけが止まっても、次の手順だけ返す', () => {
+  assert.equal(isBedtimeSlip('寝かしつけが長引いたら？'), true)
+  assert.equal(isBedtimeSlip('寝かしつけで起きちゃった'), true)
+  assert.equal(isBedtimeSlip('布団に置くと起きる'), true)
+  assert.equal(isBedtimeSlip('寝かしつけ 長引'), true)
+  assert.equal(isBedtimeSlip('オウチ予報です。18時から20時は寝かしつけ注意報'), false)
+  assert.equal(isBedtimeSlip('下の子が湯船を嫌がったら？'), false)
+  const text = [BEDTIME_SLIP.lead, BEDTIME_SLIP.note, BEDTIME_SLIP.title, BEDTIME_SLIP.why, ...BEDTIME_SLIP.steps, BEDTIME_SLIP.line, BEDTIME_SLIP.tomorrow].join('\n')
+  assert.match(text, /抱っこ/)
+  assert.match(text, /暗く/)
+  assert.match(text, /置く/)
+  assert.equal(/失敗|ダメ出し|下手|ちゃんと|手伝/.test(text), false)
+})
+
 test('今夜の流れの1画面目は12個まで', () => {
   const full = tonightFold({ rows: 4, warning: true, sample: true })
   assert.equal(full.length, 12)
   assert.ok(tonightFold({ rows: 4, warning: false, sample: false }).length <= 12)
+  const pointed = tonightFold({ rows: 4, warning: true, sample: true, next: true })
+  assert.equal(pointed.length, 12)
+  assert.equal(pointed.includes('next'), true)
+  assert.equal(pointed.includes('consult'), false)
 })

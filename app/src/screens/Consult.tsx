@@ -235,10 +235,18 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
             type="button"
             data-testid="add-to-routine"
             className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[#f3eee6] text-sm font-bold"
-            onClick={() => store.addExtraSteps(store.today, /風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'bath' : 'tomorrow', first.タスク分解ステップ)}
+            onClick={() => {
+              const blob = `${first.タイトル}${first.タスク分解ステップ.join('')}`
+              const routine = /風呂|湯船|保湿/.test(blob) ? 'bath' : /抱っこ|部屋を暗く|布団に置く/.test(blob) ? 'bedtime' : 'tomorrow'
+              store.addExtraSteps(store.today, routine, first.タスク分解ステップ)
+            }}
           >
             <Icon name="plus" size={16} />
-            {/風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`) ? 'お風呂の手順に追加' : 'やることの手順に追加'}
+            {/風呂|湯船|保湿/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`)
+              ? 'お風呂の手順に追加'
+              : /抱っこ|部屋を暗く|布団に置く/.test(`${first.タイトル}${first.タスク分解ステップ.join('')}`)
+                ? '寝かしつけの手順に追加'
+                : 'やることの手順に追加'}
           </button>
         ) : null}
       </div>

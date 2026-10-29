@@ -5,7 +5,7 @@ import { useStore } from '@/app/store.tsx'
 import { lineShareUrl } from '@/domain/export.ts'
 import { formatMd } from '@/domain/dates.ts'
 import { returnInfo } from '@/domain/profile.ts'
-import { rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, swapPronoun, type RoutineId } from '@/domain/routines.ts'
+import { completionBound, rowTitle, shareLine, stepLabel, stepsFor, stepsInTime, swapPronoun, type RoutineId } from '@/domain/routines.ts'
 import { taskIcon } from '@/domain/taskIcon.ts'
 import type { AgeLabel, Mode, Pronoun } from '@/domain/types.ts'
 import { copyText } from '@/lib/utils.ts'
@@ -29,8 +29,14 @@ export function ShareScreen() {
   const ages = data?.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age)) ?? []
   const ensoku = Boolean(data?.childEvents.some((event) => event.title.includes('遠足')))
   const back = data ? returnInfo(data.profile.home)?.back ?? null : null
-  const titles = (data?.taken?.[store.today] ?? []).map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
-  const generated = shareLine({ titles, pronoun: data?.profile.pronoun ?? '俺', back })
+  const takenNow = data?.taken?.[store.today] ?? []
+  const titles = takenNow.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku))
+  const generated = shareLine({
+    titles,
+    pronoun: data?.profile.pronoun ?? '俺',
+    back,
+    bound: completionBound(takenNow.map((item) => item.routineId)),
+  })
   const [text, setText] = useState(store.shareDraft || generated)
   const [dirty, setDirty] = useState(Boolean(store.shareDraft))
   const [ask, setAsk] = useState(() => localStorage.getItem('tone-app:await-share') === '1')

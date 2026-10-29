@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon, ProgressRing } from '@/components/icons.tsx'
+import { NextHandCard } from '@/components/NextHand.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
-import { firstUnchecked, listLabel, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, type RoutineId } from '@/domain/routines.ts'
+import { firstUnchecked, listLabel, nextHand, plusMinutes, rowAt, rowTitle, stepLabel, stepsFor, stepsInTime, tonightIds, type NextHand, type RoutineId } from '@/domain/routines.ts'
 import { taskIcon } from '@/domain/taskIcon.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import type { AgeLabel, TakenRoutine } from '@/domain/types.ts'
@@ -13,11 +14,14 @@ export function DoScreen() {
   const data = store.data
   const [focus, setFocus] = useState(false)
   const [cursor, setCursor] = useState(0)
+  const [later, setLater] = useState<string | null>(null)
   if (!data) return null
   const ages = data.profile.kids.map((kid) => kid.ageLabel).filter((age): age is AgeLabel => Boolean(age))
   const ensoku = data.childEvents.some((event) => event.title.includes('遠足'))
   const taken = data.taken?.[store.today] ?? []
   const back = returnInfo(data.profile.home)?.back ?? null
+  const hand = nextHand({ order: tonightIds(store.mode), taken, ages, ensoku })
+  const showHand = Boolean(hand && hand.id !== later)
 
   return (
     <div className="px-3.5 pt-3.5 pb-28">
@@ -46,12 +50,30 @@ export function DoScreen() {
           <p className="mt-3 text-sm leading-relaxed">今夜の流れから、引き受けるものを選べます。</p>
         </div>
       ) : null}
-      {focus ? <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} /> : taken.map((item) => <ListBlock key={item.routineId} item={item} ages={ages} ensoku={ensoku} back={back} />)}
+      {focus ? (
+        <Focus taken={taken} ages={ages} ensoku={ensoku} cursor={cursor} setCursor={setCursor} back={back} hand={showHand ? hand : null} onLater={() => hand && setLater(hand.id)} onOpen={() => setFocus(false)} />
+      ) : (
+        taken.map((item) => <ListBlock key={item.routineId} item={item} ages={ages} ensoku={ensoku} back={back} hand={showHand && hand?.from === item.routineId ? hand : null} onLater={() => hand && setLater(hand.id)} />)
+      )}
     </div>
   )
 }
 
-function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: AgeLabel[]; ensoku: boolean; back: string | null }) {
+function ListBlock({
+  item,
+  ages,
+  ensoku,
+  back,
+  hand,
+  onLater,
+}: {
+  item: TakenRoutine
+  ages: AgeLabel[]
+  ensoku: boolean
+  back: string | null
+  hand: NextHand | null
+  onLater: () => void
+}) {
   const store = useStore()
   const id = item.routineId as RoutineId
   const steps = visibleSteps(item, ages, ensoku)
@@ -104,7 +126,12 @@ function ListBlock({ item, ages, ensoku, back }: { item: TakenRoutine; ages: Age
           )
         })}
       </div>
-      {done === steps.length && steps.length > 0 ? <p className="mt-3 text-base font-bold">今夜はこれでOK</p> : null}
+      {done === steps.length && steps.length > 0 ? (
+        <>
+          <p className="mt-3 text-base font-bold">今夜はこれでOK</p>
+          {hand ? <Hand hand={hand} back={back} onLater={onLater} onOpen={() => undefined} /> : null}
+        </>
+      ) : null}
       <button type="button" className="mt-3 flex min-h-11 w-full items-center gap-2 text-left text-sm font-bold" onClick={() => store.askForecast(`${rowTitle(id, ages, ensoku)}の手順について、一つ短く。`)}>
         <Icon name="consult" size={18} className="text-accent" />
         この手順について相談
@@ -121,6 +148,9 @@ function Focus({
   cursor,
   setCursor,
   back,
+  hand,
+  onLater,
+  onOpen,
 }: {
   taken: TakenRoutine[]
   ages: AgeLabel[]
@@ -128,6 +158,9 @@ function Focus({
   cursor: number
   setCursor: (next: number) => void
   back: string | null
+  hand: NextHand | null
+  onLater: () => void
+  onOpen: () => void
 }) {
   const store = useStore()
   const flat = taken.flatMap((item) => visibleSteps(item, ages, ensoku).map((step) => ({ item, step })))
@@ -135,13 +168,16 @@ function Focus({
   const done = flat.length > 0 && doneCount === flat.length
   if (done) {
     return (
-      <article className="hare-card mt-4 px-4 py-8 text-center" data-testid="do-finish">
-        <ProgressRing value={flat.length} total={flat.length}>
-          <Icon name="check" size={36} className="text-margin" />
-        </ProgressRing>
-        <h2 className="mt-3 text-[26px] font-bold">今夜はこれでOK</h2>
-        <p className="mt-2 text-sm">引き受けた手順は、ここまでです。</p>
-      </article>
+      <>
+        <article className="hare-card mt-4 px-4 py-8 text-center" data-testid="do-finish">
+          <ProgressRing value={flat.length} total={flat.length}>
+            <Icon name="check" size={36} className="text-margin" />
+          </ProgressRing>
+          <h2 className="mt-3 text-[26px] font-bold">今夜はこれでOK</h2>
+          <p className="mt-2 text-sm">引き受けた手順は、ここまでです。</p>
+        </article>
+        {hand ? <Hand hand={hand} back={back} onLater={onLater} onOpen={onOpen} /> : null}
+      </>
     )
   }
   const index = Math.min(cursor, Math.max(flat.length - 1, 0))
@@ -193,6 +229,25 @@ function Focus({
         <p className="mt-3 text-sm font-bold">今夜はこれでOK</p>
       )}
     </article>
+  )
+}
+
+function Hand({ hand, back, onLater, onOpen }: { hand: NextHand; back: string | null; onLater: () => void; onOpen: () => void }) {
+  const store = useStore()
+  return (
+    <NextHandCard
+      hand={hand}
+      onLater={onLater}
+      onGo={() => {
+        if (hand.taken) {
+          onOpen()
+          store.setTab('do')
+          return
+        }
+        store.takeRoutine(store.today, hand.id, rowAt(hand.id, back))
+        onOpen()
+      }}
+    />
   )
 }
 

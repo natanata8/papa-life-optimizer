@@ -1,5 +1,7 @@
+import { Fragment, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
+import { NextHandCard } from '@/components/NextHand.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
 import { formatMd, hourInRange } from '@/domain/dates.ts'
@@ -12,6 +14,7 @@ import {
   freedFor,
   listLabel,
   listedSteps,
+  nextHand,
   overlapLine,
   routineDone,
   routineForPeak,
@@ -27,6 +30,7 @@ import type { AgeLabel } from '@/domain/types.ts'
 export function Home() {
   const store = useStore()
   const data = store.data
+  const [later, setLater] = useState<string | null>(null)
   if (!data) return null
   const info = returnInfo(data.profile.home)
   const back = info?.back ?? null
@@ -38,9 +42,11 @@ export function Home() {
   const bits = (peak?.bits ?? []).map((bit) => (ensoku && /弁当|持/.test(bit) ? '明日の遠足の持ち物' : bit))
   const overlap = warning && peak ? overlapLine(slotClock(peak), bits) : ''
   const windowLabel = warning && peak ? slotClock(peak) : ''
-  const recommended = peak ? routineForPeak(peak.noun, peak.kind) : null
   const ids = tonightIds(store.mode)
   const taken = data.taken?.[store.today] ?? []
+  const hand = nextHand({ order: ids, taken, ages, ensoku })
+  const showHand = Boolean(hand && hand.id !== later)
+  const recommended = showHand && hand ? hand.id : peak ? routineForPeak(peak.noun, peak.kind) : null
   const rows = ids.map((id) => {
     const item = taken.find((row) => row.routineId === id)
     const anchor = item?.at || rowAt(id, back)
@@ -70,7 +76,7 @@ export function Home() {
         <Phrase text={back ? `帰宅 ${back}。先に決めておこう` : '今夜の流れを、先に決めておこう'} />
       </h2>
       {passed ? <p className="mt-2 text-sm" data-testid="tonight-passed">今日はパスしました。記録は残していません。</p> : null}
-      {finished ? <p className="mt-2 text-sm font-bold" data-testid="tonight-done">終わった</p> : null}
+      {finished && !hand ? <p className="mt-2 text-sm font-bold" data-testid="tonight-done">終わった</p> : null}
       {shared ? <p className="mt-1 text-sm font-bold text-margin" data-testid="tonight-shared">共有済み</p> : null}
       {warning && peak && overlap ? (
         <p className={`mt-3 flex min-w-0 items-start gap-2 rounded-2xl px-3 py-2 text-sm font-bold ${peak.sky === '警報' ? 'bg-alert text-alert-ink' : 'bg-watch text-watch-ink'}`} data-fold="warning">
@@ -94,7 +100,8 @@ export function Home() {
           const bandColor = peak?.sky === '警報' ? 'bg-alert-line' : 'bg-watch-line'
           const bandEdge = peak?.sky === '警報' ? 'border-alert-line' : 'border-watch-line'
           return (
-            <div key={row.id} className="flex items-stretch gap-2" data-fold={`row-${index}`}>
+            <Fragment key={row.id}>
+            <div className="flex items-stretch gap-2" data-fold={`row-${index}`}>
               <div className="relative w-11 shrink-0">
                 {index < rows.length - 1 ? (
                   <span aria-hidden="true" className={`absolute top-7 -bottom-2 left-1/2 w-1 -translate-x-1/2 ${band ? bandColor : 'bg-line'}`} />
@@ -107,14 +114,18 @@ export function Home() {
                   {finishedRow ? <Icon name="check" size={10} /> : null}
                 </span>
               </div>
-              <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${band ? `border-l-4 ${bandEdge}` : ''}`}>
+                <article className={`hare-card flex min-w-0 flex-1 items-center gap-2 p-2.5 ${showHand && hand?.id === row.id ? 'bg-accent-soft' : ''} ${band ? `border-l-4 ${bandEdge}` : ''}`}>
                 <span className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${on ? 'bg-accent-deep text-white' : 'bg-sand text-ink'}`}>
                   <Icon name={taskIcon(row.id)} size={20} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-1 text-[15px] font-bold">
                     <Phrase text={rowTitle(row.id, ages, ensoku)} />
-                    {row.id === recommended ? <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink">おすすめ</span> : null}
+                    {row.id === recommended ? (
+                      <span className="whitespace-nowrap rounded-full bg-watch px-1.5 py-0.5 text-xs font-bold text-watch-ink" data-testid={showHand && hand?.id === row.id ? 'tonight-next' : undefined}>
+                        おすすめ
+                      </span>
+                    ) : null}
                   </p>
                   <p className="text-xs text-muted">
                     <Phrase text={rowNote(row.id, ages, ensoku, row.item?.partial, row.item?.extra)} />
@@ -139,9 +150,27 @@ export function Home() {
                 </button>
               </article>
             </div>
+            {showHand && hand?.from === row.id ? (
+              <div data-fold="next">
+                <NextHandCard
+                  hand={hand}
+                  onLater={() => setLater(hand.id)}
+                  onGo={() => {
+                    if (hand.taken) {
+                      store.setTab('do')
+                      return
+                    }
+                    const at = rows.find((item) => item.id === hand.id)?.at ?? rowAt(hand.id, back)
+                    store.takeRoutine(store.today, hand.id, at)
+                  }}
+                />
+              </div>
+            ) : null}
+            </Fragment>
           )
         })}
       </div>
+      {showHand ? null : (
       <button
         type="button"
         data-testid="tonight-consult"
@@ -162,6 +191,7 @@ export function Home() {
         <span className="min-w-0 flex-1">迷ったら相談（今夜の流れは入力済み）</span>
         <Icon name="chevron" size={16} className="shrink-0 text-muted" />
       </button>
+      )}
       <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pt-2 pb-2">
         <div className="flex items-center gap-2" data-fold="margin">
           <div className="h-2 w-16 shrink-0 overflow-hidden rounded-full bg-sand" aria-hidden="true">
