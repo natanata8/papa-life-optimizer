@@ -3,12 +3,12 @@ import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils.ts'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-1.5 rounded-xl font-bold transition active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40',
+  'inline-flex items-center justify-center gap-1.5 rounded-[18px] font-extrabold transition disabled:pointer-events-none disabled:opacity-40',
   {
     variants: {
       variant: {
-        default: 'bg-accent-deep text-white',
-        ghost: 'bg-accent-soft text-margin',
+        default: 'lip bg-accent text-white',
+        ghost: 'bg-accent-soft text-accent',
         quiet: 'bg-sand text-muted',
         good: 'bg-margin text-white',
         meh: 'bg-sand text-ink',

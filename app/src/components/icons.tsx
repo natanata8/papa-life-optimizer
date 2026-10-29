@@ -34,11 +34,11 @@ export type IconName =
   | 'back'
 
 const PATHS: Record<IconName, string[]> = {
-  today: ['M7 4v16', 'M7 6.2a1.5 1.5 0 1 0 .01 0', 'M7 12a1.5 1.5 0 1 0 .01 0', 'M7 17.8a1.5 1.5 0 1 0 .01 0', 'M11 6.2h8', 'M11 12h6', 'M11 17.8h7'],
-  do: ['M8 6h11', 'M8 12h11', 'M8 18h11', 'M4 6l1.2 1.2L7.2 4.8', 'M4 12l1.2 1.2L7.2 10.8', 'M4 18h2.4'],
-  consult: ['M5 6h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H9l-4 3v-3H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z'],
-  plan: ['M6 5h12a1 1 0 0 1 1 1v13H5V6a1 1 0 0 1 1-1z', 'M8 3.5v3', 'M16 3.5v3', 'M5 9h14', 'M9 13h2', 'M13 13h2', 'M9 16h2'],
-  house: ['M4 11.5 12 5l8 6.5', 'M7 10.8V19h10v-8.2'],
+  today: ['M3 11 12 4l9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'],
+  do: ['M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z', 'M7 12l3 3 7-7'],
+  consult: ['M21 12a8 8 0 0 1-12 7l-5 1 1-4a8 8 0 1 1 16-4z'],
+  plan: ['M5 5h14a2 2 0 0 1 2 2v12H3V7a2 2 0 0 1 2-2z', 'M3 10h18', 'M8 3v4', 'M16 3v4'],
+  house: ['M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0', 'M4 21c1-5 4-7 8-7s7 2 8 7'],
   bath: ['M5 11h14', 'M7 11V8.5A1.5 1.5 0 0 1 8.5 7H10', 'M5 11v3a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-3', 'M9 6.5c.4-1.2 1.6-1.2 2 0'],
   bed: ['M3 17V11h18v6', 'M3 13.5h7.5A2.5 2.5 0 0 0 13 11H3', 'M3 17h18', 'M6 17v2', 'M18 17v2'],
   bag: ['M8 8h8l-.8 11H8.8L8 8z', 'M9.5 8V6.5a2.5 2.5 0 0 1 5 0V8'],
@@ -154,8 +154,8 @@ export function StepSketch() {
   return (
     <svg width="220" height="132" viewBox="0 0 220 132" fill="none" aria-hidden="true" className="mx-auto">
       <rect x="8" y="8" width="204" height="116" rx="16" fill="#fff" />
-      <circle cx="110" cy="62" r="28" stroke="#1d5fa0" strokeOpacity="0.2" strokeWidth="6" />
-      <path d="M110 34a28 28 0 0 1 24 42" stroke="#1d5fa0" strokeWidth="6" strokeLinecap="round" />
+      <circle cx="110" cy="62" r="28" stroke="#047a35" strokeOpacity="0.2" strokeWidth="6" />
+      <path d="M110 34a28 28 0 0 1 24 42" stroke="#047a35" strokeWidth="6" strokeLinecap="round" />
       <path d="M98 58h24M102 50h16l-2 16H104z" stroke="#1c2430" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

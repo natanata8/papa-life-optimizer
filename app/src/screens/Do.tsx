@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon, ProgressRing } from '@/components/icons.tsx'
+import { HareMark, SpotFamily, TaskGlyph } from '@/components/marks.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
 import { useStore } from '@/app/store.tsx'
@@ -68,6 +69,10 @@ export function DoScreen() {
           {showList ? '1つずつ見る' : 'リストで見る'}
         </button>
       ) : null}
+      <div className="pointer-events-none mt-8 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
+        <SpotFamily className="h-12 w-16" />
+        <HareMark size={40} />
+      </div>
       </>
       )}
     </div>
@@ -202,24 +207,24 @@ function Focus({
   const at = current.item.at || rowAt(id, back)
   const next = flat[index + 1]
   return (
-    <article className="hare-card mt-4 px-4 py-5 text-center">
-      <ProgressRing value={doneCount} total={flat.length}>
-        <Icon name={taskIcon(id)} size={36} />
-      </ProgressRing>
-      <p className="mt-3 text-sm font-bold text-margin">
-        {rowTitle(id, ages, ensoku)} {index + 1}/{flat.length}
+    <article className="mt-2 px-1 text-center">
+      <p className="text-[13px] font-extrabold text-accent">
+        {index + 1} / {flat.length}
       </p>
-      <h2 className="mt-2 text-[26px] leading-snug font-bold">
+      <div className="mx-auto mt-4 flex h-[88px] w-[88px] items-center justify-center rounded-[28px] bg-accent-soft text-accent shadow-[0_6px_0_#b7e4c8]">
+        <TaskGlyph id={id} size={52} />
+      </div>
+      <h2 className="mt-4 text-[26px] leading-snug font-extrabold">
         <Phrase text={stepLabel(current.step, ages)} />
       </h2>
       <p className="mt-1 text-sm text-muted">
         {plusMinutes(at, current.step.offsetMin ?? 0)} ・ 約{current.step.minutes}分
       </p>
-      {current.step.tip ? <p className="mt-3 rounded-xl bg-watch px-3 py-2 text-left text-sm leading-relaxed text-watch-ink">{current.step.tip}</p> : null}
+      {current.step.tip ? <p className="mt-3 rounded-2xl border-2 border-line bg-white px-3 py-2 text-left text-sm leading-relaxed text-ink">{current.step.tip}</p> : null}
       <button
         type="button"
         data-testid="do-done"
-        className="mt-4 inline-flex min-h-[72px] w-full items-center justify-center gap-1.5 rounded-xl bg-margin text-lg font-bold text-white"
+        className="lip mt-5 inline-flex min-h-16 w-full items-center justify-center gap-1.5 bg-accent text-xl font-extrabold text-white"
         onClick={() => {
           if (!current.item.checked.includes(current.step.id)) store.toggleCheck(store.today, id, current.step.id)
           setCursor(index + 1)

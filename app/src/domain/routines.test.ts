@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import test from 'node:test'
-import { HERO_QUIET, capCards, consultTelop, glanceLine, liftLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
+import { capCards, consultTelop, glanceLine, liftLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
 import { SICK_DAY, WORK_HOME, homePlanFor, isSickChild, isWorkplace, memoryRows } from './scope.ts'
 import { hourInRange } from './dates.ts'
@@ -384,13 +384,20 @@ test('余白の数字は、引き受けた仕事の分数', () => {
   const weekend = capCards(['公園', '図書館', '家'], 1)
   assert.deepEqual(weekend.shown, ['公園'])
   assert.equal(moreCountLabel(weekend.rest.length), 'ほか2件')
-  assert.ok(contrast(HERO_QUIET, '#fffaf4') >= 4.5)
-  assert.ok(contrast('#a59c92', '#fffaf4') < 4.5)
-  assert.notEqual(HERO_QUIET.toLowerCase(), '#1d5fa0')
+  assert.ok(contrast('#047a35', '#ffffff') >= 4.5)
+  assert.ok(contrast('#ffffff', '#047a35') >= 4.5)
+  assert.ok(contrast('#035a28', '#e8fbef') >= 4.5)
+  assert.ok(contrast('#555555', '#ffffff') >= 4.5)
+  assert.ok(contrast('#888888', '#ffffff') < 4.5)
+  assert.ok(contrast('#111111', '#fff6d0') >= 4.5)
   const css = readFileSync(new URL('../index.css', import.meta.url), 'utf8')
-  assert.match(css, new RegExp(`--color-muted:\\s*${HERO_QUIET}`))
+  assert.match(css, /--color-accent:\s*#047a35/)
+  assert.match(css, /--color-plus:\s*#035a28/)
+  assert.match(css, /--color-paper:\s*#ffffff/)
+  assert.match(css, /--color-muted:\s*#555555/)
   const home = readFileSync(new URL('../screens/Home.tsx', import.meta.url), 'utf8')
-  assert.match(home, /text-margin' : 'text-muted'/)
+  assert.match(home, /text-plus' : 'text-accent'/)
+  assert.match(home, /HeroHome/)
 })
 
 function contrast(fg: string, bg: string): number {
@@ -436,20 +443,23 @@ test('注意報の解除は、ひとつを途中で割らない', () => {
     assert.equal(parts.join(''), text, text)
     for (let index = 0; index < parts.length - 1; index += 1) {
       assert.equal(parts[index].endsWith('ひと') && parts[index + 1].startsWith('つ'), false, text)
+      assert.equal(parts[index].endsWith('戻') && parts[index + 1].startsWith('る'), false, text)
     }
   }
+  const hint = labelChunks('家の余白（目安）・引き受けると戻る')
+  assert.ok(hint.some((chunk) => chunk.includes('引き受けると戻る')))
 })
 
 test('小さい青文字とLINEは4.5:1、日曜はパレットの文字色', () => {
-  assert.ok(contrast('#0a5f8c', '#e7f4fb') >= 4.5)
-  assert.ok(contrast('#0c7bb3', '#e7f4fb') < 4.5)
-  assert.ok(contrast('#ffffff', '#0c7bb3') >= 4.5)
-  assert.ok(contrast('#1c2430', '#e7f8ee') >= 4.5)
+  assert.ok(contrast('#ffffff', '#047a35') >= 4.5)
+  assert.ok(contrast('#047a35', '#e8fbef') >= 4.5)
+  assert.ok(contrast('#111111', '#e7f8ee') >= 4.5)
   assert.ok(contrast('#ffffff', '#06c755') < 4.5)
   const button = readFileSync(new URL('../components/ui/button.tsx', import.meta.url), 'utf8')
-  assert.match(button, /ghost: 'bg-accent-soft text-margin'/)
+  assert.match(button, /ghost: 'bg-accent-soft text-accent'/)
+  assert.match(button, /default: 'lip bg-accent text-white'/)
   const demo = readFileSync(new URL('../components/DemoBar.tsx', import.meta.url), 'utf8')
-  assert.match(demo, /text-margin">サンプル/)
+  assert.match(demo, /bg-accent px-2\.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル/)
   const share = readFileSync(new URL('../screens/Share.tsx', import.meta.url), 'utf8')
   assert.match(share, /border-\[#06c755\] bg-\[#e7f8ee\] text-base font-bold text-ink/)
   assert.doesNotMatch(share, /bg-\[#06c755\] text-white/)
@@ -505,6 +515,13 @@ test('ベージュと茶色はパレットAに置き、うちで働き方を直�
     'fffaf4',
     'fffbf0',
     'e7c7c2',
+    'c73b4a',
+    'b35c00',
+    'fff6ec',
+    '0c7bb3',
+    '3d3200',
+    'e8910f',
+    '6b5548',
   ]
   const root = new URL('..', import.meta.url)
   const files: string[] = []

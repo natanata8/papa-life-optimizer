@@ -58,26 +58,29 @@ export function phraseChunks(text: string): string[] {
   const tail = at >= 0 ? text.slice(at) : ''
   const chunks: string[] = []
   let buf = ''
-  for (const ch of head) {
+  const chars = [...head]
+  chars.forEach((ch, index) => {
     if ((ch === '（' || ch === '「') && buf) {
       chunks.push(buf)
       buf = ''
     }
     buf += ch
-    if (BREAK_AFTER.has(ch) || softParticle(buf, ch)) {
+    const rest = chars.slice(index + 1).join('')
+    if (BREAK_AFTER.has(ch) || softParticle(buf, ch, rest)) {
       chunks.push(buf)
       buf = ''
     }
-  }
+  })
   if (buf) chunks.push(buf)
   if (tail) chunks.push(tail)
   return chunks.filter((chunk) => chunk.length > 0)
 }
 
-/** 「ひとつ」の「と」は語の中。助詞の「は」「と」だけ折る。 */
-function softParticle(buf: string, ch: string): boolean {
+/** 「ひとつ」の「と」と、「戻る」の前では折らない。 */
+function softParticle(buf: string, ch: string, rest = ''): boolean {
   if (!SOFT_BREAK.has(ch) || buf.length < 6) return false
-  return !(ch === 'と' && buf.endsWith('ひと'))
+  if (ch === 'と' && (buf.endsWith('ひと') || rest.startsWith('戻る'))) return false
+  return true
 }
 
 const LABEL_PARTICLE = new Set(['の', 'を', 'に', 'で', 'へ', 'と', 'は', 'や'])

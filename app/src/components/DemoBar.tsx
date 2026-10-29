@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { HareMark } from '@/components/marks.tsx'
 import { demoOnly } from '@/domain/demo.ts'
 import { MODES } from '@/domain/types.ts'
 import { useStore } from '@/app/store.tsx'
@@ -9,9 +10,12 @@ export function DemoBar({ title, meta, fold }: { title?: string; meta?: string; 
   if (!store.demo && !title) return null
   return (
     <div className={`relative mb-2 flex min-h-11 items-center gap-2 ${fold ? '' : ''}`} data-fold={fold ? 'bar' : undefined}>
-      {title ? <h1 className="min-w-0 text-base font-bold">{title}</h1> : null}
+      <div className="flex min-w-0 items-center gap-2">
+        <HareMark size={28} className="shrink-0 text-accent" />
+        {title ? <h1 className="min-w-0 text-lg font-extrabold">{title}</h1> : null}
+      </div>
       <div className="ml-auto flex min-w-0 items-center gap-1">
-        {store.demo && !store.ownHome ? <span className="shrink-0 rounded-full bg-accent-soft px-2 py-1 text-xs font-bold whitespace-nowrap text-margin">サンプル</span> : null}
+        {store.demo && !store.ownHome ? <span className="shrink-0 rounded-full bg-accent px-2.5 py-1 text-xs font-extrabold whitespace-nowrap text-white">サンプル</span> : null}
         {meta ? <span className="truncate text-xs whitespace-nowrap text-muted">{meta}</span> : null}
         {store.demo ? (
           <button

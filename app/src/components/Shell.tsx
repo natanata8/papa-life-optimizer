@@ -104,7 +104,7 @@ export function Shell() {
 
 function Frame({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-dvh bg-sand">
+    <div className="min-h-dvh bg-paper">
       <div className="relative mx-auto min-h-dvh max-w-[430px] overflow-x-hidden bg-paper">{children}</div>
     </div>
   )

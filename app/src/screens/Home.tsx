@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
+import { HareMark, HeroHome, SpotFamily, TaskTile } from '@/components/marks.tsx'
 import { NextHandCard } from '@/components/NextHand.tsx'
 import { ToastBar } from '@/components/ToastBar.tsx'
 import { Phrase } from '@/components/Phrase.tsx'
@@ -9,7 +10,7 @@ import { formatMd, hourInRange } from '@/domain/dates.ts'
 import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import { morningKitLine, showMorningKit } from '@/domain/dayMode.ts'
-import { glanceLine, liftLine, skyWash, takenMargin } from '@/domain/glance.ts'
+import { glanceLine, liftLine, takenMargin } from '@/domain/glance.ts'
 import { returnInfo } from '@/domain/profile.ts'
 import {
   contextChips,
@@ -63,7 +64,6 @@ export function Home() {
   const hero = takenMargin(taken, ages, ensoku)
   const margin = hero.minutes
   const absorbed = margin > 0 && warning
-  const wash = skyWash({ quiet: cast.quiet, absorbed })
   const glance = glanceLine({
     quiet: cast.quiet,
     absorbed,
@@ -83,39 +83,44 @@ export function Home() {
   }
 
   return (
-    <div className="relative px-3.5 pt-3.5 pb-36">
-      <div aria-hidden="true" className={`sky sky-${wash}`} />
+    <div className="relative bg-paper px-3.5 pt-3 pb-36">
       <DemoBar title="今夜" fold />
-      <div data-fold="hero">
-        <p className="flex items-center gap-2 text-sm font-bold">
-          <span aria-hidden="true" className={`inline-block h-3 w-3 rounded-full ${absorbed ? 'bg-line' : 'bg-watch-line'}`} />
-          <Phrase text={sign} />
-        </p>
-        <p className="mt-2 flex items-baseline gap-1" data-testid="hero-margin">
-          <span className={`text-[48px] leading-none font-bold ${margin > 0 ? 'text-margin' : 'text-muted'}`}>{margin}</span>
-          <span className="text-base font-bold">分</span>
-        </p>
-        <p className="text-sm text-muted">
-          <Phrase text={margin > 0 ? `家の余白（目安）・${hero.detail}` : '家の余白（目安）・引き受けると戻る'} />
-        </p>
-      </div>
+      <section className="hero-card flex items-center gap-1 px-2 py-2.5" data-fold="hero" data-testid="hero-margin">
+        <HeroHome className="h-[74px] w-[140px] shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 text-xs font-extrabold">
+            <span aria-hidden="true" className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${absorbed ? 'bg-accent' : 'bg-watch-line'}`} />
+            <Phrase text={sign} />
+          </p>
+          <p className="mt-1 flex items-baseline">
+            <span className={`text-[56px] leading-none font-extrabold tracking-tight ${margin > 0 ? 'text-plus' : 'text-accent'}`}>{margin}</span>
+            <span className={`ml-0.5 text-lg font-extrabold ${margin > 0 ? 'text-plus' : 'text-accent'}`}>分</span>
+          </p>
+          <p className="text-xs font-bold leading-snug text-muted">
+            <Phrase text={margin > 0 ? `家の余白（目安）・${hero.detail}` : '家の余白（目安）・引き受けると戻る'} />
+          </p>
+        </div>
+      </section>
       {primary ? (
-        <article className="hare-card mt-4 p-3" data-fold="next" data-testid="tonight-next-card">
-          <p className="text-xs font-bold text-muted">次にやること・1つだけ</p>
-          <h2 className="mt-1 text-[22px] leading-snug font-bold">
-            <Phrase text={rowTitle(primary.id, ages, ensoku)} />
-          </h2>
+        <article className="hare-card mt-3 px-4 py-3.5" data-fold="next" data-testid="tonight-next-card">
+          <p className="text-xs font-extrabold tracking-wide text-muted">次にやること・1つだけ</p>
+          <div className="mt-2 flex items-center gap-3">
+            <TaskTile id={primary.id} large />
+            <h2 className="min-w-0 text-xl leading-snug font-extrabold">
+              <Phrase text={rowTitle(primary.id, ages, ensoku)} />
+            </h2>
+          </div>
           {windowLabel && hourInRange(primary.start, windowLabel) && !primary.item ? (
-            <p className="mt-2 inline-flex min-h-6 items-center gap-1 rounded-full bg-watch px-2 text-xs font-bold text-watch-ink">
+            <p className="mt-2 inline-flex min-h-6 items-center gap-1 rounded-full bg-watch px-2 text-xs font-extrabold text-ink">
               <span aria-hidden="true" className="inline-block h-2.5 w-2.5 rounded-full bg-watch-line" />
               注意
-              <span className="font-normal">{windowLabel}が重なる</span>
+              <span className="font-bold">{windowLabel}が重なる</span>
             </p>
           ) : null}
           <button
             type="button"
             data-testid={`tonight-take-${primary.id}`}
-            className={`mt-3 inline-flex min-h-[52px] w-full items-center justify-center rounded-xl text-base font-bold text-white ${primary.item ? 'bg-muted' : 'bg-accent'}`}
+            className={`lip mt-3.5 inline-flex min-h-[54px] w-full items-center justify-center text-[17px] font-extrabold text-white ${primary.item ? 'bg-muted shadow-none' : 'bg-accent'}`}
             onClick={() => {
               if (!primary.item) {
                 store.takeRoutine(store.today, primary.id, primary.at)
@@ -149,19 +154,20 @@ export function Home() {
           />
         </div>
       ) : null}
-      {preview.length > 0 ? <p className="mt-4 text-xs font-bold text-muted">あと{preview.length}つ</p> : null}
-      <div className="mt-1">
+      <div className="hare-card mt-3 px-3 py-2">
+      {preview.length > 0 ? <p className="px-1 text-xs font-extrabold text-muted">あと{preview.length}つ</p> : null}
+      <div>
         {preview.map((row, index) => (
-          <div key={row.id} className="flex min-h-11 items-center gap-2 border-b border-line" data-fold={`row-${index}`}>
-            <span className="w-12 shrink-0 text-right text-xs font-bold">{row.start}</span>
-            {windowLabel && hourInRange(row.start, windowLabel) && !row.item ? <span aria-hidden="true" className="inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-watch-line" /> : <span className="w-2.5 shrink-0" />}
-            <span className="min-w-0 flex-1 text-sm font-bold">
+          <div key={row.id} className="flex min-h-14 items-center gap-2 border-t border-line first:border-t-0" data-fold={`row-${index}`}>
+            <span className="w-11 shrink-0 text-right text-[13px] font-extrabold text-muted">{row.start}</span>
+            <TaskTile id={row.id} />
+            <span className="min-w-0 flex-1 text-[15px] font-extrabold">
               <Phrase text={rowTitle(row.id, ages, ensoku)} />
             </span>
             <button
               type="button"
               data-testid={`tonight-take-${row.id}`}
-              className="inline-flex min-h-11 min-w-[92px] items-center justify-center rounded-full border-2 border-accent text-sm font-bold text-accent"
+              className={`inline-flex min-h-11 min-w-[72px] items-center justify-center rounded-[14px] border-2 border-accent text-sm font-extrabold text-accent ${row.item ? 'bg-accent-soft' : 'bg-white'}`}
               onClick={() => {
                 if (!row.item) store.takeRoutine(store.today, row.id, row.at)
                 else {
@@ -177,7 +183,7 @@ export function Home() {
         ))}
       </div>
       <details className="mt-2" data-fold="more">
-        <summary data-testid="tonight-more" className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-muted">
+        <summary data-testid="tonight-more" className="inline-flex min-h-11 w-full items-center justify-center gap-1 text-sm font-bold text-muted">
           ほかを見る
           <Icon name="chevron" size={18} className="rotate-90" />
         </summary>
@@ -213,13 +219,18 @@ export function Home() {
           {absorbed ? <p className="text-sm text-muted"><Phrase text={liftLine(taken.map((item) => rowTitle(item.routineId as RoutineId, ages, ensoku)))} /></p> : null}
         </div>
       </details>
-      <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 px-3.5 pb-2">
+      </div>
+      <div className="pointer-events-none mt-6 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
+        <SpotFamily className="h-12 w-16" />
+        <HareMark size={40} />
+      </div>
+      <div className="fixed bottom-[calc(53px+env(safe-area-inset-bottom))] left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 bg-paper px-3.5 pb-2">
         {store.toast ? <ToastBar className="mb-2" /> : null}
         <button
           type="button"
           data-testid="tonight-share"
           data-fold="share"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-accent bg-paper text-sm font-bold text-accent"
+          className="inline-flex min-h-[52px] w-full items-center justify-center rounded-[18px] border-2 border-accent bg-white text-base font-extrabold text-accent"
           onClick={() => store.openShare()}
         >
           {shared ? '共有済み' : `${partner}に共有する`}

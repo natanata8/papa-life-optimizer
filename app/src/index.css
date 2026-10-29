@@ -3,52 +3,54 @@
 @theme {
   --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
     Meiryo, sans-serif;
-  --color-sand: #eef3f8;
-  --color-paper: #f7fafc;
-  --color-ink: #1c2430;
-  --color-muted: #5a6570;
-  --color-faint: #5a6570;
-  --color-line: #d9e2ec;
-  --color-accent: #0c7bb3;
-  --color-accent-deep: #0c7bb3;
-  --color-accent-soft: #e7f4fb;
-  --color-sun: #fff8d0;
-  --color-rain: #e7f1f8;
-  --color-rain-ink: #1a4f78;
-  --color-watch: #fff8d0;
-  --color-watch-ink: #3d3200;
-  --color-watch-line: #e6b800;
-  --color-watch-tag: #e6b800;
-  --color-alert: #fff8d0;
-  --color-alert-ink: #3d3200;
-  --color-alert-line: #e6b800;
-  --color-lift: #eef3f8;
-  --color-lift-ink: #1c2430;
-  --color-margin: #0a5f8c;
-  --color-margin-soft: #e6f0fa;
-  --color-margin-wash: #f3f7fb;
-  --color-cloud: #eef3f8;
-  --color-cloud-ink: #5a6570;
-  --color-inv: #eef3f8;
-  --color-inv-ink: #1c2430;
-  --color-inv-line: #d9e2ec;
-  --color-event: #e8eefb;
-  --color-event-ink: #25407f;
-  --color-child: #e7f4fb;
-  --color-child-ink: #1c2430;
-  --color-step: #e6f0fa;
-  --color-step-ink: #1c2430;
-  --color-good: #1d5fa0;
-  --color-good-ink: #f7fafc;
-  /* 空は上部132pxだけ。本文は紙色。余白の数字は --color-margin。
-     CUD: 黄＝注意（文字は焦茶）、赤＝警報（白文字）、青＝よかった。赤と緑は混ぜない。 */
-  --color-sky-dusk: #e7f4fb;
-  --color-sky-clear: #f7fafc;
-  --color-sky-lifted: #e7f4fb;
-  --color-take-ink: #0c7bb3;
-  --color-meh: #eef3f8;
-  --color-lazy: #f1f6f1;
-  --color-lazy-ink: #3d6b3d;
+  --color-sand: #f7f8f7;
+  --color-paper: #ffffff;
+  --color-ink: #111111;
+  --color-muted: #555555;
+  --color-faint: #555555;
+  --color-line: #e5e5e5;
+  --color-accent: #047a35;
+  --color-accent-deep: #047a35;
+  --color-accent-soft: #e8fbef;
+  --color-plus: #035a28;
+  --color-lip: #035a28;
+  --color-card-lip: #b7e4c8;
+  --color-sun: #e6a800;
+  --color-rain: #e8fbef;
+  --color-rain-ink: #047a35;
+  --color-watch: #fff6d0;
+  --color-watch-ink: #111111;
+  --color-watch-line: #e6a800;
+  --color-watch-tag: #e6a800;
+  --color-alert: #fff6d0;
+  --color-alert-ink: #111111;
+  --color-alert-line: #e6a800;
+  --color-lift: #e8fbef;
+  --color-lift-ink: #111111;
+  --color-margin: #047a35;
+  --color-margin-soft: #e8fbef;
+  --color-margin-wash: #f7f8f7;
+  --color-cloud: #f7f8f7;
+  --color-cloud-ink: #555555;
+  --color-inv: #f7f8f7;
+  --color-inv-ink: #111111;
+  --color-inv-line: #e5e5e5;
+  --color-event: #e8fbef;
+  --color-event-ink: #047a35;
+  --color-child: #e8fbef;
+  --color-child-ink: #111111;
+  --color-step: #e8fbef;
+  --color-step-ink: #111111;
+  --color-good: #047a35;
+  --color-good-ink: #ffffff;
+  /* D3の形、D2の色。地は白。ブランド緑 #047A35。黄は注意の言葉と点だけ。 */
+  --color-sky-dusk: #ffffff;
+  --color-sky-clear: #ffffff;
+  --color-sky-lifted: #ffffff;
+  --color-take-ink: #047a35;
+  --color-meh: #f7f8f7;
+  --color-lazy: #e8fbef;
+  --color-lazy-ink: #047a35;
 }
 
 @layer base {
@@ -110,19 +112,30 @@
 
 @layer components {
   .hare-card {
-    border-radius: 16px;
+    border-radius: 24px;
     background: #fff;
-    box-shadow: 0 1px 2px rgba(28, 36, 48, 0.06), 0 8px 18px rgba(28, 36, 48, 0.04);
+    border: 2px solid var(--color-line);
+    box-shadow: 0 5px 0 var(--color-card-lip);
+  }
+
+  .hero-card {
+    border-radius: 24px;
+    background: linear-gradient(135deg, #e8fbef 0%, #ffffff 62%);
+    box-shadow: 0 6px 0 var(--color-card-lip);
+  }
+
+  .lip {
+    border-radius: 18px;
+    box-shadow: 0 5px 0 var(--color-lip);
+  }
+
+  .lip:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 var(--color-lip);
   }
 
   .sky {
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    height: 132px;
-    pointer-events: none;
-    transition: background 300ms ease;
+    display: none;
   }
 
   .sky-dusk {
@@ -170,7 +183,8 @@
     animation: none;
   }
 
-  .sky {
-    transition: none;
+  .lip:active {
+    transform: none;
+    box-shadow: 0 5px 0 var(--color-lip);
   }
 }

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { DemoBar } from '@/components/DemoBar.tsx'
 import { Icon } from '@/components/icons.tsx'
-import { SkyMark } from '@/components/SkyMark.tsx'
+import { HareMark, IconBag, IconBed, SpotFamily } from '@/components/marks.tsx'
 import { Button, buttonVariants } from '@/components/ui/button.tsx'
 import { useStore } from '@/app/store.tsx'
-import { consultTelop, skyWash } from '@/domain/glance.ts'
+import { consultTelop } from '@/domain/glance.ts'
 import { slotClock } from '@/domain/forecast.ts'
 import { forecastFor } from '@/domain/forecastView.ts'
 import { chipIcon } from '@/domain/taskIcon.ts'
@@ -32,30 +32,29 @@ export function Consult() {
   const cast = forecastFor(data, store.today)
   const peak = cast.slots.find((slot) => slot.id === cast.peak) ?? null
   const telop = consultTelop(peak ? slotClock(peak) : null, cast.quiet)
-  const wash = skyWash({ quiet: cast.quiet, absorbed: false })
 
   return (
-    <div className={`relative px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-56'}`}>
-      <div aria-hidden="true" className={`sky sky-${wash}`} />
-      <DemoBar />
-      <p className="relative flex items-center gap-2 rounded-2xl border-l-[5px] border-watch-line bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-testid="consult-telop">
-        <SkyMark size={26} sky={peak?.sky ?? 'くもり'} label={telop} />
+    <div className={`relative bg-paper px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-56'}`}>
+      <DemoBar title="相談" />
+      <p className="flex items-start gap-2 rounded-2xl bg-ink px-3.5 py-3 text-sm font-extrabold text-white" data-testid="consult-telop">
+        <span aria-hidden="true" className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full bg-accent" />
         <span className="min-w-0">
           <Phrase text={telop} />
         </span>
       </p>
-      <div className="relative mt-3 flex items-center justify-between">
-        <h1 className="text-lg font-bold">相談</h1>
-        {data.chat.length > 0 ? (
+      {data.chat.length > 0 ? (
+        <div className="relative mt-3 flex justify-end">
           <Button size="sm" variant="ghost" onClick={store.newChat}>
             <Icon name="plus" size={14} />
             新しい相談
           </Button>
-        ) : null}
-      </div>
+        </div>
+      ) : (
+        <h1 className="relative mt-3 text-sm font-extrabold text-muted">よくある場面</h1>
+      )}
       {data.chat.length === 0 ? (
         <>
-          <div className="relative mt-3 space-y-2">
+          <div className="relative mt-3 space-y-3">
             <SceneRow testId="scene-late" label="残業で遅くなる" onClick={() => store.beginScene('late', true)} />
             <SceneRow testId="scene-sick" label="子どもが熱のとき" onClick={() => store.sendText('子どもが熱のとき')} />
             <SceneRow testId="scene-work" label="職場で育休が取りにくい" onClick={() => store.sendText('職場で育休が取りにくい')} />
@@ -79,15 +78,29 @@ export function Consult() {
           {store.pending ? <Thinking /> : null}
         </div>
       )}
+      <div className="pointer-events-none mt-8 flex items-end justify-center gap-4 text-accent opacity-20" aria-hidden="true">
+        <SpotFamily className="h-12 w-16" />
+        <HareMark size={40} />
+      </div>
       <div ref={endRef} />
       {store.flow ? <ThumbDock /> : <Composer />}
     </div>
   )
 }
 
+function SceneMark({ testId }: { testId: string }) {
+  if (testId.endsWith('bed')) return <IconBed size={24} />
+  if (testId.endsWith('work')) return <HareMark size={22} />
+  if (testId.endsWith('sick')) return <IconBag size={24} />
+  return <SpotFamily className="h-6 w-8" />
+}
+
 function SceneRow({ testId, label, onClick }: { testId: string; label: string; onClick: () => void }) {
   return (
-    <button type="button" data-testid={testId} className="flex min-h-11 w-full items-center rounded-xl border border-line bg-white px-3 text-left text-sm font-bold" onClick={onClick}>
+    <button type="button" data-testid={testId} className="hare-card flex min-h-14 w-full items-center gap-3 px-3 text-left text-[15px] font-bold" onClick={onClick}>
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-accent">
+        <SceneMark testId={testId} />
+      </span>
       {label}
     </button>
   )
