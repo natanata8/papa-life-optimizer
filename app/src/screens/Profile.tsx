@@ -12,6 +12,8 @@ import { memoryRows } from '@/domain/scope.ts'
 import {
   FIELDS,
   PRIVACY_LABEL,
+  RETURN_WINDOWS,
+  WORK_OPTIONS,
   addKid,
   fieldOptions,
   setChoice,
@@ -89,6 +91,34 @@ export function Profile() {
       <DemoBar />
       <h1 className="text-lg font-bold">うち</h1>
       <p className="mt-2 text-sm text-muted">覚えていること {data.memories.length}件。点数にはしません。</p>
+      <section className="hare-card mt-4 p-3" data-testid="profile-work">
+        <h2 className="text-sm font-bold">働き方</h2>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {WORK_OPTIONS.map((option) => (
+            <Chip
+              key={option}
+              on={data.profile.work === option}
+              data-testid={option === '自分が育休中' ? 'profile-work-leave' : undefined}
+              onClick={() => store.patchProfile((profile) => setChoice(profile, 'work', option))}
+            >
+              {option}
+            </Chip>
+          ))}
+        </div>
+        <h2 className="mt-3 text-sm font-bold">帰宅の目安</h2>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {RETURN_WINDOWS.map((option) => (
+            <Chip
+              key={option.label}
+              on={data.profile.home === option.label}
+              data-testid={option.label === '日による・リモート' ? 'profile-home-remote' : undefined}
+              onClick={() => store.patchProfile((profile) => setChoice(profile, 'home', option.label))}
+            >
+              {option.label}
+            </Chip>
+          ))}
+        </div>
+      </section>
       <details className="mt-3">
         <summary data-testid="profile-settings" className="inline-flex min-h-11 items-center text-sm font-bold">設定</summary>
       {data.profile.kids.length > 0 ? (

@@ -156,7 +156,7 @@ export function StepSketch() {
       <rect x="8" y="8" width="204" height="116" rx="16" fill="#fff" />
       <circle cx="110" cy="62" r="28" stroke="#1d5fa0" strokeOpacity="0.2" strokeWidth="6" />
       <path d="M110 34a28 28 0 0 1 24 42" stroke="#1d5fa0" strokeWidth="6" strokeLinecap="round" />
-      <path d="M98 58h24M102 50h16l-2 16H104z" stroke="#8a4510" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M98 58h24M102 50h16l-2 16H104z" stroke="#1c2430" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -166,7 +166,7 @@ export function BubbleSketch() {
     <svg width="220" height="132" viewBox="0 0 220 132" fill="none" aria-hidden="true" className="mx-auto">
       <rect x="8" y="8" width="204" height="116" rx="16" fill="#dfe7ea" />
       <path d="M48 36h124a12 12 0 0 1 12 12v32a12 12 0 0 1-12 12H78l-16 14v-14H48a12 12 0 0 1-12-12V48a12 12 0 0 1 12-12z" fill="#d9fdd3" />
-      <path d="M64 58h88M64 72h64" stroke="#2c2a28" strokeWidth="2" strokeLinecap="round" />
+      <path d="M64 58h88M64 72h64" stroke="#1c2430" strokeWidth="2" strokeLinecap="round" />
     </svg>
   )
 }

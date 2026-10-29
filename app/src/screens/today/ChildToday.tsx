@@ -58,7 +58,7 @@ export function ChildToday() {
         </div>
       ) : null}
       {reminders.length > 0 ? (
-        <div className="mt-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5" data-testid="bring-reminder">
+        <div className="mt-2 rounded-xl border border-line bg-sand px-3 py-2.5" data-testid="bring-reminder">
           {reminders.map((line) => (
             <p key={line} className="text-[13px] leading-relaxed">
               {line}

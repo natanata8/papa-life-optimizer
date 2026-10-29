@@ -18,7 +18,7 @@ export function Onboarding() {
       {ob.step >= 1 && ob.step <= 4 ? (
         <div className="mt-2 flex items-center gap-1.5">
           {[1, 2, 3, 4].map((step) => (
-            <i key={step} className={`h-1.5 flex-1 rounded-full ${step <= ob.step ? 'bg-accent' : 'bg-[#eadfd3]'}`} />
+            <i key={step} className={`h-1.5 flex-1 rounded-full ${step <= ob.step ? 'bg-accent' : 'bg-line'}`} />
           ))}
           <span className="text-xs text-muted">{ob.step}/4</span>
         </div>
@@ -174,11 +174,11 @@ function ReturnStep() {
         ))}
       </div>
       {info ? (
-        <p className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">
+        <p className="mt-3 rounded-xl border border-line bg-sand px-3 py-2.5 text-[13px] leading-relaxed">
           帰る前（<b>{info.notify}ごろ</b>）に、今日の画面に「帰る前の一手」を出します。
         </p>
       ) : store.ob.home ? (
-        <p className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-[13px] leading-relaxed">
+        <p className="mt-3 rounded-xl border border-line bg-sand px-3 py-2.5 text-[13px] leading-relaxed">
           日によって違うので、自動では送りません。今日の画面にだけ出します。
         </p>
       ) : null}

@@ -28,16 +28,16 @@ export function SkyMark({
       {!lifted && sky === '注意報' ? (
         <>
           <Cloud fill="#8aa0b8" />
-          <Triangle fill="#e6cf00" />
+          <Triangle fill="#e6b800" />
         </>
       ) : null}
       {!lifted && sky === '警報' ? (
         <>
           <Cloud fill="#8aa0b8" />
-          <Triangle fill="#d7301b" />
+          <Triangle fill="#e6b800" />
         </>
       ) : null}
-      {!lifted && sky === 'none' ? <circle cx="24" cy="24" r="10" fill="none" stroke="#a59c92" strokeWidth="2" strokeDasharray="3 3" /> : null}
+      {!lifted && sky === 'none' ? <circle cx="24" cy="24" r="10" fill="none" stroke="#5a6570" strokeWidth="2" strokeDasharray="3 3" /> : null}
     </svg>
   )
 }
@@ -45,8 +45,8 @@ export function SkyMark({
 function Sun() {
   return (
     <>
-      <circle cx="24" cy="24" r="8" fill="#e0a04a" />
-      <g stroke="#e0a04a" strokeWidth="2.4" strokeLinecap="round">
+      <circle cx="24" cy="24" r="8" fill="#0c7bb3" />
+      <g stroke="#0c7bb3" strokeWidth="2.4" strokeLinecap="round">
         <path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4" />
       </g>
     </>

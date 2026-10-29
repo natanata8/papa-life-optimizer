@@ -82,7 +82,7 @@ function FilterChip({
     step: on ? 'bg-step text-step-ink' : 'bg-white text-faint',
     inv: on ? 'bg-inv text-inv-ink' : 'bg-white text-faint',
     child: on ? 'bg-child text-child-ink' : 'bg-white text-faint',
-    wife: on ? 'bg-[#f3f0ea] text-muted' : 'bg-white text-faint',
+    wife: on ? 'bg-sand text-muted' : 'bg-white text-faint',
   }
   return (
     <button type="button" className={`inline-flex min-h-11 items-center gap-1 rounded-full border border-line px-2.5 ${colors[tone]}`} onClick={onClick}>
@@ -478,7 +478,7 @@ function WifeBlock({ date, block }: { date: string; block: PartnerBlock }) {
       type="button"
       data-testid={`wife-block-${block.id}`}
       aria-label={block.line}
-      className="min-h-11 w-full min-w-0 rounded-lg border border-dashed border-line bg-[#f7f4ef]/90 px-1.5 py-2 text-left text-xs leading-snug text-muted"
+      className="min-h-11 w-full min-w-0 rounded-lg border border-dashed border-line bg-sand/90 px-1.5 py-2 text-left text-xs leading-snug text-muted"
       onClick={() => store.openSheet({ type: 'wife', date, blockId: block.id })}
     >
       <span className="block text-xs">推定 {block.time}</span>

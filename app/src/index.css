@@ -12,7 +12,7 @@
   --color-accent: #0c7bb3;
   --color-accent-deep: #0c7bb3;
   --color-accent-soft: #e7f4fb;
-  --color-sun: #fff4df;
+  --color-sun: #fff8d0;
   --color-rain: #e7f1f8;
   --color-rain-ink: #1a4f78;
   --color-watch: #fff8d0;
@@ -27,26 +27,26 @@
   --color-margin: #0a5f8c;
   --color-margin-soft: #e6f0fa;
   --color-margin-wash: #f3f7fb;
-  --color-cloud: #f3eee6;
-  --color-cloud-ink: #5c4630;
-  --color-inv: #fffbf0;
-  --color-inv-ink: #6b5a2a;
-  --color-inv-line: #c9a227;
+  --color-cloud: #eef3f8;
+  --color-cloud-ink: #5a6570;
+  --color-inv: #eef3f8;
+  --color-inv-ink: #1c2430;
+  --color-inv-line: #d9e2ec;
   --color-event: #e8eefb;
   --color-event-ink: #25407f;
-  --color-child: #f3eee4;
-  --color-child-ink: #5c4630;
-  --color-step: #fdeee4;
-  --color-step-ink: #8a3f1d;
+  --color-child: #e7f4fb;
+  --color-child-ink: #1c2430;
+  --color-step: #e6f0fa;
+  --color-step-ink: #1c2430;
   --color-good: #1d5fa0;
-  --color-good-ink: #fffaf4;
+  --color-good-ink: #f7fafc;
   /* 空は上部132pxだけ。本文は紙色。余白の数字は --color-margin。
      CUD: 黄＝注意（文字は焦茶）、赤＝警報（白文字）、青＝よかった。赤と緑は混ぜない。 */
   --color-sky-dusk: #e7f4fb;
   --color-sky-clear: #f7fafc;
   --color-sky-lifted: #e7f4fb;
   --color-take-ink: #0c7bb3;
-  --color-meh: #f3eee6;
+  --color-meh: #eef3f8;
   --color-lazy: #f1f6f1;
   --color-lazy-ink: #3d6b3d;
 }
@@ -112,7 +112,7 @@
   .hare-card {
     border-radius: 16px;
     background: #fff;
-    box-shadow: 0 1px 2px rgba(44, 42, 40, 0.06), 0 8px 18px rgba(44, 42, 40, 0.04);
+    box-shadow: 0 1px 2px rgba(28, 36, 48, 0.06), 0 8px 18px rgba(28, 36, 48, 0.04);
   }
 
   .sky {

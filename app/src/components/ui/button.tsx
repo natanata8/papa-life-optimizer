@@ -9,9 +9,9 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-accent-deep text-white',
         ghost: 'bg-accent-soft text-margin',
-        quiet: 'bg-[#eee] text-[#666]',
+        quiet: 'bg-sand text-muted',
         good: 'bg-margin text-white',
-        meh: 'bg-meh text-[#6b625a]',
+        meh: 'bg-sand text-ink',
         outline: 'border border-line bg-white text-ink',
       },
       size: {

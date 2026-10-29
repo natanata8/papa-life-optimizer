@@ -27,7 +27,7 @@ export function NextHandCard({
         <button type="button" data-testid="next-hand-go" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-accent-deep text-sm font-bold text-white" onClick={onGo}>
           {hand.taken ? '手順を開く' : '引き受ける'}
         </button>
-        <button type="button" data-testid="next-hand-later" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#f3eee6] px-3 text-sm font-bold" onClick={onLater}>
+        <button type="button" data-testid="next-hand-later" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-sand px-3 text-sm font-bold text-ink" onClick={onLater}>
           あとで
         </button>
       </div>

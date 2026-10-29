@@ -117,7 +117,7 @@ export function MessageComposer() {
           />
         </label>
       ) : null}
-      <div className="mt-3 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5" data-testid="message-preview">
+      <div className="mt-3 rounded-xl border border-line bg-sand px-3 py-2.5" data-testid="message-preview">
         <p className="text-[13px] leading-relaxed whitespace-pre-line">{preview || '入れる部品を選んでください。'}</p>
       </div>
       <div className="mt-2 flex items-center gap-2">

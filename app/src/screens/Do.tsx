@@ -126,7 +126,7 @@ function ListBlock({
               className={`hare-card flex min-h-11 w-full items-start gap-2 px-3 py-2 text-left ${here ? 'bg-margin-soft' : ''}`}
               onClick={() => store.toggleCheck(store.today, id, step.id)}
             >
-              <span className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${on ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4] bg-white text-ink'}`}>
+              <span className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${on ? 'border-margin bg-margin text-white' : 'border-line bg-white text-ink'}`}>
                 {on ? <Icon name="check" size={16} /> : index + 1}
               </span>
               <span className="min-w-0">
@@ -135,7 +135,7 @@ function ListBlock({
                   <Phrase text={stepLabel(step, ages)} />
                 </span>
                 <span className="block text-xs text-muted">約{step.minutes}分</span>
-                {step.tip && !on ? <span className="mt-1 block rounded-lg bg-[#fff6e4] px-2 py-1 text-xs leading-relaxed text-watch-ink">{step.tip}</span> : null}
+                {step.tip && !on ? <span className="mt-1 block rounded-lg bg-watch px-2 py-1 text-xs leading-relaxed text-watch-ink">{step.tip}</span> : null}
               </span>
             </button>
           )
@@ -215,7 +215,7 @@ function Focus({
       <p className="mt-1 text-sm text-muted">
         {plusMinutes(at, current.step.offsetMin ?? 0)} ・ 約{current.step.minutes}分
       </p>
-      {current.step.tip ? <p className="mt-3 rounded-xl bg-[#fff6e4] px-3 py-2 text-left text-sm leading-relaxed text-watch-ink">{current.step.tip}</p> : null}
+      {current.step.tip ? <p className="mt-3 rounded-xl bg-watch px-3 py-2 text-left text-sm leading-relaxed text-watch-ink">{current.step.tip}</p> : null}
       <button
         type="button"
         data-testid="do-done"
@@ -229,10 +229,10 @@ function Focus({
         できた
       </button>
       <div className="mt-2 grid grid-cols-2 gap-2">
-        <button type="button" data-testid="do-back" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold disabled:opacity-40" disabled={index === 0} onClick={() => setCursor(Math.max(index - 1, 0))}>
+        <button type="button" data-testid="do-back" className="min-h-11 rounded-xl bg-sand text-ink text-sm font-bold disabled:opacity-40" disabled={index === 0} onClick={() => setCursor(Math.max(index - 1, 0))}>
           ひとつ戻る
         </button>
-        <button type="button" data-testid="do-skip" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={() => setCursor(index + 1)}>
+        <button type="button" data-testid="do-skip" className="min-h-11 rounded-xl bg-sand text-ink text-sm font-bold" onClick={() => setCursor(index + 1)}>
           とばす
         </button>
       </div>

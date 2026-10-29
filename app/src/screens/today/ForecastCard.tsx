@@ -119,7 +119,7 @@ function Decide({
         type="button"
         data-testid="forecast-cant"
         data-fold="cant"
-        className="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-[#f3eee6] text-[15px] font-bold"
+        className="mt-2 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-sand text-ink text-[15px] font-bold"
         onClick={() => store.openSheet({ type: 'cant', date: store.today, slotId: peak.id })}
       >
         今日は無理
@@ -182,7 +182,7 @@ function Tell({ peak, initial, small }: { peak: ForecastSlot; initial: string; s
       <textarea
         id="send-line"
         data-fold="line"
-        className="mt-1 w-full rounded-xl bg-[#f7f1e8] px-3 py-2 text-sm leading-relaxed"
+        className="mt-1 w-full rounded-xl bg-sand px-3 py-2 text-sm leading-relaxed"
         rows={3}
         value={text}
         onChange={(event) => setText(event.target.value)}
@@ -194,7 +194,7 @@ function Tell({ peak, initial, small }: { peak: ForecastSlot; initial: string; s
         <button
           type="button"
           data-fold="copy"
-          className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-xl bg-[#f3eee6] text-sm font-bold"
+          className="inline-flex min-h-[52px] flex-1 items-center justify-center rounded-xl bg-sand text-ink text-sm font-bold"
           onClick={() => {
             void copyText(text).then((ok) => {
               store.showToast(ok ? 'コピーしました' : 'コピーできませんでした')
@@ -273,7 +273,7 @@ function Quiet({
 }) {
   return (
     <div data-testid="forecast-quiet">
-      <article className={`rounded-[14px] px-3 py-3 shadow-sm ${passed ? 'bg-white' : 'bg-[#fff8ee]'}`}>
+      <article className={`rounded-[14px] px-3 py-3 shadow-sm ${passed ? 'bg-white' : 'bg-sand'}`}>
         <p className="inline-flex items-center gap-1 text-sm font-bold" data-fold="badge">
           <SkyMark sky="晴れ" size={24} />
           {passed ? '今日はパス' : '一日 晴れ'}

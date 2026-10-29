@@ -115,7 +115,7 @@ export function ShareScreen() {
         <button
           type="button"
           data-testid="share-copy"
-          className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl bg-[#f3eee6] text-sm font-bold"
+          className="inline-flex min-h-11 items-center justify-center gap-1 rounded-xl bg-sand text-ink text-sm font-bold"
           onClick={() => {
             void copyText(body).then((ok) => store.showToast(ok ? 'コピーしました' : 'コピーできませんでした'))
           }}
@@ -123,7 +123,7 @@ export function ShareScreen() {
           <Icon name="copy" size={16} />
           コピー
         </button>
-        <button type="button" data-testid="share-later" className="min-h-11 rounded-xl bg-[#f3eee6] text-sm font-bold" onClick={store.closePanel}>
+        <button type="button" data-testid="share-later" className="min-h-11 rounded-xl bg-sand text-ink text-sm font-bold" onClick={store.closePanel}>
           あとで
         </button>
       </div>
@@ -196,7 +196,7 @@ export function PartnerPreview() {
             <ul className="mt-2 space-y-2">
               {withExtra.map((step) => (
                 <li key={step.id} className="flex items-center gap-2 text-sm">
-                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${item.checked.includes(step.id) ? 'border-margin bg-margin text-white' : 'border-[#c8bfb4]'}`}>{item.checked.includes(step.id) ? <Icon name="check" size={12} /> : ''}</span>
+                  <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full border-2 ${item.checked.includes(step.id) ? 'border-margin bg-margin text-white' : 'border-line'}`}>{item.checked.includes(step.id) ? <Icon name="check" size={12} /> : ''}</span>
                   <Phrase text={step.title} />
                 </li>
               ))}

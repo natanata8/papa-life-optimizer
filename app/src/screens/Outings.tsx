@@ -95,7 +95,7 @@ function OutingDetail({ spot, onBack }: { spot: OutingSpot; onBack: () => void }
         <p className="mt-0.5 text-xs text-muted">子どもの年齢で足しています。</p>
       </div>
       <p className="mt-3 text-[12px] font-bold text-accent">提案の文</p>
-      <p className="mt-1 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-sm leading-relaxed">「{spot.phrase}」</p>
+      <p className="mt-1 rounded-xl border border-line bg-sand px-3 py-2.5 text-sm leading-relaxed">「{spot.phrase}」</p>
       <Button
         className="mt-2"
         size="sm"

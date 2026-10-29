@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
 import test from 'node:test'
 import { HERO_QUIET, capCards, consultTelop, glanceLine, liftLine, moreCountLabel, rowMark, skyWash, takenMargin, weekGlance } from './glance.ts'
 import { dayPacks, gymNotice, morningKitLine, shouldShowDayMode, showMorningKit } from './dayMode.ts'
@@ -474,6 +475,63 @@ test('探す場所は、切ったあとも画面にある', () => {
   assert.match(consult, /const QUICK = \['職場で育休が取りにくい'/)
   assert.match(consult, /testId="scene-work"/)
   assert.match(consult, /consult-chip-work/)
+})
+
+test('ベージュと茶色はパレットAに置き、うちで働き方を直せる', () => {
+  const banned = [
+    'f3eee6',
+    'f0e8df',
+    'f7f1e8',
+    'fff6e4',
+    'fff4df',
+    'fff7ef',
+    'f3d9c6',
+    'fff8ee',
+    'f3f0ea',
+    'f7f4ef',
+    'eadfd3',
+    'c8bfb4',
+    '6b625a',
+    '5c4630',
+    '8a3f1d',
+    '6b5a2a',
+    'c9a227',
+    'f3eee4',
+    'fdeee4',
+    'e0a04a',
+    'a59c92',
+    '8a4510',
+    '2c2a28',
+    'fffaf4',
+    'fffbf0',
+    'e7c7c2',
+  ]
+  const root = new URL('..', import.meta.url)
+  const files: string[] = []
+  const walk = (dir: string) => {
+    for (const name of readdirSync(dir)) {
+      const path = join(dir, name)
+      if (statSync(path).isDirectory()) walk(path)
+      else if (/\.(tsx|css)$/.test(name)) files.push(path)
+    }
+  }
+  walk(root.pathname)
+  const hits = files.flatMap((path) => {
+    const text = readFileSync(path, 'utf8').toLowerCase()
+    return banned.filter((hex) => text.includes(hex)).map((hex) => `${path} ${hex}`)
+  })
+  assert.deepEqual(hits, [])
+  const profile = readFileSync(new URL('../screens/Profile.tsx', import.meta.url), 'utf8')
+  const workAt = profile.indexOf('data-testid="profile-work"')
+  const settingsAt = profile.indexOf('data-testid="profile-settings"')
+  assert.ok(workAt > 0 && workAt < settingsAt)
+  assert.match(profile, /WORK_OPTIONS\.map/)
+  assert.match(profile, /RETURN_WINDOWS\.map/)
+  assert.match(profile, /setChoice\(profile, 'work', option\)/)
+  assert.match(profile, /setChoice\(profile, 'home', option\.label\)/)
+  const hand = readFileSync(new URL('../components/NextHand.tsx', import.meta.url), 'utf8')
+  assert.match(hand, /data-testid="next-hand-later"[\s\S]*bg-sand/)
+  assert.doesNotMatch(hand, /#f3eee6/)
 })
 
 test('覚えていることは、新しい順で5件まで', () => {

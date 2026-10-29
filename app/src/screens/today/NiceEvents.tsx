@@ -45,7 +45,7 @@ export function NiceEvents() {
                 <p className="mt-0.5 text-[12px] text-muted">{niceSummary(event, store.today)}</p>
                 {event.note ? <p className="mt-1 text-[13px] leading-relaxed">{event.note}</p> : null}
                 {hint ? (
-                  <div className="mt-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2">
+                  <div className="mt-2 rounded-xl border border-line bg-sand px-3 py-2">
                     <p className="text-[13px] leading-relaxed">{hint.hint}</p>
                     <p className="mt-1 text-[13px] leading-relaxed">「{hint.line}」</p>
                     <Button

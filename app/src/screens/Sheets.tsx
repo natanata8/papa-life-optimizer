@@ -145,7 +145,7 @@ function WifeSheet({ date, blockId }: { date: string; blockId: string }) {
   if (!block) return <p className="text-sm">この推定は、今は出ていません。</p>
   return (
     <div data-testid="sheet-wife">
-      <span className="inline-block rounded-full bg-[#f3f0ea] px-2 py-0.5 text-xs font-bold text-muted">推定</span>
+      <span className="inline-block rounded-full bg-sand px-2 py-0.5 text-xs font-bold text-muted">推定</span>
       <p className="mt-1 text-[17px] font-bold">{block.line}</p>
       <p className="text-xs text-muted">
         {dayName(date, store.today)} {block.time}
@@ -154,7 +154,7 @@ function WifeSheet({ date, blockId }: { date: string; blockId: string }) {
       <p className="mt-3 text-sm leading-relaxed">{block.detail}</p>
       <p className="mt-2 text-[12px] leading-relaxed text-muted">登録された予定ではありません。編集も、チェックもできません。</p>
       <h2 className="mt-3 text-sm font-bold">ありがとう、の一例</h2>
-      <p className="mt-1 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-sm leading-relaxed">「{block.thanks}」</p>
+      <p className="mt-1 rounded-xl border border-line bg-sand px-3 py-2.5 text-sm leading-relaxed">「{block.thanks}」</p>
       <div className="mt-3 flex gap-2">
         <Button
           size="sm"

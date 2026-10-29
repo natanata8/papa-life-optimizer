@@ -38,7 +38,7 @@ export function Consult() {
     <div className={`relative px-3.5 pt-3.5 ${dock ? 'pb-64' : 'pb-56'}`}>
       <div aria-hidden="true" className={`sky sky-${wash}`} />
       <DemoBar />
-      <p className="relative flex items-center gap-2 rounded-2xl border-l-[5px] border-watch-line bg-[#fff8d6] px-3 py-2 text-sm font-bold text-watch-ink" data-testid="consult-telop">
+      <p className="relative flex items-center gap-2 rounded-2xl border-l-[5px] border-watch-line bg-watch px-3 py-2 text-sm font-bold text-watch-ink" data-testid="consult-telop">
         <SkyMark size={26} sky={peak?.sky ?? 'くもり'} label={telop} />
         <span className="min-w-0">
           <Phrase text={telop} />
@@ -116,7 +116,7 @@ function Message({ message, latest = false }: { message: ChatMessage; latest?: b
   if (message.role === 'bot') {
     const hotline = message.safety === 'stop'
     return (
-      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm ${hotline ? 'border border-[#e7c7c2]' : ''}`} data-testid={hotline ? 'safety-stop' : undefined}>
+      <div className={`max-w-[92%] rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-sm leading-relaxed shadow-sm ${hotline ? 'border border-line' : ''}`} data-testid={hotline ? 'safety-stop' : undefined}>
         {hotline ? <Hotline selfHarm={message.selfHarm} /> : message.text}
         {message.scenes ? (
           <div className="mt-2">
@@ -151,7 +151,7 @@ function Hotline({ selfHarm = false }: { selfHarm?: boolean }) {
 
 function CareCard() {
   return (
-    <p className="mb-2 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2 text-[13px] leading-relaxed" data-testid="care-card">
+    <p className="mb-2 rounded-xl border border-line bg-sand px-3 py-2 text-[13px] leading-relaxed" data-testid="care-card">
       {CARE_CARD}
     </p>
   )
@@ -246,7 +246,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
                 key={step}
                 type="button"
                 data-testid="scene-choice"
-                className="inline-flex min-h-11 items-center rounded-xl bg-[#f7f1e8] px-3 text-left text-sm font-bold"
+                className="inline-flex min-h-11 items-center rounded-xl bg-sand px-3 text-left text-sm font-bold"
                 onClick={() => store.sendText(step)}
               >
                 {step}
@@ -264,7 +264,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
           <button
             type="button"
             data-testid="add-to-routine"
-            className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-[#f3eee6] text-sm font-bold"
+            className="mt-2 inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-sand text-ink text-sm font-bold"
             onClick={() => {
               const blob = `${first.タイトル}${first.タスク分解ステップ.join('')}`
               const routine = /風呂|湯船|保湿/.test(blob) ? 'bath' : /抱っこ|部屋を暗く|布団に置く/.test(blob) ? 'bedtime' : 'tomorrow'
@@ -283,7 +283,7 @@ function AnswerCard({ message, latest }: { message: Extract<ChatMessage, { role:
       {message.answer.声かけ例 ? (
         <>
           <p className="mt-3 text-xs font-bold text-accent">声かけ例</p>
-          <div className="mt-1 rounded-xl border border-[#f3d9c6] bg-[#fff7ef] px-3 py-2.5 text-sm leading-relaxed">
+          <div className="mt-1 rounded-xl border border-line bg-sand px-3 py-2.5 text-sm leading-relaxed">
             「{message.answer.声かけ例}」
             <div className="mt-2 flex gap-1.5">
               <CopyButton text={message.answer.声かけ例} />
@@ -392,7 +392,7 @@ function ThumbDock() {
   const options = flow.lazy ? fieldOptions(flow.lazy) : (SCENES[flow.scene].questions[flow.answers.length]?.options ?? [])
   if (!prompt) return null
   return (
-    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-[#eee] bg-white px-3 py-2.5 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+    <div className="fixed bottom-16 left-1/2 z-20 w-full max-w-[430px] -translate-x-1/2 border-t border-line bg-white px-3 py-2.5 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
       <p className="mb-1.5 text-xs text-muted">{prompt}（タップで答える）</p>
       <div className="grid grid-cols-2 gap-2">
         {options.map((option) => (
@@ -437,7 +437,7 @@ function Composer() {
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder="ひとことでOK"
-          className="min-w-0 flex-1 rounded-lg border border-[#ddd] bg-white px-2 py-2 text-[15px]"
+          className="min-w-0 flex-1 rounded-lg border border-line bg-white px-2 py-2 text-[15px]"
         />
         <Button size="sm" type="submit">
           <Icon name="send" size={14} />
