@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', 'Yu Gothic',
+    Meiryo, sans-serif;
+  --color-sand: #f3f4f6;
+  --color-paper: #ffffff;
+  --color-hero: #f8fafc;
+  --color-ink: #111827;
+  --color-muted: #6b7280;
+  --color-faint: #6b7280;
+  --color-line: #d1d5db;
+  --color-accent: #0052cc;
+  --color-accent-deep: #0052cc;
+  --color-accent-soft: #e8f0fe;
+  --color-plus: #b45309;
+  --color-sun: #e6a800;
+  --color-rain: #e8f0fe;
+  --color-rain-ink: #0052cc;
+  --color-watch: #fffbeb;
+  --color-watch-ink: #111827;
+  --color-watch-line: #e6a800;
+  --color-watch-tag: #e6a800;
+  --color-alert: #fffbeb;
+  --color-alert-ink: #111827;
+  --color-alert-line: #e6a800;
+  --color-lift: #f8fafc;
+  --color-lift-ink: #111827;
+  --color-margin: #0052cc;
+  --color-margin-soft: #e8f0fe;
+  --color-margin-wash: #f8fafc;
+  --color-cloud: #f3f4f6;
+  --color-cloud-ink: #6b7280;
+  --color-inv: #f8fafc;
+  --color-inv-ink: #111827;
+  --color-inv-line: #d1d5db;
+  --color-event: #e8f0fe;
+  --color-event-ink: #0052cc;
+  --color-child: #e8f0fe;
+  --color-child-ink: #111827;
+  --color-step: #f3f4f6;
+  --color-step-ink: #111827;
+  --color-good: #0052cc;
+  --color-good-ink: #ffffff;
+  /* M1 ツール白＋信頼ブルー。影もグラデーションも置かない。黄は注意の言葉と点だけ。 */
+  --color-sky-dusk: #ffffff;
+  --color-sky-clear: #ffffff;
+  --color-sky-lifted: #ffffff;
+  --color-take-ink: #0052cc;
+  --color-meh: #f3f4f6;
+  --color-lazy: #f3f4f6;
+  --color-lazy-ink: #0052cc;
+  --color-meter: #e5e7eb;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  details > summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@keyframes tone-sheet {
+  from {
+    transform: translateY(16px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.tone-sheet {
+  animation: tone-sheet 180ms ease-out;
+}
+
+@layer components {
+  .hare-card {
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid var(--color-line);
+  }
+
+  .hero-card {
+    border-radius: 8px;
+    background: var(--color-hero);
+  }
+
+  .sky {
+    display: none;
+  }
+
+  .take-open {
+    border: 2px solid var(--color-accent-deep);
+    background: var(--color-paper);
+    color: var(--color-take-ink);
+  }
+
+  .take-on {
+    border: 2px solid var(--color-accent-deep);
+    background: var(--color-accent-deep);
+    color: #fff;
+  }
+}
+
+@keyframes cloud-drift {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(14px);
+  }
+}
+
+.thinking-cloud {
+  animation: cloud-drift 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tone-sheet,
+  .thinking-cloud {
+    animation: none;
+  }
+
+}
